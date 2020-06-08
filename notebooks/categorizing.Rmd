@@ -1,0 +1,256 @@
+---
+title: "Population annotation"
+author: "Harly Durbin"
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(readr)
+library(readxl)
+library(dplyr)
+library(stringr)
+library(magrittr)
+library(purrr)
+library(rlang)
+library(ggplot2)
+library(tidyr)
+library(tidylog)
+```
+
+# Notes & questions
+
+
+* ![Rashoki geographic locations](http://bigd.big.ac.cn/gvm/showmaterial?orgId=19)
+* ![Some Chinese breeds](http://www.eaap.org/Annual_Meeting/2015_warsaw/S11_02.pdf)
+* ![Sikias or Sykia???](http://www.save-foundation.net/images/projekte/mittelmeer/griechenland-3.pdf)
+    + ![See also, "The Greek Steppe Breeds"](http://www.andreagaddini.it/Greek%20Steppe%20Gaddini%202018.pdf)
+* ![Turano-mongolicus cattle](https://en.wikipedia.org/wiki/Turano-Mongolian_cattle)
+* ![Podolian cattle](https://en.wikipedia.org/wiki/Podolian_cattle)
+* ![1K Bulls presentation for indicus or taurine of some of the Asian breeds](https://meetings.eaap.org/wp-content/uploads/2015/S11_02.pdf)
+* ![Yanbian, Bohai, Luxi, Qinchuan, Jiaxian, Nanyang](https://link.springer.com/content/pdf/10.1186/1297-9686-40-6-681.pdf)H
+* Mason's World Encyclopedia of Livestock Breeds and Breeding
+    + Dabieshan - p. 162
+    + Dehong and Yunnan are maybe the same?? - p. 331
+    + Dengchuan - p. 167
+    + Guangfeng - p. 192
+    + Guanling, Liping, Weining - p. 193
+    + Kazakh and Hasake are the same - p. 452
+    + Jinjiang, Ji'an - p. 213
+    + Mongolian and Menggu are the same - p. 249
+    + Wannan - p. 324
+    + Wenling - p. 325
+    + Wenshan - p. 266
+    + Xizang and Tibet are the same - p. 452
+    + Chaidamu Yellow - p. 147
++ ![Dianzhong](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6599958/)
++ ![Leiqiong](https://www.krankykids.com/cows/mydailycow_2010/2010_february/20100207.html)
++ ![Wandong - supplementary file for "Whole-genome resequencing reveals world-wide ancestry and adaptive introgression events of domesticated cattle in East Asia"](https://static-content.springer.com/esm/art%3A10.1038%2Fs41467-018-04737-0/MediaObjects/41467_2018_4737_MOESM1_ESM.pdf)
+
+    
+# Setup
+
+
+# Geographic regions
+
+```{r}
+sorted <-  
+  read_rds(here::here("data/derived_data/200605.sample_metadata.rds")) %>%
+  mutate(
+    region = 
+      case_when(
+        #### EUROPE ####
+        # british isles
+        population %in% c("angus", "hereford", "red angus", "shorthorn", "belted galloway", "hereford miniature", "dexter", "angus lowline", "devon", "scottish highland", "galloway") ~ "british isles",
+        # ancient derby
+        lab_id == 185723 ~ "british isles",
+        # france
+        population %in% c("limousin", "charolais", "salers", "maine-anjou", "tarentaise", "montbeliarde", "normande", "blonde d'aquitaine") ~ "france",
+        # continental/western europe
+        population %in% c("simmental", "gelbvieh", "braunvieh", "holstein", "jersey", "belgian blue", "fleckvieh", "brown swiss",  "eringer", "tyrolean grey", "danish red") ~ "continental europe",
+        # podolian
+        population %in% c("boskarin", "podolica", "maremmana", "sikias") ~ "podolian steppe",
+        # southern europe: italy
+        population %in% c("chianina", "piedmontese", "romagnola") ~ "italy",
+        # southern europe: iberia
+        population %in% c("sayaguesa", "maronesa", "limia", "pajuna", "alentejana") ~ "iberia",
+        # scandinavian 
+        population %in% c("norwegian red", "nordic red", "western finncattle", "eastern finncattle") ~ "scandinavia",
+        #### AFRICA ####
+        # western africa
+        # ankole??
+        population %in% c("muturu", "n'dama", "kapsiki", "namchi", "lagune", "somba", "white fulani", "red fulani", "gudali") ~ "west africa",
+        population %in% c("boran", "kenana", "ogaden", "east african zebu", "ankole") ~ "east africa",
+        #### AUS/OCEANIA/SE ASIA #####
+        population %in% c("droughtmaster") ~ "australia",
+        #### AMERICAS ####
+        # composites
+        population %in% c("beefmaster", "brangus", "santa gertrudis") ~ "americas",
+        # taurines
+        population %in% c("texas longhorn", "corriente", "limonero", "san martinero", "costeno con cuernos") ~ "americas",
+        # indicines
+        population %in% c("brahman", "nelore") ~ "americas",
+        #### ASIA ####
+        # india
+        population %in% c("gir", "indian zebu", "hariana", "kangayam", "vechur",  "sahiwal", "tharparkar") ~ "india and pakistan",
+        # middle east
+        # anatolian should maybe be middle east?? or it's own thing?? I don't know
+        population %in% c("rashoki", "south anatolian red") ~ "middle east",
+        # east asia: japan and korea - bos taurus
+        population %in% c("mishima", "kuchinoshima", "wagyu", "japanese black", "hanwoo") ~ "japan and korea",
+        # asian steppe 
+        population %in% c("yakutian", "siberian", "kazakh", "tibetan", "mongolian", "chaidamu yellow") ~ "asian steppe",
+        # siberian ancient
+        lab_id == 118017 ~ "asian steppe",
+        # CHINA
+        population %in% c("yanbian") ~ "northeast  china",
+        population %in% c("bohai black", "luxi", "lingnan", "nanyang", "qinchuan", "dabieshan", "guangfeng", "jinjiang", "jiaxian red", "wannan", "wandong", "xuanhan", "zaobei") ~ "east central china",
+        population %in% c("wenling", "jian", "guanling", "leiqiong") ~ "southeast china",
+        population %in% c("yunnan", "dengchuan", "dianzhong", "liping", "weining", "wenshan", "sichuan indigenous", "mangshi zebu") ~ "south central china",
+        #### OUTGROUPS ####
+        # bison 
+        population %in% c("american bison") ~ "americas",
+        # yak
+        str_detect(population, "yak") ~ "asian steppe",
+        # gayal
+        str_detect(population, "gayal") ~ "southeast asia",
+        population %in% c("banteng", "gaur") ~ "southeast asia"
+    )
+  )
+
+
+```
+
+# Continent
+
+```{r}
+sorted %<>%
+  mutate(continent = 
+           case_when(
+             region %in% c("british isles", "continental europe", "france", "italy", "scandinavia", "iberia", "podolian steppe") ~ "europe",
+             region %in% c("east africa", "west africa") ~ "africa",
+             str_detect(region, "china|asia") ~ "asia",
+             region %in% c("japan and korea", "india and pakistan", "middle east") ~ "asia",
+             TRUE ~ region
+           ))
+```
+
+
+# Species
+
+```{r}
+sorted %>% 
+  filter(str_detect(population, "yak")) %>% 
+  distinct(population)
+```
+
+
+```{r}
+sorted %<>% 
+  rename(species = organism) %>% 
+  mutate(
+    species = 
+      case_when(
+        #### GRUNNIENS/MUTUS #####
+        population %in% c("yak wild") ~ "bos mutus",
+        population %in% c("yak unknown", "yak tianzhu white", "yak qtp", "yak datong", "yak jinchuan") ~ "bos grunniens",
+        ##### BISON #####
+        population %in% c("american bison") ~ "bison bison",
+        ##### JAVANICUS #####
+        population %in% c("banteng") ~ "bos javanicus",
+        ##### FRONTALIS #####
+        str_detect(population, "gayal") ~ "bos frontalis",
+        population %in% c("gaur") ~ "bos gaurus",
+        #### TAURUS ####
+        continent == "europe" ~ "bos taurus",
+        region %in% c("asian steppe", "japan and korea") ~ "bos taurus",
+        # africa
+        population %in% c("muturu", "n'dama", "somba", "namchi", "kapsiki", "lagune") ~ "bos taurus",
+        # americas
+        population %in% c("texas longhorn", "corriente", "limonero", "san martinero", "costeno con cuernos") ~ "bos taurus",
+        # other
+        population == "south anatolian red" ~ "bos taurus",
+        # east asia: china - bos taurus
+        population %in% c("sichuan indigenous") ~ "bos taurus",       
+        #### ANCIENT ####
+        population == "ancient" ~ "bos primigenius",
+        #### HYBRID ####
+        # africa
+        population %in% c("ankole", "boran") | str_detect(population, "fulani") ~ "composite",
+        # middle east
+        population %in% c("rashoki") ~ "composite",
+        # australia
+        population %in% c("droughtmaster") ~ "composite",
+        # americas
+        population %in% c("beefmaster", "brangus", "santa gertrudis") ~ "composite",
+        # east asia: china - hybrid
+        population %in% c("luxi", "yanbian", "jiaxian red", "bohai black", "nanyang", "lingnan", "wandong", "zaobei", "weining", "xuanhan") ~ "composite",
+        #### INDICUS ####
+        # africa
+        population %in% c("kenana", "ogaden", "east african zebu", "gudali") ~ "bos indicus",
+        # americas
+        population %in% c("brahman", "nelore") ~ "bos indicus",
+        # south asia
+        region == "india and pakistan" ~ "bos indicus",
+        # east asia: china - indicus
+        population %in% c("mangshi zebu", "qinchuan", "liping", "wenling", "dengchuan", "guanling",  "dabieshan", "jinjiang", "dianzhong", "guangfeng", "jian", "leiqiong", "wannan", "wenshan", "yunnan") ~ "bos indicus"
+        
+      )
+  ) 
+
+
+```
+
+```{r}
+sorted %>% 
+  group_by(species, population) %>% 
+  tally() %>% 
+  arrange(species)
+```
+
+
+```{r}
+sorted %>% 
+  select(lab_id, population, avg_coverage, species, continent, region) %>% 
+  arrange(continent, region, species, population) %>% 
+  write_csv(here::here("20515.sample_metadata.csv"), na = "")
+```
+
+```{r}
+sorted %>% 
+  write_rds(here::here("data/derived_data/sorted.rds"))
+```
+
+
+# Summary
+
+```{r}
+sorted %>% 
+  visdat::vis_miss()
+```
+
+
+```{r}
+sorted %>% 
+  group_by(species) %>% 
+  tally(sort = TRUE)
+```
+
+```{r}
+sorted %>% 
+  group_by(continent) %>% 
+  tally(sort = TRUE)
+```
+
+```{r}
+sorted %>% 
+  group_by(region) %>% 
+  tally(sort = TRUE) 
+```
+
+
+
+

@@ -1,0 +1,104 @@
+---
+title: "Memory tracking"
+author: "Harly Durbin"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    df_print: paged
+    code_folding: show
+---
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(purrr)
+library(tidyr)
+library(lubridate)
+
+source(here::here("source_functions/psrecord_summary.R"))
+```
+
+# `ancient_preprocess`
+
+## `trimBam`
+
+```{r}
+usage_summary(process = "ancient_preprocess", keyword = "trimBam")
+```
+
+```{r}
+usage_facets(process = "ancient_preprocess", keyword = "trimBam")
+```
+
+## `index_bam`
+
+```{r}
+usage_summary(process = "ancient_preprocess", keyword = "index_bam")
+```
+
+```{r}
+usage_facets(process = "ancient_preprocess", keyword = "index_bam")
+```
+
+## `target_creator`
+
+```{r}
+usage_summary(process = "ancient_preprocess", keyword = "target_creator")
+```
+
+```{r}
+usage_facets(process = "ancient_preprocess", keyword = "target_creator")
+```
+
+## `indel_realigner`
+
+```{r}
+usage_summary(process = "ancient_preprocess", keyword = "indel_realigner")
+```
+
+```{r}
+usage_facets(process = "ancient_preprocess", keyword = "indel_realigner")
+```
+
+## `merge_realigned`
+
+```{r}
+usage_summary(process = "ancient_preprocess", keyword = "merge_realigned")
+```
+
+```{r}
+usage_facets(process = "ancient_preprocess", keyword = "merge_realigned")
+```
+
+
+
+# `joint_genotyping`
+
+## `combine_gvcfs`
+
+```{r}
+usage_summary(process = "joint_genotyping", keyword = "combine_gvcfs") 
+```
+
+## `genotype_gvcfs`
+
+```{r}
+usage_summary(process = "joint_genotyping", keyword = "genotype_gvcfs") 
+```
+
+```{r}
+usage_facets(process = "joint_genotyping", keyword = "genotype_gvcfs")
+```
+
+## `select_variants`
+
+```{r}
+usage_summary(process = "joint_genotyping", keyword = "select_variants") 
+```
+
+```{r}
+usage_facets(process = "joint_genotyping", keyword = "select_variants")
+```

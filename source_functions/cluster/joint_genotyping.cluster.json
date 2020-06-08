@@ -1,0 +1,60 @@
+{
+    "__default__":
+    {
+        "p" : "BioCompute,htc4,hpc5",
+        "account" : "animalsci",
+        "mem" : 120G,
+        "c": 12,
+        "t": "12:00:00",
+        "o": "log/slurm_out/{rule}/{wildcards}.%j.out",
+        "mail-user" : "hjdurbin@mail.missouri.edu",
+        "mail-type" : "NONE"
+    },
+    "combine_gvcfs":
+    {
+        "c" : 4,
+        "mem" : 100G,
+        "t": "48:00:00"
+    },
+    "genotype_gvcfs_list":
+    {
+        "c" : 1,
+        "mem" : 1G,
+        "t": "1:00:00",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "genotype_gvcfs":
+    {
+        "c" : 28,
+        "mem" : 180G,
+        "t": "48:00:00"
+    },
+    "biallelic_28":
+    {
+        "c" : 6,
+        "mem" : 24G,
+        "t": "8:00:00",
+        "mail-type" : "END,FAIL"
+    },
+    "table_28":
+    {
+        "account" : "general,animalsci",
+        "c" : 3,
+        "mem" : 24G,
+        "t": "8:00:00",
+        "mail-type" : "END,FAIL"
+    },
+    "select_variants":
+    {
+        "c" : 8,
+        "t": "24:00:00",
+        "mem" : 100G
+    },
+    "variant_filtration":
+    {
+        "c" : 8,
+        "t": "02:00:00",
+        "mem" : 24G,
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    }
+}

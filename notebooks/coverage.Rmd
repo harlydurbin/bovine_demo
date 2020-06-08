@@ -1,0 +1,123 @@
+---
+title: "Coverage evaluation"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(purrr)
+library(dplyr)
+library(stringr)
+```
+
+# Setup
+
+```{r, message = FALSE, warning = FALSE, eval=FALSE}
+cov_detail <- 
+  list.files(here::here("data/raw_data/coverage/"),
+             pattern = ".detail.csv",
+             full.names = TRUE) %>% 
+  purrr::set_names(~ str_extract(., "(?<=/)[[:digit:]]+(?=\\.DOC)")) %>%  
+  purrr::map_dfr(~ read_table2(.x, col_names = TRUE), .id = "lab_id") %>% 
+  dplyr::mutate(lab_id = as.numeric(lab_id))
+
+```
+
+```{r}
+animal_table <-
+  read_rds("~/googledrive/research_extension/hair_shed/data/derived_data/animal_table.rds")
+```
+
+```{r, message = FALSE, warning = FALSE, eval=FALSE}
+write_rds(cov_detail, here::here("data/derived_data/cov_detail.rds"))
+```
+
+```{r}
+sorted <- read_rds(here::here("data/derived_data/sorted.rds"))
+```
+
+```{r}
+sorted_cov <-
+  sorted %>% 
+  select(lab_id, species, continent, region, population) %>% 
+  left_join(cov_detail) 
+```
+
+```{r}
+cov_detail %>% 
+  filter(!chr %in% c("MT", "UNMAPPED")) %>% 
+  filter(chr == "Y" & mean < 0.3)
+
+cov_detail %>% 
+  filter(chr == "Y" & str_detect(sid, "(?<=^[[:upper:]]{6})F")) %>% 
+  rename(Lab_ID = lab_id) %>% 
+  select(Lab_ID:mean) %>% 
+  left_join(animal_table) %>% 
+  arrange(desc(mean))
+```
+
+
+```{r, fig.width=10, fig.height=7}
+sorted %>% 
+  select(lab_id, species, continent, region, population) %>% 
+  left_join(cov_detail) %>% 
+  filter(species %in% c("bos taurus", "bos indicus")) %>% 
+  rename(mean_cov = mean) %>% 
+  filter(!is.na(chr)) %>% 
+  filter(!chr %in%  c("MT", "UNMAPPED", "X", "Y")) %>% 
+  ggplot(aes(y = forcats::fct_inorder(chr),
+             # Orders `sid` (individuals) by lowest to highest
+             # autosome-wide avg coverage (avg of all values in `mean_cov`)
+             x = forcats::fct_reorder(sid, mean_cov, mean),
+             fill = mean_cov)) +
+  geom_tile() +
+  viridis::scale_fill_viridis(option = "inferno", direction = -1) +
+  labs(y = "Chromosome",
+       x = "Sample",
+       fill = "Mean coverage",
+       title = "Cattle samples") +
+  theme(
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.x = element_text(size = 20),
+    axis.title.y = element_text(size = 20),
+    legend.text = element_text(size = 12), 
+    legend.title = element_text(size = 14),
+    plot.title = element_text(size = 22)
+  )
+
+ggsave(here::here("figures/cattle.cov_detail_flip.png"), width = 10, height = 7, dpi = 500)
+```
+
+---
+
+```{r}
+sorted_cov %>%
+  filter(!chr %in%  c("MT", "UNMAPPED", "X", "Y")) %>%
+  filter(!is.na(chr)) %>%
+  group_by(lab_id, species, continent, region, population) %>%
+  summarise(cov_gw = mean(mean)) %>%
+  left_join(sorted_cov %>%
+              filter(chr == 25) %>%
+              select(lab_id, cov_25 = mean)) %>% 
+  mutate(diff = cov_25 - cov_gw) %>% 
+  arrange(diff)
+  
+
+
+```
+
+```{r}
+sorted_cov %>%
+  filter(!chr %in%  c("MT", "UNMAPPED", "X", "Y")) %>%
+  select(lab_id:population, chr, chr_cov = mean) %>% 
+  group_by(lab_id) %>% 
+  mutate(gw_cov = mean(chr_cov)) %>% 
+  ungroup() %>% 
+  mutate(diff = chr_cov - gw_cov) %>% 
+  filter(chr == "18") %>% 
+  arrange(desc(diff))
+```
+

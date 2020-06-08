@@ -1,0 +1,37 @@
+rules: ['trimBam', 'index_bam', 'target_creator', 'indel_realigner', 'merge_realigned', 'haplotype_caller']
+
+ref_genome: "/storage/hpc/group/UMAG/REF_GENOME/ARS-UCD1.2_Btau5.0.1Y.fa"
+
+samtools_module: "samtools/samtools-1.7"
+
+java_module: "java/openjdk/java-1.8.0-openjdk"
+
+gatk_module: "gatk/gatk-3.8"
+
+gatk_path: "/cluster/software/gatk/gatk-3.8/GenomeAnalysisTK.jar"
+
+target_creator_nt: 4
+
+target_creator_gc: 2
+
+target_creator_xmx: 4
+
+indel_realigner_gc: 2
+
+indel_realigner_xmx: 15
+
+merge_realigned_nt: 10
+
+haplotype_caller_gc: 4
+
+haplotype_caller_xmx: 15
+
+haplotype_caller_nt: 6
+
+bamUtil_path: "~/bam"
+
+pop: ["siberian", "derbyshire"]
+
+chr: ["X", "Y", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29"]
+
+target: "data/derived_data/ancient_preprocess/haplotype_caller/{chr}/{pop}.haplotype_caller.{chr}.g.vcf.gz"

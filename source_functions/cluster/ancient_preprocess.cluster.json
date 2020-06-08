@@ -1,0 +1,52 @@
+{
+    "__default__":
+    {
+        "p" : "BioCompute,htc4,hpc5",
+        "c": 3,
+        "mem" : 10G,
+        "t" : "05:00:00",
+        "o": "log/slurm_out/{rule}/{wildcards}.%j.out",
+        "account" : "animalsci",
+        "mail-user" : "hjdurbin@mail.missouri.edu",
+        "mail-type" : "NONE"
+    },
+    "trimBam":
+    {
+        "mem" : 3G,
+        "t": "2:00:00",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "index_bam":
+    {
+        "mem" : 5G,
+        "t": "2:00:00",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "target_creator":
+    {
+        "p" : "Lewis,BioCompute,htc4,hpc5",
+        "t": "02:00:00",
+        "mem" : 5G,
+        "c" : 12
+    },
+    "indel_realigner":
+    {
+        "t": "02:00:00",
+        "p" : "Lewis,BioCompute,htc4,hpc5",
+        "mem" : 5G,
+        "c" : 12
+    },
+    "merge_realigned":
+    {
+        "t": "04:00:00",
+        "mem" : 40G,
+        "c" : 12
+    },
+    "haplotype_caller":
+    {
+        "mem" : 24G,
+        "c": 12,
+        "t": "12:00:00",
+        "mail-type" : "END,FAIL"
+    }
+}

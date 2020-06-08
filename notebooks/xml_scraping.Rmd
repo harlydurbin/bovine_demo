@@ -1,0 +1,549 @@
+---
+title: "BioSample meta-data XML parsing"
+author: "Harly Durbin"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(purrr)
+library(dplyr)
+library(readr)
+library(stringr)
+library(readxl)
+library(magrittr)
+library(tidylog)
+
+source(here::here("source_functions/flatten_xml_biosample.R"))
+source(here::here("source_functions/iterative_id_search.R"))
+source(here::here("source_functions/coalesce_join.R"))
+```
+
+# Notes & questions
+
+> Objective: I'm missing a lot of metadata by scraping only specific fields that I know to exist from the text file versions of the "full summary" files. I'm interested the most in the elements of the "Attributes" and "Ids" lists, which vary in length from BioSample to BioSample. Biggest issue I was running into was that the "Attributes" and "Ids" descriptors are stored as "attributes" of the list elements rather than "names" (v confusing), so that I couldn't tell which value corresponded to which descriptor. 
+
+
+# Setup 
+
+```{r}
+blacklist <- 
+  read_excel(here::here("data/raw_data/CDDR_sequence.xlsx")) %>% 
+  pull(lab_id)
+```
+
+
+```{r}
+animal_table <- read_rds("~/googledrive/research_extension/hair_shed/data/derived_data/animal_table.rds")
+```
+
+```{r}
+breed_table <- read_rds(here::here("data/raw_data/breed_table.rds")) %>% 
+  janitor::clean_names() %>% 
+  mutate_if(is.factor, ~ as.character(.))
+```
+
+## Processed genomes on hand
+
+```{r, warning=FALSE, message=FALSE}
+processed <-
+  read_excel(
+    here::here("data/raw_data/sra_metadata/190221_Unknown_SRA.xlsx"),
+    na = c("na", "NA", "missing"),
+    trim_ws = TRUE
+  ) %>%
+  select(lab_id, BioSample, BioSample_metadata.breed) %>%
+  rename(Common_name = BioSample_metadata.breed) %>%
+  # 200511
+  bind_rows(
+    c(
+      "data/raw_data/sra_metadata/200511.processed_genomes.txt",
+      "data/raw_data/sra_metadata/200511.processed_genomes.outgroup.txt"
+    ) %>%
+      purrr::map_dfr(~ read_tsv(here::here(.x),
+                                col_names = "path")) %>%
+      filter(str_detect(path, "realigned.recalibrated.bam$")) %>%
+      mutate(lab_id = str_extract(path, "[[:digit:]]+(?=\\.realigned)")) %>%
+      select(lab_id) %>%
+      mutate(lab_id = as.integer(lab_id)) %>%
+      full_join(read_table2(
+        here::here("data/raw_data/sra_metadata/181011_WGS.txt")
+      ) %>%
+        select(-international_id))
+  ) %>%
+  distinct(lab_id, .keep_all = TRUE) %>%
+  select(-BC) %>%
+  rename(population = Common_name) %>%
+  mutate(population = case_when(
+    population == "Unknown" ~ NA_character_,
+    TRUE ~ as.character(population)
+  )) %>%
+  # 200511
+  left_join(animal_table, by = c("lab_id" = "Lab_ID")) %>%
+  left_join(breed_table %>% 
+              select(BC = breed_code, breed)) %>% 
+  mutate(
+    BioSample = if_else(!str_detect(BioSample, "^S"), NA_character_, BioSample),
+    BioSample = case_when(
+      is.na(BioSample) & is.na(population) & !is.na(Ref_ID) ~ Ref_ID,
+      is.na(BioSample) & is.na(population) & !is.na(Reg) ~ Reg,
+      TRUE ~ BioSample
+    ),
+    population = if_else(is.na(population) & BC != "UNK", breed, population)
+  ) %>% 
+  select(lab_id:SampleName) %>% 
+  # Remove if we don't have permission to use it
+  filter(!lab_id %in% blacklist)
+```
+
+```{r}
+mu_ids <-
+  processed %>%
+  select(id = BioSample) %>% 
+  bind_rows(processed %>% 
+              select(id = SampleName)) %>% 
+  filter(!is.na(id)) %>% 
+  distinct() %>% 
+  pull(id)
+```
+
+## Import XML file
+
+```{r}
+xmllist <-
+  c(list.files(here::here("data/raw_data/sra_metadata/unknown_xml"),
+             full.names = TRUE),
+    here::here("data/raw_data/sra_metadata/biosample_result_full.xml")
+    ) %>% 
+  # Import XML file with {xml2} package
+  purrr::map(~ xml2::read_xml(.x) %>% 
+               # Convert to a list
+               xml2::as_list() %>% 
+               # Remove a layer: first layer is now individual BioSamples
+               purrr::flatten()) %>% 
+  purrr::list_merge() %>% 
+  purrr::flatten()
+```
+
+# Flatten XML file
+
+```{r, eval=FALSE}
+flattened <- purrr::map_dfr(.x = seq_along(xmllist), ~ flatten_biosample(biosample_list = xmllist, index_num = .x, approved_ids = mu_ids))
+ 
+```
+
+```{r, eval=FALSE}
+write_rds(flattened, here::here("data/derived_data/flattened_raw.rds"))
+```
+
+# Tidy `flattened`
+
+```{r}
+flattened <- read_rds(here::here("data/derived_data/flattened_raw.rds"))
+```
+
+## First pass
+
+```{r}
+flattened %<>%
+  # Some titles, sample names, and organism descriptors
+  # weren't placed where I expected them to be
+  mutate(
+    organism =
+      case_when(
+        is.na(organism) & !is.na(organism1) ~ organism1,
+        is.na(organism) &
+          attribute == "array_express_species" ~ value,
+        TRUE ~ organism
+      ),
+    title = case_when(
+      !is.na(title) ~ title,
+      !is.na(title1) ~ title1,
+      attribute == "title" ~ value,
+      TRUE ~ title
+    ),
+    sample_name = dplyr::case_when(
+      !is.na(university_of_goettingen) &
+        is.na(sample_name) ~ university_of_goettingen,
+      !is.na(eth_zurich) & is.na(sample_name) ~ eth_zurich,
+      !is.na(wellcome_sanger_institute) &
+        is.na(sample_name) ~ wellcome_sanger_institute,
+      !is.na(natural_resources_institute_finland_luke) &
+        is.na(sample_name) ~ natural_resources_institute_finland_luke,
+      !is.na(texas_a_m_university) &
+        is.na(sample_name) ~ texas_a_m_university,
+      !is.na(bgi) & is.na(sample_name) ~ bgi,
+      !is.na(sandor) & is.na(sample_name) ~ sandor,
+      str_detect(attribute, "title") &
+        is.na(sample_name) ~ value,
+      attribute == "sample_name" & is.na(sample_name) ~ value,
+      attribute == "sample_id" & is.na(sample_name) ~ value,
+      attribute == "subject_id" & is.na(sample_name) ~ value,
+      TRUE ~ sample_name
+    ),
+    insdc_center_name = if_else(attribute == "insdc_center_name", value, NA_character_)
+  ) %>%
+  group_by(bio_sample) %>%
+  tidyr::fill(-bio_sample, .direction = "downup") %>%
+  ungroup() %>%
+  mutate(owner = if_else(!is.na(insdc_center_name), insdc_center_name, owner)) %>%
+  select(
+    -organism1,
+    -title1,
+    -university_of_goettingen,
+    -eth_zurich,
+    -wellcome_sanger_institute,
+    -natural_resources_institute_finland_luke,
+    -texas_a_m_university,
+    -bgi,
+    -sandor,
+    -insdc_center_name
+  )
+```
+
+## Concatenate and organize metadata attributes
+
+```{r}
+
+flattened %<>%
+  # Remove unnecessary attributes
+  mutate(
+    attribute = case_when(
+      value %in% c(
+        "not collected",
+        "not determined",
+        "not applicable",
+        "not provided",
+        "missing",
+        "Missing",
+        "undetermined",
+        "NA"
+      ) ~ NA_character_,
+      str_detect(value, "unknown|Unknown") ~ NA_character_,
+      str_detect(value, "Applicable|applicable") ~ NA_character_,
+      attribute %in% c(
+        "ploidy",
+        "propagation",
+        "num_replicons",
+        "title",
+        "env_material",
+        "env_biome",
+        "estimated_size",
+        "sra_accession",
+        "store_cond",
+        "external_id",
+        "fasted_status",
+        "availability",
+        "number_of_pieces",
+        "cell_line",
+        "isol_growth_condt",
+        "submitter_id",
+        "submission_identifier",
+        "subject_id",
+        "sample_id",
+        "organism",
+        "title",
+        "specimen_collection_protocol",
+        "dev_stage",
+        "gestational_age_at_sample_collection",
+        "developmental_stage",
+        "animal_age_at_collection",
+        "age",
+        "birth_date",
+        "specimen_collection_date",
+        "estimated_age",
+        "death_date",
+        "sampling_date",
+        "sample_type",
+        "material",
+        "health_status_at_collection",
+        "health_state",
+        "submission_description",
+        "specimen_size",
+        "collection_date",
+        "label",
+        "array_express_species",
+        "project",
+        "project_name",
+        "disease",
+        "collected_by",
+        "collected_by",
+        "investigation_type",
+        "sample_comment",
+        "genotype",
+        "treatment",
+        "breeding_history",
+        "breeding_method",
+        "interbull_id",
+        "stud_book_number",
+        "child_of"
+      ) ~ NA_character_,
+      str_detect(attribute, "ena|insdc") ~ NA_character_,
+      TRUE ~ attribute
+    ),
+    value = if_else(is.na(attribute), NA_character_, value)
+  ) %>%
+  # Condense attributes
+  mutate(
+    attribute =
+      case_when(
+        str_detect(attribute, "sex|gender") ~ "sex",
+        attribute %in% c("geographic_location_country_and_or_sea", "geo_loc_name") ~ "geo_loc",
+        attribute %in% c(
+          "tissue",
+          "tissue_type",
+          "organism_part",
+          "sample_type",
+          "bio_material",
+          "isolation_source",
+          "array_express_phenotype"
+        ) ~ "sample_type",
+        TRUE ~ attribute
+      ),
+    value = case_when(
+      attribute == "sex" & value %in% c("Female", "female", "F") ~ "F",
+      attribute == "sex" &
+        value %in% c("Male", "male", "M") ~ "M",
+      TRUE ~ value
+    )
+  ) %>%
+  distinct() %>%
+  tidyr::pivot_wider(
+    names_from = attribute,
+    values_from = value,
+    names_repair = janitor::make_clean_names
+  )
+```
+
+## Add metadata from assorted supplementary materials
+
+```{r}
+# Zhang 2016 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4875690/pdf/12864_2016_Article_2702.pdf
+flattened %<>%
+  coalesce_join(
+    read_excel(
+      here::here(
+        "data/raw_data/sra_metadata/yak_12864_2016_2702_MOESM1_ESM.xls"
+      )
+    ) %>%
+      select(
+        sample_name = `Sample ID1`,
+        geo_loc = Location,
+        lat_lon = `Geographic coordinates`,
+        altitude = Altitude
+      ),
+    by = c("sample_name"),
+    join = dplyr::left_join
+  ) 
+ 
+```
+
+
+# Join flattened XML to processed genomes on hand
+
+```{r}
+joined <-
+  flattened %>%
+  id_search(
+    source_col = bio_sample,
+    search_df = processed,
+    search_col = BioSample,
+    key_col = lab_id
+  ) %>%
+  id_search(
+    source_col = bio_sample,
+    search_df = processed,
+    search_col = SampleName,
+    key_col = lab_id
+  ) %>%
+  id_search(
+    source_col = sra,
+    search_df = processed,
+    search_col = BioSample,
+    key_col = lab_id
+  ) %>%
+  id_search(
+    source_col = sra,
+    search_df = processed,
+    search_col = SampleName,
+    key_col = lab_id
+  ) %>%
+  filter(!is.na(lab_id)) %>%
+  right_join(processed %>%
+               select(-avg_coverage)) %>%
+  mutate(bio_sample = if_else(is.na(bio_sample) &
+                                !is.na(BioSample), BioSample, bio_sample)) %>% 
+  select(lab_id, population, everything(), -BioSample, -SampleName) %>% 
+  # deal with duplicate samples
+  group_by(lab_id) %>% 
+  arrange(sample_name) %>% 
+  fill(-lab_id, .direction = "downup") %>% 
+  slice(1) %>% 
+  ungroup() %>% 
+  # sex imputation
+  left_join(animal_table %>% 
+              select(lab_id = Lab_ID, Sex)) %>% 
+  mutate(sex = case_when(
+    !is.na(sex) ~ sex,
+    Sex != "U" ~ Sex
+  )) %>% 
+  select(-Sex, -na)
+```
+
+# Tidy population labels in `joined`
+
+```{r}
+joined %<>% 
+  mutate_if(is.character, ~ str_squish(.)) %>% 
+  # No water buffalo
+  filter(!organism %in% c("Bubalus bubalis")) %>% 
+  filter(!title %in% c("Indian Murrah Buffalo")) %>% 
+  filter(!population %in% c("Water")) %>% 
+  # No German Angus or Fujian
+  # Can't find any info at all about Fujian
+  filter(!breed %in% c("German Angus", "Fujian")) %>% 
+  # No Shimao ancient samples
+  filter(!bio_sample %in% c("SAMN08866418", "SAMN08866419", "SAMN08866420", "SAMN08866421", "SAMN08866422", "SAMN08866423", "SAMN08866424", "SAMN08866425")) %>% 
+  mutate(
+    population = case_when(
+      !is.na(breed) ~ breed,
+      !is.na(population) ~ population,
+      !is.na(strain) ~ strain,
+      !is.na(common_name) ~ common_name, 
+      !is.na(isolate) ~ isolate, 
+      !is.na(ecotype) ~ ecotype, 
+      !is.na(description) ~ description,
+      !is.na(title) ~ title,
+      !is.na(sample_name) ~ sample_name
+    ),
+    population = str_to_lower(population),
+    population = str_remove_all(population, "[[:digit:]]"),
+    population = str_remove_all(population, " cattle"),
+    # Spelling errors
+    population = str_replace(population, "fincattle", "finncattle"),
+    population = case_when(
+      # Medical samples
+      population %in% c("arthrogryposis multiplex congenita in a family of red", "bovine osteogenesis imperfecta", "bulldog_", "epidermolysa bullosa in danish hereford calves is caused by a deletion in lamc gene", "piggybac transposon", "progressive ataxia case", "sleeping beauty transposon", "bovinesperm_bulk_wgs_father", "cloned bull", "bulldog animal") ~ "medical",
+      str_detect(title, "Progressive ataxia case|Hairless stripes in cattle") ~ "medical",
+      bio_sample %in% c("SAMEA3869562", "SAMEA3869563", "SAMN08724709", "SAMEA4675143") ~ "medical",
+      population == "" ~ NA_character_,
+      # Crossbred
+      str_detect(population, " x |cross|chi-angus|composite") | bio_sample %in% c("Belgian Blue x Holstein") ~ "crossbred",
+      str_detect(population, "belgian blue|belgium blue") ~ "belgian blue",
+      # Concatenation
+      str_detect(population, "angus(?! lowline)") ~ "angus",
+      str_detect(population, "brown swiss|brown suisse") | bio_sample %in% c("SAMEA4051550") ~ "brown swiss",
+      population %in% c("maine", "maine anjou", "maine-anjou") ~ "maine-anjou",
+      str_detect(population, "piemontese|piedmontese") ~ "piedmontese",
+      str_detect(population, "tyrolean grey") ~ "tyrolean grey", 
+      str_detect(population, "romagnola") ~ "romagnola",
+      str_detect(population, "braunvieh|braunveih") | str_detect(title, "(?i)braunvieh") ~ "braunvieh",
+      str_detect(population, "nelore|nellore") ~ "nelore",
+      population %in% c("thar", "tharparkar") | str_detect(population, "tharparker|tharparkar") ~ "tharparkar",
+      str_detect(population, "holstein") | str_detect(title, "(?i)holstein") ~ "holstein",
+      str_detect(population, "hereford|herford") & !str_detect(population, "miniature") ~ "hereford",
+      population == "red" ~ "red angus",
+      str_detect(population, "charolais") ~ "charolais",
+      str_detect(population, "simmental") ~ "simmental",
+      str_detect(population, "limousin") ~ "limousin", 
+      str_detect(population, "kuchinoshima") ~ "kuchinoshima",
+      str_detect(population, "mishima") ~ "mishima",
+      population %in% c("scotish highland", "scottish highland", "highland") | str_detect(population, "highland") ~ "scottish highland",
+      str_detect(population, "eringer") ~ "eringer",
+      str_detect(population, "fleckvieh") ~ "fleckvieh",
+      str_detect(population, "wgyu|wagyu") ~ "wagyu", 
+      str_detect(population, "somba") ~ "somba",
+      str_detect(population, "south anatolian red") ~ "south anatolian red",
+      str_detect(population, "sikias") ~ "sikias",
+      str_detect(population, "lagune") ~ "lagune",
+      str_detect(population, "hariana") ~ "hariana",
+      str_detect(population, "alentejana") ~ "alentejana",
+      population %in% c("n'dama", "ndama") ~ "n'dama",
+      str_detect(population, "sahiwal|shaiwal") ~ "sahiwal",
+      population %in% c("mongolian", "menggu") | bio_sample == "SAMN03447086" ~ "mongolian",
+      population %in% c("hasake", "kazakh") ~ "kazakh",
+      population == "xizang" | str_detect(population, "tibet") ~ "tibetan",
+      population %in% c("dehong", "yunnan") ~ "yunnan",
+      str_detect(population, "romagnola") | str_detect(title, "(?i)romagnola") ~ "romagnola",
+      bio_sample %in% c("SAMEA6528901") ~ "danish red",
+      bio_sample %in% c("SAMEA4051549", "SAMEA4051548") ~ "belted galloway",
+      str_detect(population, "chaidamu") ~ "chaidamu yellow",
+      # BGI
+      # from data/raw_data/sra_metadata/msx322_supp.SuppTables.xlsx
+      str_detect(sample_name, "^BGI-QC|QX") ~ "qinchuan",
+      str_detect(sample_name, "^BGI-AGS") ~ "red angus",
+      str_detect(sample_name, "^BGI-HN") ~ "japanese black",
+      str_detect(sample_name, "^BGI-LQ") ~ "leiqiong",
+      str_detect(sample_name, "^BGI-LX") ~ "luxi",
+      str_detect(sample_name, "^BGI-NY") ~ "nanyang",
+      str_detect(sample_name, "^BGI-YB") ~ "yanbian",
+      str_detect(sample_name, "^BGI-YN") ~ "yunnan",
+      # INRA
+      str_detect(alias, "^INRA_HOL") ~ "holstein",
+      str_detect(alias, "^INRA_MON") ~ "montbeliarde",
+      str_detect(alias, "^INRA_NOR") ~ "normande",
+      # Outgroups
+      lab_id %in% c(2406, 20079, 20087, 20098, 20172) | population == "bison bison" | organism == "Bison bison" ~ "american bison",
+      # https://www.ncbi.nlm.nih.gov/biosample/?term=SAMN02343391
+      # domestic yak breeds
+      str_detect(population, "(?i)Jinchuan") | str_detect(title, "(?i)Jinchuan") | str_detect(geo_loc, "(?i)Jinchuan") | str_detect(strain, "(?i)Jinchuan") ~ "yak jinchuan",
+      organism == "Bos grunniens" & sample_name %in% c("DYG01", "DYG02", "DYG03", "DYG04", "DYG05", "DYG06", "DYG07", "DYG09", "DYG66", "DYG69", "DYG70") ~ "yak tianzhu white",
+      str_detect(population, "(?i)datong") | str_detect(title, "(?i)datong") ~ "yak datong",
+      # Qinghai-Tibetan plateau yaks
+      # https://pubmed.ncbi.nlm.nih.gov/22751099/
+      str_detect(title, "(?i)Qinghai") | str_detect(geo_loc, "(?i)Qinghai") | str_detect(strain, "(?i)Qinghai") ~ "yak qtp",
+      # https://www.nature.com/articles/ncomms10283#MOESM177
+      organism == "Bos grunniens" & str_detect(geo_loc, "Gansu|Sichuan|Tibet") ~ "yak qtp",
+      bio_sample %in% c("SAMN02439780", "SAMN02439781") ~ "yak qtp",
+      # Wild yaks
+      organism == "Bos mutus" | bio_sample %in% c("SAMN00744358") ~ "yak wild",
+      organism == "Bos grunniens" & str_detect(title, "^WY") ~ "yak wild",
+      # All other yaks of unknown origins
+      population %in% c("yak", "bos grunniens", "horned yak") | organism == "Bos grunniens" | bio_sample %in% c("SAMN02343391", "SAMN02343392", "SAMN02343393", "SAMN02343394", "SAMN02439780", "SAMN02439781") ~ "yak unknown",
+      # Gayal
+      str_detect(title, "chinese_gayal") ~ "gayal chinese",
+      str_detect(title, "bangladesh_gayal") ~ "gayal bangladeshi",
+      str_detect(title, "indian_gayal") | bio_sample %in% c("SAMN02689702") ~ "gayal indian",
+      organism == "Bos javanicus" ~ "banteng",
+      organism == "Bos gaurus" ~ "gaur",
+      str_detect(population, "ancient") ~ "ancient",
+      TRUE ~ population
+      )
+  ) %>% 
+  filter(!population %in% c("bos taurus", "stdy", "crossbred", "medical", "sample from bos taurus")) %>% 
+  filter(!is.na(population)) 
+
+```
+
+
+# Nest metadata columns
+
+```{r}
+joined %<>%
+  tidyr::nest(
+    geo_data = c(
+      country_of_origin,
+      closest_locality,
+      closest_city,
+      env_broad_scale,
+      env_feature,
+      env_local_scale,
+      geo_loc,
+      location,
+      birth_location,
+      latitude,
+      longitude,
+      lat_lon
+    )
+  ) %>% 
+  tidyr::nest(metadata = !c(lab_id, bio_sample, sra, owner, population, organism, sex, geo_data))
+
+```
+
+```{r}
+write_rds(joined, path = here::here("data/derived_data/200605.sample_metadata.rds"))
+
+joined <- read_rds(here::here("data/derived_data/200605.sample_metadata.rds"))
+```
+
