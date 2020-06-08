@@ -1,0 +1,96 @@
+---
+title: "Filter evaluation"
+author: "Harly Jane Durbin"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(dplyr)
+library(tidyr)
+library(readr)
+library(ggplot2)
+
+source(here::here("source_functions/qc_eval_functions.R"))
+```
+
+# Notes & questions
+
+# Setup 
+
+```{r}
+eval_28 <- read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.table")) %>% 
+  janitor::clean_names()
+```
+
+```{r}
+indel_range <- 
+  eval_28 %>% 
+  filter(type == "INDEL") %>% 
+  select(pos) %>% 
+  mutate(list = purrr::map(.x = pos, ~ seq(from = .x-5, to = .x+5))) %>% 
+  unnest(list) %>% 
+  pull(list)
+```
+
+
+
+# How many SNPs within 5 bp of an indel?
+
+```{r}
+eval_28 %>% 
+  filter(type == "SNP") %>% 
+  filter(pos %in% indel_range)
+```
+
+# Filter values prior to QC
+
+## QD
+
+```{r}
+eval_28 %>% 
+  filter(type == "SNP") %>% 
+  plot_filter_density(var = qd)
+```
+
+## FS
+
+```{r}
+eval_28 %>% 
+  filter(type == "SNP") %>% 
+  plot_filter_density(var = fs)
+```
+
+## MQ
+
+```{r}
+eval_28 %>% 
+  filter(type == "SNP") %>% 
+  plot_filter_density(var = mq)
+```
+
+## MQ rank sum
+
+```{r}
+eval_28 %>% 
+  filter(type == "SNP") %>% 
+  plot_filter_density(var = mq_rank_sum)
+```
+
+## Read position rank sum
+
+```{r}
+eval_28 %>% 
+  filter(type == "SNP") %>% 
+  plot_filter_density(var = read_pos_rank_sum)
+```
+
+# Number of no calls across the chromosome
+
+```{r}
+eval_28 %>% 
+  filter(type == "SNP") %>% 
+  ggplot(aes(x = pos, y = no_call)) +
+  geom_smooth()
+```
+
