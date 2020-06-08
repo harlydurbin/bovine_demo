@@ -6,3 +6,5 @@
 .rds
 .list
 .ftpconfig
+.out
+.xml
