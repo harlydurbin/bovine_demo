@@ -1,4 +1,4 @@
-# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200608.joint_genotyping.log
+# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200610.joint_genotyping.log
 
 # paste(c(1:29, "X", "Y"), collapse = "', '")
 
@@ -24,7 +24,7 @@ for x in expand("temp/joint_genotyping/{rules}", rules = config['rules']):
 rule all:
 	input:
 		expand("data/derived_data/joint_genotyping/select_variants/select_variants.{chr}.vcf.gz", chr = config['chr']),
-		"data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.table"
+		"data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.gf.table"
 
 
 rule combine_gvcfs:
@@ -111,6 +111,12 @@ rule biallelic_28:
 		java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads=2 {params.gatk_path} -nt {params.nt} -T SelectVariants -R {params.ref_genome} -L 28 -V {input.vcf} --restrictAllelesTo BIALLELIC -o {output.vcf}
 		"""
 
+# module load vcftools
+
+# vcftools --gzvcf data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.vcf.gz --depth --out data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28
+
+# vcftools --gzvcf data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.vcf.gz --site-mean-depth --out data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28
+
 rule table_28:
 	input:
 		vcf = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.vcf.gz",
@@ -127,6 +133,24 @@ rule table_28:
 		module load {params.java_module}
 		java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads=2 -jar {params.gatk_path} -R {params.ref_genome} -L 28 -T VariantsToTable -V {input.vcf} -F POS -F TYPE -F TRANSITION -F QD -F FS -F MQ -F ReadPosRankSum -F MQRankSum -F NO-CALL -F N-CALLED -F VAR -o {output.table}
 		"""
+
+rule table_gf_28:
+	input:
+		vcf = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.vcf.gz",
+		tbi = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.vcf.gz.tbi"
+	params:
+		java_module = config['java_module'],
+		ref_genome = config['ref_genome'],
+		gatk_path = config['gatk_path'],
+		java_tmp = "temp/joint_genotyping/table_gf_28"
+	output:
+		table = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.gf.table"
+	shell:
+		"""
+		module load {params.java_module}
+		java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads=2 -jar {params.gatk_path} -R {params.ref_genome} -L 28 -T VariantsToTable -V {input.vcf} -F POS -GF GQ -GF PL -GF DP -o {output.table}
+		"""
+
 
 # Restrict to biallelic SNPs
 # Remove indels
