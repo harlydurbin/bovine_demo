@@ -16,12 +16,28 @@ source(here::here("source_functions/qc_eval_functions.R"))
 
 # Notes & questions
 
+* From GATK [`VariantsToTable` docs](https://gatk.broadinstitute.org/hc/en-us/articles/360036896892-VariantsToTable#--genotype-fields):
+    + TRANSITION (1 for a bi-allelic transition (SNP), 0 for bi-allelic transversion (SNP), -1 for INDELs and multi-allelics)
+    + NO-CALL (count of no-call genotypes)
+    + VAR (count of non-reference genotypes)
+* Need to plot
+    + Depth of coverage per individual
+    + Mean coverage per site (Yassine says limit to 8)
+    + GQ per site (Yassine says limit to 20)
+
 # Setup 
 
+
 ```{r}
-eval_28 <- read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.table")) %>% 
-  janitor::clean_names()
+eval_28 <- 
+  read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.table")) %>% 
+  janitor::clean_names() %>% 
+  left_join(
+    read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.ldepth.mean")) %>% 
+      select(-CHROM) %>% 
+      janitor::clean_names())
 ```
+
 
 ```{r}
 indel_range <- 
@@ -37,52 +53,124 @@ indel_range <-
 
 # How many SNPs within 5 bp of an indel?
 
-```{r}
-eval_28 %>% 
+```{r, echo=FALSE}
+in_range_length <-
+  eval_28 %>% 
   filter(type == "SNP") %>% 
-  filter(pos %in% indel_range)
+  filter(pos %in% indel_range) %>% 
+  pull(pos) %>% 
+  length(.) 
+
+snp_length <-
+  eval_28 %>%
+  filter(type == "SNP") %>%
+  pull(pos) %>%
+  length(.)
+  
 ```
+
+`r in_range_length %>% scales::comma(.)` of `r snp_length %>% scales::comma` total SNPs are within 5 bp of an indel (`r scales::percent(in_range_length/snp_length)`).
 
 # Filter values prior to QC
 
-## QD
+## Quality by depth
+
+* "[QUAL](https://gatkforums.broadinstitute.org/gatk/discussion/1268/what-is-a-vcf-and-how-should-i-interpret-it): The Phred-scaled probability that a REF/ALT polymorphism exists at this site given sequencing data. Because the Phred scale is -10 x log(1-p), a value of 10 indicates a 1 in 10 chance of error, while a 100 indicates a 1 in 10^10 chance (see the FAQ article for a detailed explanation). These values can grow very large when a large amount of data is used for variant calling, **so QUAL is not often a very useful property for evaluating the quality of a variant call.** 
+Not to be confused with the sample-level annotation GQ; see this FAQ article for an explanation of the differences in what they mean and how they should be used."
+* "[QUAL](https://gatk.broadinstitute.org/hc/en-us/articles/360035531392-Difference-between-QUAL-and-GQ-annotations-in-germline-variant-calling) tells you how confident we are that there is some kind of variation at a given site. The variation may be present in one or more samples."
 
 ```{r}
 eval_28 %>% 
   filter(type == "SNP") %>% 
-  plot_filter_density(var = qd)
+  plot_filter_density(var = qd, plot_title = "Density of QD values, chromosome 28") + 
+  geom_vline(xintercept = 10, color = "red")
 ```
 
-## FS
+## Fisher strand
+
+* "[Strand bias](https://gatk.broadinstitute.org/hc/en-us/articles/360036361992-FisherStrand) is a type of sequencing bias in which one DNA strand is favored over the other, which can result in incorrect evaluation of the amount of evidence observed for one allele vs. the other. The output is a Phred-scaled p-value. The higher the output value, the more likely there is to be bias. More bias is indicative of false positive calls. FisherStrand is best suited for low coverage situations. For testing strand bias in higher coverage situations, see the StrandOddsRatio annotation."
+* Have used FS > 60 in the past
+
 
 ```{r}
 eval_28 %>% 
   filter(type == "SNP") %>% 
-  plot_filter_density(var = fs)
+  plot_filter_density(var = fs, plot_title = "Density of FS values, chromosome 28") + 
+  geom_vline(xintercept = 60, color = "red")
 ```
+
+The GATK team [reccomends](http://mbontrager.org/blog/2016/08/17/Variant-Exploration) log(10) scaling the x-axis when plotting FS:
+
+```{r}
+eval_28 %>% 
+  filter(type == "SNP") %>% 
+  plot_filter_density(var = fs, plot_title = "Density of FS values, chromosome 28") +
+  scale_x_continuous(trans = 'log10') +
+  labs(x = "log10(FS)")
+```
+
+
+## RMS mapping quality
+
+* "[Root mean square mapping quality](https://gatk.broadinstitute.org/hc/en-us/articles/360037591751-RMSMappingQuality) provides an estimation of the overall mapping quality of reads supporting a variant call, averaged over all samples in a cohort."
+* Have used MQ < 15 in the past
 
 ## MQ
 
 ```{r}
 eval_28 %>% 
   filter(type == "SNP") %>% 
-  plot_filter_density(var = mq)
+  plot_filter_density(var = mq, plot_title = "Density of MQ values, chromosome 28") +
+  geom_vline(xintercept = 15, color = "red")
 ```
 
-## MQ rank sum
+## Mapping quality rank sum test
+
+* Have used MQRankSum < -12.5 in the past
 
 ```{r}
 eval_28 %>% 
   filter(type == "SNP") %>% 
-  plot_filter_density(var = mq_rank_sum)
+  plot_filter_density(var = mq_rank_sum, plot_title = "Density of MQRankSum values, chromosome 28") +
+  geom_vline(xintercept = -12.5, color = "red")
 ```
 
 ## Read position rank sum
 
+* Have used ReadPosRankSum < -8.0 in the past
+
 ```{r}
 eval_28 %>% 
   filter(type == "SNP") %>% 
-  plot_filter_density(var = read_pos_rank_sum)
+  plot_filter_density(var = read_pos_rank_sum, "Density of ReadPosRankSum values, chromosome 28") +
+  geom_vline(xintercept = -8)
+```
+
+## Mean depth per site averaged across all individuals
+
+```{r}
+eval_28 %>% 
+  filter(type == "SNP") %>% 
+  plot_filter_density(var = mean_depth, "Mean depth per site, chromosome 28") +
+  geom_vline(xintercept = 8, color = "red")
+```
+
+# Mean depth across the chromosome
+
+```{r}
+eval_28 %>% 
+  filter(type == "SNP") %>% 
+  arrange(pos) %>% 
+  ggplot(aes(x = pos, y = mean_depth)) +
+  geom_line()
+```
+
+```{r}
+eval_28 %>% 
+  filter(type == "SNP") %>% 
+  arrange(pos) %>% 
+  ggplot(aes(x = pos, y = var_depth)) +
+  geom_line()
 ```
 
 # Number of no calls across the chromosome
@@ -90,7 +178,9 @@ eval_28 %>%
 ```{r}
 eval_28 %>% 
   filter(type == "SNP") %>% 
+  arrange(pos) %>% 
   ggplot(aes(x = pos, y = no_call)) +
-  geom_smooth()
+  geom_smooth(color = "red")
 ```
 
+# Commentary
