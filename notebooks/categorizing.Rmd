@@ -58,7 +58,7 @@ library(tidylog)
 
 ```{r}
 sorted <-  
-  read_rds(here::here("data/derived_data/200605.sample_metadata.rds")) %>%
+  read_rds(here::here("data/derived_data/xml_scraping/scraped.sample_metadata.rds")) %>%
   mutate(
     region = 
       case_when(
@@ -142,13 +142,6 @@ sorted %<>%
 # Species
 
 ```{r}
-sorted %>% 
-  filter(str_detect(population, "yak")) %>% 
-  distinct(population)
-```
-
-
-```{r}
 sorted %<>% 
   rename(species = organism) %>% 
   mutate(
@@ -204,34 +197,17 @@ sorted %<>%
 
 ```
 
-```{r}
-sorted %>% 
-  group_by(species, population) %>% 
-  tally() %>% 
-  arrange(species)
-```
-
-
-```{r}
-sorted %>% 
-  select(lab_id, population, avg_coverage, species, continent, region) %>% 
-  arrange(continent, region, species, population) %>% 
-  write_csv(here::here("20515.sample_metadata.csv"), na = "")
-```
-
-```{r}
-sorted %>% 
-  write_rds(here::here("data/derived_data/sorted.rds"))
-```
-
-
 # Summary
 
 ```{r}
 sorted %>% 
   visdat::vis_miss()
 ```
-
+```{r}
+sorted %>% 
+  select(lab_id, bio_sample, sra, population, region, continent, species, sex, owner, geo_data, metadata) %>% 
+  write_rds(here::here("data/derived_data/categorizing/sorted.sample_metadata.rds"))
+```
 
 ```{r}
 sorted %>% 
@@ -250,6 +226,7 @@ sorted %>%
   group_by(region) %>% 
   tally(sort = TRUE) 
 ```
+
 
 
 

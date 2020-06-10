@@ -24,17 +24,17 @@ cov_detail <-
 
 ```
 
+```{r, message = FALSE, warning = FALSE, eval=FALSE}
+write_rds(cov_detail, here::here("data/derived_data/coverage/cov_detail.rds"))
+```
+
 ```{r}
 animal_table <-
   read_rds("~/googledrive/research_extension/hair_shed/data/derived_data/animal_table.rds")
 ```
 
-```{r, message = FALSE, warning = FALSE, eval=FALSE}
-write_rds(cov_detail, here::here("data/derived_data/cov_detail.rds"))
-```
-
 ```{r}
-sorted <- read_rds(here::here("data/derived_data/sorted.rds"))
+sorted <- read_rds(here::here("data/derived_data/categorizing/sorted.sample_metadata.rds"))
 ```
 
 ```{r}
@@ -45,10 +45,85 @@ sorted_cov <-
 ```
 
 ```{r}
+sample_table <-
+  read_delim(
+    "~/googledrive/research_extension/hair_shed/data/raw_data/200501_sample_sheet.csv",
+    delim = c(","),
+    col_names = TRUE,
+    guess_max = 10000
+  )
+```
+```{r}
+sorted %<>%
+  left_join(animal_table %>%
+              select(lab_id = Lab_ID, international_id) %>%
+              distinct()) 
+
+
+sorted %<>% 
+  mutate(
+    international_id = 
+      case_when(
+        lab_id == 20076 ~ "UMCUSAM000000020076",
+        lab_id == 20079 ~ "UMCUSAM000000020079",
+        lab_id == 20098 ~ "UMCUSAM000000020098",
+        lab_id == 20136 ~ "UMCUSAM000000020136",
+        lab_id == 185723 ~ "CPC98_Bprimigenius_EnglandDerbyshire_5936", 
+        
+      )
+  )
+```
+
+
+```{r}
+depth <-
+  read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.idepth"), skip = 1, col_names = c("international_id", "n_sites", "mean_depth"))
+  
+```
+```{r}
+sorted %>% 
+filter(!international_id %in% depth$international_id) %>% 
+  arrange(lab_id) %>% 
+  View
+
+```
+
+```{r}
+depth %>% 
+  filter(!international_id %in% sorted$international_id) %>% 
+  left_join(animal_table %>% 
+              select(international_id, lab_id = Lab_ID, BC, Sex)) %>% 
+  arrange(lab_id)
+```
+
+
+# Add to sample metadata
+
+```{r}
+cov_detail %>% 
+  filter(!chr %in% c("X", "Y", "MT", "UNMAPPED")) %>% 
+  group_by(lab_id) %>% 
+  summarise(avg_coverage = mean(mean)) %>% 
+  ungroup() %>% 
+  right_join(sorted) %>%
+```
+
+```{r}
+sa
+```
+
+
+
+# Incorrect sex issues?
+
+```{r}
 cov_detail %>% 
   filter(!chr %in% c("MT", "UNMAPPED")) %>% 
   filter(chr == "Y" & mean < 0.3)
+```
 
+
+```{r}
 cov_detail %>% 
   filter(chr == "Y" & str_detect(sid, "(?<=^[[:upper:]]{6})F")) %>% 
   rename(Lab_ID = lab_id) %>% 
@@ -57,6 +132,9 @@ cov_detail %>%
   arrange(desc(mean))
 ```
 
+# Autosomal coverage for all samples
+
+## Plot
 
 ```{r, fig.width=10, fig.height=7}
 sorted %>% 
@@ -88,10 +166,12 @@ sorted %>%
     plot.title = element_text(size = 22)
   )
 
-ggsave(here::here("figures/cattle.cov_detail_flip.png"), width = 10, height = 7, dpi = 500)
+#ggsave(here::here("figures/cattle.cov_detail_flip.png"), width = 10, height = 7, dpi = 500)
 ```
 
----
+
+
+# Chromosomes with poor coverage
 
 ```{r}
 sorted_cov %>%

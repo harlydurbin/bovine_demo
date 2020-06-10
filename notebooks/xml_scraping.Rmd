@@ -49,7 +49,7 @@ breed_table <- read_rds(here::here("data/raw_data/breed_table.rds")) %>%
 ```{r, warning=FALSE, message=FALSE}
 processed <-
   read_excel(
-    here::here("data/raw_data/sra_metadata/190221_Unknown_SRA.xlsx"),
+    here::here("data/raw_data/xml_scraping/190221_Unknown_SRA.xlsx"),
     na = c("na", "NA", "missing"),
     trim_ws = TRUE
   ) %>%
@@ -58,8 +58,8 @@ processed <-
   # 200511
   bind_rows(
     c(
-      "data/raw_data/sra_metadata/200511.processed_genomes.txt",
-      "data/raw_data/sra_metadata/200511.processed_genomes.outgroup.txt"
+      "data/raw_data/xml_scraping/200511.processed_genomes.txt",
+      "data/raw_data/xml_scraping/200511.processed_genomes.outgroup.txt"
     ) %>%
       purrr::map_dfr(~ read_tsv(here::here(.x),
                                 col_names = "path")) %>%
@@ -68,7 +68,7 @@ processed <-
       select(lab_id) %>%
       mutate(lab_id = as.integer(lab_id)) %>%
       full_join(read_table2(
-        here::here("data/raw_data/sra_metadata/181011_WGS.txt")
+        here::here("data/raw_data/xml_scraping/181011_WGS.txt")
       ) %>%
         select(-international_id))
   ) %>%
@@ -112,9 +112,9 @@ mu_ids <-
 
 ```{r}
 xmllist <-
-  c(list.files(here::here("data/raw_data/sra_metadata/unknown_xml"),
+  c(list.files(here::here("data/raw_data/xml_scraping/unknown_xml"),
              full.names = TRUE),
-    here::here("data/raw_data/sra_metadata/biosample_result_full.xml")
+    here::here("data/raw_data/xml_scraping/biosample_result_full.xml")
     ) %>% 
   # Import XML file with {xml2} package
   purrr::map(~ xml2::read_xml(.x) %>% 
@@ -134,13 +134,13 @@ flattened <- purrr::map_dfr(.x = seq_along(xmllist), ~ flatten_biosample(biosamp
 ```
 
 ```{r, eval=FALSE}
-write_rds(flattened, here::here("data/derived_data/flattened_raw.rds"))
+write_rds(flattened, here::here("data/derived_data/xml_scraping/flattened_raw.rds"))
 ```
 
 # Tidy `flattened`
 
 ```{r}
-flattened <- read_rds(here::here("data/derived_data/flattened_raw.rds"))
+flattened <- read_rds(here::here("data/derived_data/xml_scraping/flattened_raw.rds"))
 ```
 
 ## First pass
@@ -324,7 +324,7 @@ flattened %<>%
   coalesce_join(
     read_excel(
       here::here(
-        "data/raw_data/sra_metadata/yak_12864_2016_2702_MOESM1_ESM.xls"
+        "data/raw_data/xml_scraping/supplements/yak_12864_2016_2702_MOESM1_ESM.xls"
       )
     ) %>%
       select(
@@ -390,6 +390,7 @@ joined <-
   )) %>% 
   select(-Sex, -na)
 ```
+
 
 # Tidy population labels in `joined`
 
@@ -542,8 +543,7 @@ joined %<>%
 ```
 
 ```{r}
-write_rds(joined, path = here::here("data/derived_data/200605.sample_metadata.rds"))
+write_rds(joined, path = here::here("data/derived_data/xml_scraping/scraped.sample_metadata.rds"))
 
-joined <- read_rds(here::here("data/derived_data/200605.sample_metadata.rds"))
 ```
 

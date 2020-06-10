@@ -117,6 +117,8 @@ rule biallelic_28:
 
 # vcftools --gzvcf data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.vcf.gz --site-mean-depth --out data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28
 
+# vcftools --gzvcf data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.vcf.gz --get-INFO GQ --out data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28
+
 rule table_28:
 	input:
 		vcf = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.vcf.gz",
