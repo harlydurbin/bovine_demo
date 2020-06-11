@@ -1,7 +1,11 @@
 ---
 title: "Filter evaluation"
 author: "Harly Jane Durbin"
-output: html_document
+output:
+  html_document:
+    toc: true
+    df_print: paged
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
@@ -27,7 +31,6 @@ source(here::here("source_functions/qc_eval_functions.R"))
 
 # Setup 
 
-
 ```{r}
 eval_28 <- 
   read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.table")) %>% 
@@ -38,7 +41,6 @@ eval_28 <-
       janitor::clean_names())
 ```
 
-
 ```{r}
 indel_range <- 
   eval_28 %>% 
@@ -48,8 +50,6 @@ indel_range <-
   unnest(list) %>% 
   pull(list)
 ```
-
-
 
 # How many SNPs within 5 bp of an indel?
 
@@ -69,7 +69,7 @@ snp_length <-
   
 ```
 
-`r in_range_length %>% scales::comma(.)` of `r snp_length %>% scales::comma` total SNPs are within 5 bp of an indel (`r scales::percent(in_range_length/snp_length)`).
+`r in_range_length %>% scales::comma(.)` of `r snp_length %>% scales::comma(.)` total SNPs are within 5 bp of an indel (`r scales::percent(in_range_length/snp_length)`).
 
 # Filter values prior to QC
 
@@ -91,7 +91,6 @@ eval_28 %>%
 * "[Strand bias](https://gatk.broadinstitute.org/hc/en-us/articles/360036361992-FisherStrand) is a type of sequencing bias in which one DNA strand is favored over the other, which can result in incorrect evaluation of the amount of evidence observed for one allele vs. the other. The output is a Phred-scaled p-value. The higher the output value, the more likely there is to be bias. More bias is indicative of false positive calls. FisherStrand is best suited for low coverage situations. For testing strand bias in higher coverage situations, see the StrandOddsRatio annotation."
 * Have used FS > 60 in the past
 
-
 ```{r}
 eval_28 %>% 
   filter(type == "SNP") %>% 
@@ -109,13 +108,10 @@ eval_28 %>%
   labs(x = "log10(FS)")
 ```
 
-
 ## RMS mapping quality
 
 * "[Root mean square mapping quality](https://gatk.broadinstitute.org/hc/en-us/articles/360037591751-RMSMappingQuality) provides an estimation of the overall mapping quality of reads supporting a variant call, averaged over all samples in a cohort."
 * Have used MQ < 15 in the past
-
-## MQ
 
 ```{r}
 eval_28 %>% 
@@ -155,22 +151,29 @@ eval_28 %>%
   geom_vline(xintercept = 8, color = "red")
 ```
 
-# Mean depth across the chromosome
+# #Summary
 
 ```{r}
-eval_28 %>% 
-  filter(type == "SNP") %>% 
-  arrange(pos) %>% 
-  ggplot(aes(x = pos, y = mean_depth)) +
-  geom_line()
-```
 
-```{r}
-eval_28 %>% 
-  filter(type == "SNP") %>% 
-  arrange(pos) %>% 
-  ggplot(aes(x = pos, y = var_depth)) +
-  geom_line()
+eval_28 %>%
+  filter(type == "SNP") %>%
+  summarize_dropped(var = mean_depth, cutoff = 8) %>%
+  bind_rows(
+    eval_28 %>%
+      filter(type == "SNP") %>%
+      summarize_dropped(var = qd, cutoff = 10)) %>% 
+  bind_rows(
+    eval_28 %>%
+      filter(type == "SNP") %>%
+      summarize_dropped(var = mq, cutoff = 15)) %>% 
+  bind_rows(
+    eval_28 %>%
+      filter(type == "SNP") %>%
+      summarize_dropped(var = mq_rank_sum, cutoff = -12.5)) %>% 
+  bind_rows(
+    eval_28 %>%
+      filter(type == "SNP") %>%
+      summarize_dropped(var = read_pos_rank_sum, cutoff = -8)) 
 ```
 
 # Number of no calls across the chromosome
@@ -182,5 +185,8 @@ eval_28 %>%
   ggplot(aes(x = pos, y = no_call)) +
   geom_smooth(color = "red")
 ```
+
+
+
 
 # Commentary
