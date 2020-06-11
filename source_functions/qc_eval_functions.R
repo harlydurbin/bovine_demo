@@ -2,8 +2,7 @@
 
 
 plot_filter_density <-
-  
-<<<<<<< HEAD
+
   function(df, var, plot_title = NULL) {
     fvar <- rlang::enquo(var)
     
@@ -21,20 +20,7 @@ plot_filter_density <-
       labs(
         x = rlang::quo_name(fvar),
         y = "Kernel density",
-        title = plot_title
-=======
-  function(df, var) {
-    fvar <- rlang::enquo(var)
-    
-    df %>%
-      ggplot(aes(x = !!fvar)) +
-      geom_density(alpha = 0.3) +
-      labs(
-        x = rlang::quo_name(fvar),
-        y = "Kernel density",
-        title = glue::glue("Density of {rlang::quo_name(fvar)} values, chromosome 28")
->>>>>>> 4c39271af70d37b45e0c1577cf409302a0143c1d
-      )
+        title = plot_title)
     
   }
 
