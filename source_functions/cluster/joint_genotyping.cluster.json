@@ -28,28 +28,7 @@
         "c" : 28,
         "mem" : 180G,
         "t": "48:00:00"
-    },
-    "biallelic_28":
-    {
-        "c" : 6,
-        "mem" : 24G,
-        "t": "8:00:00",
-        "mail-type" : "END,FAIL"
-    },
-    "table_28":
-    {
-        "c" : 3,
-        "mem" : 24G,
-        "t": "8:00:00",
-        "mail-type" : "END,FAIL"
-    },
-    "table_gf_28":
-    {
-        "c" : 3,
-        "mem" : 24G,
-        "t": "8:00:00",
-        "mail-type" : "END,FAIL"
-    },
+    }
     "select_variants":
     {
         "c" : 8,

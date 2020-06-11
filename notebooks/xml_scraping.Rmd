@@ -517,6 +517,40 @@ joined %<>%
 
 ```
 
+# 2020/06/10 ID snafu
+
+* Need to remove information for samples that I now have metadata for but didn't make it into genotyping
+* Need to create a list of samples to be removed (genotyped, but since found out they're bad)
+
+```{r}
+genotyped <- 
+  read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.idepth")) %>% 
+  pull(1)
+```
+
+
+```{r}
+joined %<>%
+  left_join(animal_table %>%
+              select(lab_id = Lab_ID, international_id) %>%
+              distinct()) %>% 
+  mutate(
+    international_id = 
+      case_when(
+        lab_id == 20076 ~ "UMCUSAM000000020076",
+        lab_id == 20079 ~ "UMCUSAM000000020079",
+        lab_id == 20098 ~ "UMCUSAM000000020098",
+        lab_id == 20136 ~ "UMCUSAM000000020136",
+        lab_id == 185723 ~ "CPC98_Bprimigenius_EnglandDerbyshire_5936",
+        lab_id == 118017 ~ "A2494_Yenisei_River", 
+        lab_id == 91166 ~ "AANUSAU000006639770", 
+        lab_id == 91171 ~ "RANUSAM000000802442", 
+        lab_id == 118766 ~ "UMCUSAF000000118766",
+        TRUE ~ international_id
+      )
+  ) %>% 
+  filter(international_id %in% genotyped) 
+```
 
 # Nest metadata columns
 
@@ -538,7 +572,7 @@ joined %<>%
       lat_lon
     )
   ) %>% 
-  tidyr::nest(metadata = !c(lab_id, bio_sample, sra, owner, population, organism, sex, geo_data))
+  tidyr::nest(metadata = !c(lab_id, bio_sample, international_id, sra, owner, population, organism, sex, geo_data))
 
 ```
 

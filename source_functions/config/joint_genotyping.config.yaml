@@ -20,8 +20,6 @@ genotype_gvcfs_xmx: 175
 
 genotype_gvcfs_nt: 24
 
-biallelic_28_nt: 6
-
 select_variants_nt: 6
 
 select_variants_gc: 2

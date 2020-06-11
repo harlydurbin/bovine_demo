@@ -22,10 +22,12 @@ cov_detail <-
   purrr::map_dfr(~ read_table2(.x, col_names = TRUE), .id = "lab_id") %>% 
   dplyr::mutate(lab_id = as.numeric(lab_id))
 
+write_rds(cov_detail, here::here("data/derived_data/coverage/cov_detail.rds"))
+
 ```
 
 ```{r, message = FALSE, warning = FALSE, eval=FALSE}
-write_rds(cov_detail, here::here("data/derived_data/coverage/cov_detail.rds"))
+cov_detail <- read_rds(here::here("data/derived_data/coverage/cov_detail.rds"))
 ```
 
 ```{r}
@@ -44,59 +46,6 @@ sorted_cov <-
   left_join(cov_detail) 
 ```
 
-```{r}
-sample_table <-
-  read_delim(
-    "~/googledrive/research_extension/hair_shed/data/raw_data/200501_sample_sheet.csv",
-    delim = c(","),
-    col_names = TRUE,
-    guess_max = 10000
-  )
-```
-```{r}
-sorted %<>%
-  left_join(animal_table %>%
-              select(lab_id = Lab_ID, international_id) %>%
-              distinct()) 
-
-
-sorted %<>% 
-  mutate(
-    international_id = 
-      case_when(
-        lab_id == 20076 ~ "UMCUSAM000000020076",
-        lab_id == 20079 ~ "UMCUSAM000000020079",
-        lab_id == 20098 ~ "UMCUSAM000000020098",
-        lab_id == 20136 ~ "UMCUSAM000000020136",
-        lab_id == 185723 ~ "CPC98_Bprimigenius_EnglandDerbyshire_5936", 
-        
-      )
-  )
-```
-
-
-```{r}
-depth <-
-  read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.idepth"), skip = 1, col_names = c("international_id", "n_sites", "mean_depth"))
-  
-```
-```{r}
-sorted %>% 
-filter(!international_id %in% depth$international_id) %>% 
-  arrange(lab_id) %>% 
-  View
-
-```
-
-```{r}
-depth %>% 
-  filter(!international_id %in% sorted$international_id) %>% 
-  left_join(animal_table %>% 
-              select(international_id, lab_id = Lab_ID, BC, Sex)) %>% 
-  arrange(lab_id)
-```
-
-
 # Add to sample metadata
 
 ```{r}
@@ -105,13 +54,9 @@ cov_detail %>%
   group_by(lab_id) %>% 
   summarise(avg_coverage = mean(mean)) %>% 
   ungroup() %>% 
-  right_join(sorted) %>%
+  right_join(sorted) %>% 
+  select(lab_id, international_id, sex, bio_sample, population:species, avg_coverage, owner, geo_data, metadata)
 ```
-
-```{r}
-sa
-```
-
 
 
 # Incorrect sex issues?
