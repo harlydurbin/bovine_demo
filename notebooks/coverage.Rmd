@@ -26,8 +26,9 @@ write_rds(cov_detail, here::here("data/derived_data/coverage/cov_detail.rds"))
 
 ```
 
-```{r, message = FALSE, warning = FALSE, eval=FALSE}
-cov_detail <- read_rds(here::here("data/derived_data/coverage/cov_detail.rds"))
+```{r, message = FALSE, warning = FALSE}
+cov_detail <- 
+  read_rds(here::here("data/derived_data/coverage/cov_detail.rds"))
 ```
 
 ```{r}
@@ -36,7 +37,8 @@ animal_table <-
 ```
 
 ```{r}
-sorted <- read_rds(here::here("data/derived_data/categorizing/sorted.sample_metadata.rds"))
+sorted <- 
+  read_rds(here::here("data/derived_data/categorizing/sorted.sample_metadata.rds"))
 ```
 
 ```{r}
@@ -55,7 +57,8 @@ cov_detail %>%
   summarise(avg_coverage = mean(mean)) %>% 
   ungroup() %>% 
   right_join(sorted) %>% 
-  select(lab_id, international_id, sex, bio_sample, population:species, avg_coverage, owner, geo_data, metadata)
+  select(lab_id, international_id, sex, bio_sample, population, region, continent, species, avg_coverage, owner) %>% 
+  write_csv(here::here("data/derived_data/coverage/coverage.sample_metadata.csv"), na = "")
 ```
 
 

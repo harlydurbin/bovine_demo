@@ -5,7 +5,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 library(purrr)
 library(dplyr)
@@ -110,7 +110,7 @@ mu_ids <-
 
 ## Import XML file
 
-```{r}
+```{r, eval=FALSE}
 xmllist <-
   c(list.files(here::here("data/raw_data/xml_scraping/unknown_xml"),
              full.names = TRUE),
