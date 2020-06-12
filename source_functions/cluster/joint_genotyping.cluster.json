@@ -28,7 +28,7 @@
         "c" : 28,
         "mem" : 180G,
         "t": "48:00:00"
-    }
+    },
     "select_variants":
     {
         "c" : 8,
@@ -41,5 +41,11 @@
         "t": "02:00:00",
         "mem" : 24G,
         "p" : "General,Lewis,BioCompute,htc4,hpc5"
-    }
+    },
+    "remove_failed":
+    {
+        "c" : 8,
+        "t": "24:00:00",
+        "mem" : 24G
+    },
 }

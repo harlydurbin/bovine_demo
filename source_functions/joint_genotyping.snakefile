@@ -87,7 +87,7 @@ rule genotype_gvcfs:
 		module load {params.java_module}
 		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.gatk_path} -nt {params.nt} -T GenotypeGVCFs -R {params.ref_genome} -L {params.chr} -V {input.list} --useNewAFCalculator --heterozygosity 0.0033 --standard_min_confidence_threshold_for_calling 10 -o {output.vcf}" --log {params.psrecord} --include-children --interval 5
 		"""
- 
+
 # Restrict to biallelic SNPs
 # Remove indels
 rule select_variants:
@@ -114,25 +114,25 @@ rule select_variants:
 		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -jar {params.gatk_path} -T SelectVariants -nt {params.nt} -R {params.ref_genome} -L {params.chr} -selectType SNP --restrictAllelesTo BIALLELIC -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 2
 		"""
 
-# rule variant_filtration:
-# 	input:
-# 		vcf = "data/derived_data/joint_genotyping/select_variants/select_variants.{chr}.vcf.gz",
-# 		tbi = "data/derived_data/joint_genotyping/select_variants/select_variants.{chr}.vcf.gz.tbi"
-# 	params:
-# 		java_module = config['java_module'],
-# 		ref_genome = config['ref_genome'],
-# 		gc_threads = config['variant_filtration_gc'],
-# 		xmx = config['variant_filtration_xmx'],
-# 		chr = "{chr}",
-# 		java_tmp = "temp/joint_genotyping/variant_filtration/{chr}",
-# 		gatk_path = config['gatk_path'],
-# 		filter = config['filter'],
-# 		psrecord = "log/psrecord/joint_genotyping/variant_filtration/variant_filtration.{chr}.log"
-# 	output:
-# 		vcf = temp("data/derived_data/joint_genotyping/variant_filtration/variant_filtration.{chr}.vcf.gz"),
-# 		tbi = temp("data/derived_data/joint_genotyping/select_variants/variant_filtration.{chr}.vcf.gz.tbi")
-# 	shell:
-# 		"""
-# 		module load {params.java_module}
-# 		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.gatk_path} -T VariantFiltration -R {params.ref_genome} -L {params.chr} {params.filter} -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 5
-# 		"""
+rule variant_filtration:
+	input:
+		vcf = "data/derived_data/joint_genotyping/select_variants/select_variants.{chr}.vcf.gz",
+		tbi = "data/derived_data/joint_genotyping/select_variants/select_variants.{chr}.vcf.gz.tbi"
+	params:
+		java_module = config['java_module'],
+		ref_genome = config['ref_genome'],
+		gc_threads = config['variant_filtration_gc'],
+		xmx = config['variant_filtration_xmx'],
+		chr = "{chr}",
+		java_tmp = "temp/joint_genotyping/variant_filtration/{chr}",
+		gatk_path = config['gatk_path'],
+		filter = config['filter'],
+		psrecord = "log/psrecord/joint_genotyping/variant_filtration/variant_filtration.{chr}.log"
+	output:
+		vcf = temp("data/derived_data/joint_genotyping/variant_filtration/variant_filtration.{chr}.vcf.gz"),
+		tbi = temp("data/derived_data/joint_genotyping/select_variants/variant_filtration.{chr}.vcf.gz.tbi")
+	shell:
+		"""
+		module load {params.java_module}
+		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.gatk_path} -T VariantFiltration -R {params.ref_genome} -L {params.chr} {params.filter} -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 5
+		"""

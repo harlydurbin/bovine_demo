@@ -1,4 +1,4 @@
-rules: ["combine_gvcfs", "genotype_gvcfs_list", "genotype_gvcfs", "biallelic_28", "table_28", "table_gf_28", "select_variants", "variant_filtration"]
+rules: ["combine_gvcfs", "genotype_gvcfs_list", "genotype_gvcfs", "select_variants", "variant_filtration", "remove_failed", "format_filtration", concat_sort]
 
 cohort : ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33']
 
@@ -24,17 +24,17 @@ select_variants_nt: 6
 
 select_variants_gc: 2
 
-select_variants_xmx: 95
-
 variant_filtration_gc: 6
 
 variant_filtration_xmx: 24
 
-filter: "-filter 'QD < 20.0' --filterName 'QD20' -filter 'FS > 60.0' --filterName 'FS60' -filter 'MQ < 15.0' --filterName 'MQ15' -filter 'MQRankSum < -12.5' --filterName 'MQRankSum-12.5' -filter 'ReadPosRankSum < -8.0' --filterName 'ReadPosRankSum-8'"
+info_filter: "-filter 'QD < 20.0' --filterName 'QD20' -filter 'FS > 60.0' --filterName 'FS60' -filter 'MQ < 15.0' --filterName 'MQ15' -filter 'MQRankSum < -12.5' --filterName 'MQRankSum-12.5' -filter 'ReadPosRankSum < -8.0' --filterName 'ReadPosRankSum-8'"
+
+format_filter: "'FORMAT/DP >= 8 && FORMAT/GQ >= 20'"
+
+format_filtration_nt: 6
 
 bcftools_module: "bcftools"
-
-concat_sort_nt: 12
 
 samtools_module: "samtools/samtools-1.7"
 
