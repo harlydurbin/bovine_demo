@@ -5,7 +5,7 @@
         "account" : "animalsci",
         "mem" : 120G,
         "c": 12,
-        "t": "12:00:00",
+        "t": "24:00:00",
         "o": "log/slurm_out/{rule}/{wildcards}.%j.out",
         "mail-user" : "hjdurbin@mail.missouri.edu",
         "mail-type" : "NONE"
@@ -35,7 +35,7 @@
         "t": "24:00:00",
         "mem" : 100G
     },
-    "variant_filtration":
+    "info_filtration":
     {
         "c" : 8,
         "t": "02:00:00",
@@ -48,4 +48,21 @@
         "t": "24:00:00",
         "mem" : 24G
     },
+    "format_filtration":
+    {
+        "c" : 6,
+        "t": "24:00:00",
+        "mem" : 24G
+    },
+    "concat_list":
+    {
+        "c" : 1,
+        "mem" : 1G,
+        "t": "1:00:00",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "concat":
+    {
+        "mail-type" : "END,FAIL"
+    }
 }

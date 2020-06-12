@@ -38,3 +38,30 @@ var_sum <-
       )
     
   }
+
+summarize_dropped <-
+  function(df, var, cutoff) {
+    
+    var <- rlang::enquo(var)
+    
+    total <-
+      df %>% 
+      filter(!is.na(!!var)) %>% 
+      filter(!is.infinite(!!var)) %>% 
+      pull(!!var) %>% 
+      length(.)
+    
+    fail <-
+      df %>% 
+      filter(!is.na(!!var)) %>% 
+      filter(!is.infinite(!!var)) %>% 
+      filter(!!var < cutoff) %>% 
+      pull(!!var) %>% 
+      length(.)
+    
+    tibble::tribble(
+      ~ `Variable`, ~`n total`, ~ `n failed`, ~ `% failed`,
+      rlang::quo_name(var), scales::comma(total), scales::comma(fail), scales::percent(fail/total)
+    )
+    
+  }
