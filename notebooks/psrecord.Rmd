@@ -112,3 +112,23 @@ usage_summary(process = "joint_genotyping", keyword = "info_filtration")
 ```{r}
 usage_facets(process = "joint_genotyping", keyword = "info_filtration")
 ```
+
+## `format_filtration`
+
+```{r}
+usage_summary(process = "joint_genotyping", keyword = "format_filtration") 
+```
+
+```{r}
+usage_facets(process = "joint_genotyping", keyword = "format_filtration")
+```
+
+## `concat`
+
+```{r}
+usage_summary(process = "joint_genotyping", keyword = "concat") 
+```
+
+```{r}
+usage_facets(process = "joint_genotyping", keyword = "concat")
+```

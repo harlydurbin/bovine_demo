@@ -39,3 +39,5 @@ bcftools_module: "bcftools"
 samtools_module: "samtools/samtools-1.7"
 
 concat_nt: 12
+
+htslib_module: "htslib/htslib-1.9"
