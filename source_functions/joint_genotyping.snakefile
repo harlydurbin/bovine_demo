@@ -1,4 +1,4 @@
-# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200612.joint_genotyping.log
+# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200613.joint_genotyping.log
 
 # paste(c(1:29, "X", "Y"), collapse = "', '")
 
@@ -168,14 +168,15 @@ rule format_filtration:
 	params:
 		bcftools_module = config['bcftools_module'],
 		filter = config['format_filter'],
-		nt = config['format_filtration_nt']
+		nt = config['format_filtration_nt'],
+		psrecord = "log/psrecord/joint_genotyping/format_filtration/format_filtration.{chr}.log"
 	output:
 		bcf = "data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.bcf.gz",
 		tbi = "data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.bcf.gz.tbi"
 	shell:
 		"""
 		module load {params.bcftools_module}
-		psrecord "bcftools filter --threads {params.nt} -g 5 -S . -i {params.filter} -O b -o {output.vcf} {input.vcf}" --log {params.psrecord} --include-children --interval 5
+		psrecord "bcftools filter --threads {params.nt} -g 5 -S . -i {params.filter} -O b -o {output.bcf} {input.vcf}" --log {params.psrecord} --include-children --interval 5
 		tabix {output.bcf}
 		"""
 rule concat_list:
@@ -185,7 +186,7 @@ rule concat_list:
 	output:
 		list = "data/derived_data/joint_genotyping/concat/concat.list"
 	shell:
-		"ls -d data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.bcf.gz > {output.list}"
+		"ls -d data/derived_data/joint_genotyping/format_filtration/* > {output.list}"
 
 rule concat:
 	input:
@@ -203,6 +204,6 @@ rule concat:
 	shell:
 		"""
 		module load {params.bcftools_module}
-		psrecord "bcftools concat -f {input.merge_list} -O b --threads {params.nt} -f {input.list} --temp-dir {params.temp}" --log {params.psrecord} --include-children --interval 5
+		psrecord "bcftools concat -O b --threads {params.nt} -o {output.bcf} -f {input.list} --temp-dir {params.temp}" --log {params.psrecord} --include-children --interval 5
 		tabix {output.bcf}
 		"""

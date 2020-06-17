@@ -102,3 +102,13 @@ usage_summary(process = "joint_genotyping", keyword = "select_variants")
 ```{r}
 usage_facets(process = "joint_genotyping", keyword = "select_variants")
 ```
+
+## `info_filtration`
+
+```{r}
+usage_summary(process = "joint_genotyping", keyword = "info_filtration") 
+```
+
+```{r}
+usage_facets(process = "joint_genotyping", keyword = "info_filtration")
+```

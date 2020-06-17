@@ -28,7 +28,7 @@ info_filtration_gc: 6
 
 info_filtration_xmx: 24
 
-info_filter: "-filter 'QD < 7.0' --filterName 'QD7' -filter 'FS > 60.0' --filterName 'FS60' -filter 'MQ < 15.0' --filterName 'MQ15' -filter 'MQRankSum < -12.5' --filterName 'MQRankSum-12.5' -filter 'ReadPosRankSum < -8.0' --filterName 'ReadPosRankSum-8'"
+info_filter: "-filter 'QD < 7.0' --filterName 'QD7' -filter 'FS > 60.0' --filterName 'FS60' -filter 'MQ < 15.0' --filterName 'MQ15'"
 
 format_filter: "'FORMAT/DP >= 8 && FORMAT/GQ >= 20'"
 

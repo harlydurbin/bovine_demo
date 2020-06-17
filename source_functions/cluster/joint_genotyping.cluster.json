@@ -38,9 +38,8 @@
     "info_filtration":
     {
         "c" : 8,
-        "t": "02:00:00",
-        "mem" : 24G,
-        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+        "t": "12:00:00",
+        "mem" : 12G
     },
     "remove_failed":
     {
