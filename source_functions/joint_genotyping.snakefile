@@ -167,7 +167,6 @@ rule format_filtration:
 		tbi = "data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi"
 	params:
 		bcftools_module = config['bcftools_module'],
-		htslib_module = config['htslib_module'],
 		filter = config['format_filter'],
 		nt = config['format_filtration_nt'],
 		psrecord = "log/psrecord/joint_genotyping/format_filtration/format_filtration.{chr}.log"
@@ -177,7 +176,6 @@ rule format_filtration:
 	shell:
 		"""
 		module load {params.bcftools_module}
-		module load {params.htslib_module}
 		psrecord "bcftools filter --threads {params.nt} -g 5 -S . -i {params.filter} -O b -o {output.bcf} {input.vcf}" --log {params.psrecord} --include-children --interval 5
 		tabix {output.bcf}
 		"""
@@ -188,7 +186,7 @@ rule concat_list:
 	output:
 		list = "data/derived_data/joint_genotyping/concat/concat.list"
 	shell:
-		"ls -d data/derived_data/joint_genotyping/format_filtration/* > {output.list}"
+		"ls -d data/derived_data/joint_genotyping/format_filtration/*.bcf.gz > {output.list}"
 
 rule concat:
 	input:
@@ -198,7 +196,6 @@ rule concat:
 	params:
 		psrecord = "log/psrecord/joint_genotyping/concat/concat.log",
 		bcftools_module = config['bcftools_module'],
-		htslib_module = config['htslib_module'],
 		nt = config['concat_nt']
 	output:
 		bcf = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz",
@@ -206,7 +203,6 @@ rule concat:
 	shell:
 		"""
 		module load {params.bcftools_module}
-		module load {params.htslib_module}
 		psrecord "bcftools concat -O b --threads {params.nt} -o {output.bcf} -f {input.list}" --log {params.psrecord} --include-children --interval 5
 		tabix {output.bcf}
 		"""
