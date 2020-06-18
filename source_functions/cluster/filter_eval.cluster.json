@@ -17,13 +17,6 @@
         "t": "8:00:00",
         "mail-type" : "END,FAIL"
     },
-    "plink_28":
-    {
-        "p" : "General,Lewis,BioCompute,htc4,hpc5",
-        "c" : 12,
-        "mem" : 24G,
-        "t": "1:00:00"
-    },
     "depth_28":
     {
         "c" : 1,
@@ -36,20 +29,6 @@
         "c" : 3,
         "mem" : 24G,
         "t": "8:00:00",
-        "mail-type" : "END,FAIL"
-    },
-    "table_gf_28":
-    {
-        "c" : 3,
-        "mem" : 24G,
-        "t": "8:00:00",
-        "mail-type" : "END,FAIL"
-    },
-    "find_dups":
-    {
-        "c" : 12,
-        "mem" : 24G,
-        "t": "1:00:00",
         "mail-type" : "END,FAIL"
     }
 }

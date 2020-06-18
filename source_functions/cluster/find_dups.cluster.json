@@ -1,0 +1,29 @@
+{
+    "__default__":
+    {
+        "p" : "General,Lewis,BioCompute,htc4,hpc5",
+        "account" : "animalsci",
+        "mem" : 24G,
+        "c": 12,
+        "t": "2:00:00",
+        "o": "log/slurm_out/{rule}/{wildcards}.%j.out",
+        "mail-user" : "hjdurbin@mail.missouri.edu",
+        "mail-type" : "NONE"
+    },
+    "index_map":
+    {
+        "c" : 2
+    },
+    "extract_variants":
+    {
+        "c" : 2
+    },
+    "dups_plink":
+    {
+        "mail-type" : "END,FAIL"
+    },
+    "find_dups":
+    {
+        "mail-type" : "END,FAIL"
+    }
+}

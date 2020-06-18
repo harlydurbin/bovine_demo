@@ -1,0 +1,17 @@
+rules: ["index_map", "extract_variants", "dups_plink", "find_dups"]
+
+ref_genome: "/storage/hpc/group/UMAG/REF_GENOME/ARS-UCD1.2_Btau5.0.1Y.fa"
+
+java_module: "java/openjdk/java-1.8.0-openjdk"
+
+bcftools_module: "bcftools"
+
+map: "data/raw_data/850K_snps.tsv"
+
+full_file: "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz"
+
+plink_nt: 12
+
+king_path: "source_functions/king"
+
+king_nt: 12

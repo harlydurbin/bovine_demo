@@ -11,7 +11,7 @@ for x in expand("temp/filter_eval/{rules}", rules = config['rules']):
 
 rule all:
 	input:
-	 	"data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.table", "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.ldepth.mean", "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.con", "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.gf.table"
+	 	"data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.table", "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.ldepth.mean"
 
 # Create a chr28 vcf with snps & indels to evaluate how many indels are within
 # 5bp of an inel, filtering values
@@ -32,21 +32,6 @@ rule biallelic_28:
 		"""
 		module load {params.java_module}
 		java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads=2 {params.gatk_path} -nt {params.nt} -T SelectVariants -R {params.ref_genome} -L 28 -V {input.vcf} --restrictAllelesTo BIALLELIC -o {output.vcf}
-		"""
-
-rule plink_28:
-	input:
-		vcf = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.vcf.gz",
-		tbi = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.vcf.gz.tbi"
-	params:
-		prefix = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28",
-		nt = config['plink_nt']
-	output:
-		bed = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.bed"
-	shell:
-		"""
-		module load plink
-		plink --vcf {input.vcf} --make-bed --double-id --cow --threads {params.nt} --out {params.prefix}
 		"""
 
 # vcftools --gzvcf data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.vcf.gz --get-INFO GQ --out data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28
@@ -81,15 +66,3 @@ rule table_28:
 		module load {params.java_module}
 		java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads=2 -jar {params.gatk_path} -R {params.ref_genome} -L 28 -T VariantsToTable -V {input.vcf} -F POS -F TYPE -F TRANSITION -F QD -F FS -F MQ -F ReadPosRankSum -F MQRankSum -F NO-CALL -F N-CALLED -F VAR -o {output.table}
 		"""
-
-rule find_dups:
-	input:
-		bed = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.bed"
-	params:
-		king_path = config['king_path'],
-		prefix = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28",
-		nt = config['king_nt']
-	output:
-		dups = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.con"
-	shell:
-		"{params.king_path} -b {input.bed} --duplicate --prefix {params.prefix} --sexchr 30 --cpus {params.nt}"

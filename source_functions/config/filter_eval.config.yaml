@@ -1,4 +1,4 @@
-rules: ["biallelic_28", "table_28", "table_gf_28", "plink_28"]
+rules: ["biallelic_28", "depth_28", "table_28"]
 
 ref_genome: "/storage/hpc/group/UMAG/REF_GENOME/ARS-UCD1.2_Btau5.0.1Y.fa"
 
@@ -7,9 +7,3 @@ java_module: "java/openjdk/java-1.8.0-openjdk"
 gatk_path: "/cluster/spack/opt/spack/linux-centos7-x86_64/gcc-4.8.5/gatk-3.8-1-0-gf15c1c3ef-qlqslekqpddmxmnfad2uk6s7zrbtfrza/bin/GenomeAnalysisTK.jar"
 
 biallelic_28_nt: 6
-
-plink_nt: 12
-
-king_path: "source_functions/king"
-
-king_nt: 12
