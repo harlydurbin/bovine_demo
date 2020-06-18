@@ -77,13 +77,21 @@ usage_facets(process = "ancient_preprocess", keyword = "merge_realigned")
 
 # `joint_genotyping`
 
+* ~ 2,900 multi-breed and multi-species *Bos* samples
+
 ## `combine_gvcfs`
+
+* Combining 33 cohort-GVCFs of ~ 90 samples each into chromosome-level GVCFs using `GATK CombineGVCFs`
+* For each chromosome, provided 4 threads
 
 ```{r}
 usage_summary(process = "joint_genotyping", keyword = "combine_gvcfs") 
 ```
 
 ## `genotype_gvcfs`
+
+* Chromosome-by-chromosome joint genotyping with `GATK GenotypeGVCFs`
+* For each chromosome, provided 28 threads
 
 ```{r}
 usage_summary(process = "joint_genotyping", keyword = "genotype_gvcfs") 
@@ -95,6 +103,9 @@ usage_facets(process = "joint_genotyping", keyword = "genotype_gvcfs")
 
 ## `select_variants`
 
+* Removing indels & multiallelic SNPs using `GATK SelectVariants`
+* For each chromosome, provided 8 threads
+
 ```{r}
 usage_summary(process = "joint_genotyping", keyword = "select_variants") 
 ```
@@ -104,6 +115,9 @@ usage_facets(process = "joint_genotyping", keyword = "select_variants")
 ```
 
 ## `info_filtration`
+
+* Site-level filtering using `GATK VariantFiltration`
+* For each chromosome, provided 8 threads
 
 ```{r}
 usage_summary(process = "joint_genotyping", keyword = "info_filtration") 
@@ -115,6 +129,9 @@ usage_facets(process = "joint_genotyping", keyword = "info_filtration")
 
 ## `remove_failed`
 
+* Removing variants that didn't pass filtering using `GATK SelectVariants`
+* For each chromosome, provided 8 threads
+
 ```{r}
 usage_summary(process = "joint_genotyping", keyword = "remove_failed") 
 ```
@@ -125,6 +142,9 @@ usage_facets(process = "joint_genotyping", keyword = "remove_failed")
 
 ## `format_filtration`
 
+* Genotype-level filtering using `bcftools filter`
+* For each chromosome, provided 6 threads
+
 ```{r}
 usage_summary(process = "joint_genotyping", keyword = "format_filtration") 
 ```
@@ -134,6 +154,8 @@ usage_facets(process = "joint_genotyping", keyword = "format_filtration")
 ```
 
 ## `concat`
+
+* Concatenating chromosome-level files into one whole-genome file using `bcftools concat`
 
 ```{r,eval=FALSE}
 usage_summary(process = "joint_genotyping", keyword = "concat") 

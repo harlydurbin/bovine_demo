@@ -2,6 +2,8 @@
 
 ## Genotype calling
 
+Evaluation of computing resources used for each step of genotype calling can be found in `notebooks/psrecord.Rmd` with results in `html/psrecord.html`
+
 1. Ancient sample BAM files pre-processed and haplotypes called in `source_functions/ancient_preprocess.snakefile`
 2. All samples combined and genotypes called in `source_functions/joint_genotyping.snakefile`
     + Sample cohorts combined using `GATK CombineGVCFs` (cohorts determined in `source_functions/genotyping_cohorts.R`)
@@ -13,6 +15,8 @@
     + Genotype-level filtering & removal of all SNPs within 5 bp of an indel using `bcftools filter`
 5. Chromosome-by-chromosome files concatenated to one whole genome file using `bcftools concat`
 6. Duplicate samples identified using `king` then removed in `source_functions/find_dups.snakefile`
+
+
     
 ## Meta-data processing
 
