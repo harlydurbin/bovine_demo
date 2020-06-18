@@ -82,23 +82,6 @@ rule table_28:
 		java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads=2 -jar {params.gatk_path} -R {params.ref_genome} -L 28 -T VariantsToTable -V {input.vcf} -F POS -F TYPE -F TRANSITION -F QD -F FS -F MQ -F ReadPosRankSum -F MQRankSum -F NO-CALL -F N-CALLED -F VAR -o {output.table}
 		"""
 
-rule table_gf_28:
-	input:
-		vcf = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.vcf.gz",
-		tbi = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.vcf.gz.tbi"
-	params:
-		java_module = config['java_module'],
-		ref_genome = config['ref_genome'],
-		gatk_path = config['gatk_path'],
-		java_tmp = "temp/joint_genotyping/table_gf_28"
-	output:
-		table = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.gf.table"
-	shell:
-		"""
-		module load {params.java_module}
-		java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads=2 -jar {params.gatk_path} -R {params.ref_genome} -L 28 -T VariantsToTable -V {input.vcf} -F POS -GF GQ -GF PL -GF DP -o {output.table}
-		"""
-
 rule find_dups:
 	input:
 		bed = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.bed"

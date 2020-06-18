@@ -13,8 +13,8 @@
     "combine_gvcfs":
     {
         "c" : 4,
-        "mem" : 100G,
-        "t": "48:00:00"
+        "mem" : 24G,
+        "t": "15:00:00"
     },
     "genotype_gvcfs_list":
     {
@@ -26,32 +26,32 @@
     "genotype_gvcfs":
     {
         "c" : 28,
-        "mem" : 180G,
+        "mem" : 100G,
         "t": "48:00:00"
     },
     "select_variants":
     {
         "c" : 8,
-        "t": "24:00:00",
-        "mem" : 100G
+        "t": "10:00:00",
+        "mem" : 16G
     },
     "info_filtration":
     {
         "c" : 8,
         "t": "12:00:00",
-        "mem" : 12G
+        "mem" : 8G
     },
     "remove_failed":
     {
         "c" : 8,
-        "t": "24:00:00",
-        "mem" : 24G
+        "t": "10:00:00",
+        "mem" : 16G
     },
     "format_filtration":
     {
         "c" : 6,
-        "t": "24:00:00",
-        "mem" : 24G
+        "t": "6:00:00",
+        "mem" : 5G
     },
     "concat_list":
     {

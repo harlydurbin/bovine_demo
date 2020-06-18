@@ -1,4 +1,4 @@
-# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200617.joint_genotyping.log
+# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200618.joint_genotyping.log
 
 # paste(c(1:29, "X", "Y"), collapse = "', '")
 
@@ -199,8 +199,7 @@ rule concat:
 		psrecord = "log/psrecord/joint_genotyping/concat/concat.log",
 		bcftools_module = config['bcftools_module'],
 		htslib_module = config['htslib_module'],
-		nt = config['concat_nt'],
-		temp = "temp/joint_genotyping/concat"
+		nt = config['concat_nt']
 	output:
 		bcf = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz",
 		csi = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz.csi"
@@ -208,6 +207,6 @@ rule concat:
 		"""
 		module load {params.bcftools_module}
 		module load {params.htslib_module}
-		psrecord "bcftools concat -O b --threads {params.nt} -o {output.bcf} -f {input.list} --temp-dir {params.temp}" --log {params.psrecord} --include-children --interval 5
+		psrecord "bcftools concat -O b --threads {params.nt} -o {output.bcf} -f {input.list}" --log {params.psrecord} --include-children --interval 5
 		tabix {output.bcf}
 		"""

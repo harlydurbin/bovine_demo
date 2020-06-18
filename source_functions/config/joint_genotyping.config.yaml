@@ -12,13 +12,13 @@ gatk_path: "/cluster/spack/opt/spack/linux-centos7-x86_64/gcc-4.8.5/gatk-3.8-1-0
 
 combine_gvcfs_gc: 4
 
-combine_gvcfs_xmx: 95
+combine_gvcfs_xmx: 22
 
 genotype_gvcfs_gc: 4
 
-genotype_gvcfs_xmx: 175
+genotype_gvcfs_xmx: 100
 
-genotype_gvcfs_nt: 24
+genotype_gvcfs_nt: 15
 
 select_variants_nt: 6
 
@@ -26,7 +26,7 @@ select_variants_gc: 2
 
 info_filtration_gc: 6
 
-info_filtration_xmx: 24
+info_filtration_xmx: 8
 
 info_filter: "-filter 'QD < 7.0' --filterName 'QD7' -filter 'FS > 60.0' --filterName 'FS60' -filter 'MQ < 15.0' --filterName 'MQ15'"
 
