@@ -16,3 +16,7 @@ fpconfig/*
 log/*
 data/derived_data/joint_genotyping/genotyping_cohorts/*
 data/raw_data/*
+data/derived_data/sample_metadata.csv
+data/derived_data/xml_scraping/*
+data/derived_data/categorizing/*
+data/derived_data/coverage/*
