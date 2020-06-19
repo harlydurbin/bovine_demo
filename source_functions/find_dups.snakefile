@@ -8,6 +8,8 @@ configfile: "source_functions/config/find_dups.config.yaml"
 for x in expand("log/slurm_out/{rules}", rules = config['rules']):
     os.makedirs(x, exist_ok = True)
 
+os.makedirs("log/psrecord/joint_genotyping/extract_850K", exist_ok = True)
+
 rule all:
 	input:
 	 	"data/derived_data/joint_genotyping/find_dups/bovine_demo.850K.con"
@@ -27,25 +29,27 @@ rule index_map:
 		tabix -s1 -b2 -e2 {output.map_gz}
 		"""
 
-rule extract_variants:
+rule extract_850K:
 	input:
 		full_file = config['full_file'],
 		map_gz = config['map'] + ".gz",
 		map_index = config['map'] + ".gz.tbi"
 	params:
-		bcftools_module = config['bcftools_module']
+		bcftools_module = config['bcftools_module'],
+		nt = config['extract_850K_nt'],
+		psrecord = "log/psrecord/joint_genotyping/extract_850K/extract_850K.log"
 	output:
-		subset_file = "data/derived_data/joint_genotyping/find_dups/bovine_demo.850K.vcf.gz"
+		subset_file = "data/derived_data/joint_genotyping/find_dups/bovine_demo.850K.bcf.gz"
 	shell:
 		"""
 		module load {params.bcftools_module}
-		bcftools view --regions-file {input.map_gz} -O z -o {output.subset_file} {input.full_file}
+		psrecord "bcftools view --threads {params.nt} --regions-file {input.map_gz} -O b -o {output.subset_file} {input.full_file}" --log {params.psrecord} --include-children --interval 5
 		tabix {output.subset_file}
 		"""
 
 rule dups_plink:
 	input:
-		subset_file = "data/derived_data/joint_genotyping/find_dups/bovine_demo.850K.vcf.gz"
+		subset_file = "data/derived_data/joint_genotyping/find_dups/bovine_demo.850K.bcf.gz"
 	params:
 		prefix = "data/derived_data/joint_genotyping/find_dups/bovine_demo.850K",
 		nt = config['plink_nt']

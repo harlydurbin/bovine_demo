@@ -1,4 +1,4 @@
-rules: ["index_map", "extract_variants", "dups_plink", "find_dups"]
+rules: ["index_map", "extract_850K", "dups_plink", "find_dups"]
 
 ref_genome: "/storage/hpc/group/UMAG/REF_GENOME/ARS-UCD1.2_Btau5.0.1Y.fa"
 
@@ -9,6 +9,8 @@ bcftools_module: "bcftools"
 map: "data/raw_data/850K_snps.tsv"
 
 full_file: "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz"
+
+extract_850K_nt: 2
 
 plink_nt: 12
 

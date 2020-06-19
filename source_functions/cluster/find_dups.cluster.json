@@ -14,9 +14,11 @@
     {
         "c" : 2
     },
-    "extract_variants":
+    "extract_850K":
     {
-        "c" : 2
+        "c" : 2,
+        "t": "12:00:00",
+        "mem" : 48G
     },
     "dups_plink":
     {
