@@ -1,3 +1,5 @@
+# snakemake -s source_functions/find_dups.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/find_dups.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200619.find_dups.log
+
 import os
 
 configfile: "source_functions/config/find_dups.config.yaml"
@@ -8,7 +10,7 @@ for x in expand("log/slurm_out/{rules}", rules = config['rules']):
 
 rule all:
 	input:
-	 	"data/derived_data/joint_genotyping/find_dups/find_dups.with_indels.table"
+	 	"data/derived_data/joint_genotyping/find_dups/bovine_demo.850K.con"
 
 rule index_map:
 	input:
@@ -52,7 +54,7 @@ rule dups_plink:
 	shell:
 		"""
 		module load plink
-		plink --vcf {input.vcf} --make-bed --double-id --cow --threads {params.nt} --out {params.prefix}
+		plink --bcf {input.subset_file} --make-bed --double-id --cow --threads {params.nt} --out {params.prefix}
 		"""
 
 rule find_dups:
