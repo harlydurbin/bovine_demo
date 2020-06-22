@@ -1,4 +1,4 @@
-# snakemake -s source_functions/find_dups.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/find_dups.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200619.find_dups.log
+# snakemake -s source_functions/find_dups.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/find_dups.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200622.find_dups.log
 
 import os
 
@@ -17,23 +17,17 @@ rule all:
 rule index_map:
 	input:
 		map = config['map']
-	params:
-		bcftools_module = config['bcftools_module']
 	output:
-		map_gz = config['map'] + ".gz",
-		map_index = config['map'] + ".gz.tbi"
+		regions_file = "data/derived_data/joint_genotyping/find_dups/regions_file.850K.tsv"
 	shell:
 		"""
-		module load {params.bcftools_module}
-		bgzip -c {input.map} > {output.map_gz}
-		tabix -s1 -b2 -e2 {output.map_gz}
+		awk '{{print $1"\t"$2}}' {input.map} > {output.regions_file}
 		"""
 
 rule extract_850K:
 	input:
 		full_file = config['full_file'],
-		map_gz = config['map'] + ".gz",
-		map_index = config['map'] + ".gz.tbi"
+		regions_file = "data/derived_data/joint_genotyping/find_dups/regions_file.850K.tsv"
 	params:
 		bcftools_module = config['bcftools_module'],
 		nt = config['extract_850K_nt'],
@@ -43,7 +37,7 @@ rule extract_850K:
 	shell:
 		"""
 		module load {params.bcftools_module}
-		psrecord "bcftools view --threads {params.nt} --regions-file {input.map_gz} -O b -o {output.subset_file} {input.full_file}" --log {params.psrecord} --include-children --interval 5
+		psrecord "bcftools view --threads {params.nt} -R {input.regions_file} -O b -o {output.subset_file} {input.full_file}" --log {params.psrecord} --include-children --interval 5
 		tabix {output.subset_file}
 		"""
 

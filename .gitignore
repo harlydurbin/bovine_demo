@@ -22,3 +22,5 @@ data/derived_data/categorizing/*
 data/derived_data/coverage/*
 *.tbi
 *.gz
+scratch.Rmd
+*.tsv
