@@ -1,4 +1,4 @@
-rules: ["combine_gvcfs", "genotype_gvcfs_list", "genotype_gvcfs", "select_variants", "info_filtration", "remove_failed", "format_filtration", "concat_list", "concat"]
+rules: ["combine_gvcfs", "genotype_gvcfs_list", "genotype_gvcfs", "select_variants", "info_filtration", "remove_failed", "format_filtration", "concat_list", "concat", "index_concat"]
 
 cohort : ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33']
 
@@ -37,3 +37,9 @@ format_filtration_nt: 6
 bcftools_module: "bcftools"
 
 concat_nt: 12
+
+index_nt: 6
+
+sort_nt: 12
+
+sort_mem: 48

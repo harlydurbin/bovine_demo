@@ -1,4 +1,4 @@
-# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200618.joint_genotyping.log
+# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200624.joint_genotyping.log
 
 # paste(c(1:29, "X", "Y"), collapse = "', '")
 
@@ -23,8 +23,7 @@ for x in expand("temp/joint_genotyping/{rules}", rules = config['rules']):
 
 rule all:
 	input:
-		"data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz"
-
+		"data/derived_data/joint_genotyping/bovine_demo.sorted_snps.vcf.gz", "data/derived_data/joint_genotyping/bovine_demo.sorted_snps.vcf.gz.tbi"
 
 rule combine_gvcfs:
 # Can't parallelize CombineGVCFs!!!
@@ -198,11 +197,57 @@ rule concat:
 		bcftools_module = config['bcftools_module'],
 		nt = config['concat_nt']
 	output:
-		bcf = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz",
-		csi = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz.csi"
+		bcf = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz"
 	shell:
 		"""
 		module load {params.bcftools_module}
 		psrecord "bcftools concat -O b --threads {params.nt} -o {output.bcf} -f {input.list}" --log {params.psrecord} --include-children --interval 5
-		tabix {output.bcf}
+		"""
+
+rule index_concat:
+	input:
+		bcf = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz"
+	params:
+		bcftools_module = config['bcftools_module'],
+		nt = config['index_nt'],
+		psrecord = "log/psrecord/joint_genotyping/index_concat/index_concat.log",
+	output:
+		csi = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz.csi"
+	shell:
+		"""
+		module load {params.bcftools_module}
+		psrecord "bcftools index --threads {params.nt} {input.bcf}" --log {params.psrecord} --include-children --interval 5
+		"""
+
+rule sort:
+	input:
+		bcf = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz",
+		csi = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz.csi"
+	params:
+		bcftools_module = config['bcftools_module'],
+		nt = config['sort_nt'],
+		mem = config['sort_mem'],
+		tmp = "temp/joint_genotyping/sort",
+		psrecord = "log/psrecord/joint_genotyping/sort/sort.log"
+	output:
+		vcf = "data/derived_data/joint_genotyping/bovine_demo.sorted_snps.vcf.gz"
+	shell:
+		"""
+		module load {params.bcftools_module}
+		psrecord "bcftools sort --max-mem {params.mem}G --temp-dir {params.tmp} --threads {params.nt} -O z -o {output.vcf} {input.bcf}" --log {params.psrecord} --include-children --interval 5
+		"""
+
+rule index_sort:
+	input:
+		vcf = "data/derived_data/joint_genotyping/bovine_demo.sorted_snps.vcf.gz"
+	params:
+		bcftools_module = config['bcftools_module'],
+		nt = config['concat_nt'],
+		psrecord = "log/psrecord/joint_genotyping/index_sort/index_sort.log",
+	output:
+		tbi = "data/derived_data/joint_genotyping/bovine_demo.sorted_snps.vcf.gz.tbi"
+	shell:
+		"""
+		module load {params.bcftools_module}
+		psrecord "bcftools index --threads {params.nt} --tbi {input.vcf}" --log {params.psrecord} --include-children --interval 5
 		"""

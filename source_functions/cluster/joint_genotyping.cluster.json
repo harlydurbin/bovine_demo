@@ -63,5 +63,25 @@
     "concat":
     {
         "mail-type" : "END,FAIL"
+    },
+    "index_concat":
+    {
+        "mail-type" : "END,FAIL",
+        "c" : 6,
+        "t": "12:00:00"
+    },
+    "sort":
+    {
+        "mail-type" : "END,FAIL",
+        "c" : 12,
+        "mem" : 48G,
+        "t": "12:00:00"
+    },
+    "index_sort":
+    {
+        "mail-type" : "END,FAIL",
+        "c" : 6,
+        "mem" : 48G,
+        "t": "12:00:00"
     }
 }
