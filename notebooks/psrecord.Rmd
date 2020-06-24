@@ -164,3 +164,63 @@ usage_summary(process = "joint_genotyping", keyword = "concat")
 ```{r, eval=FALSE}
 usage_facets(process = "joint_genotyping", keyword = "concat")
 ```
+
+## `index_concat`
+
+* Index concatenated whole-genome file using `bcftools index`
+
+```{r,eval=FALSE}
+usage_summary(process = "joint_genotyping", keyword = "index_concat") 
+```
+
+```{r, eval=FALSE}
+usage_facets(process = "joint_genotyping", keyword = "index_concat")
+```
+
+## `sort`
+
+* Sort whole-genome file using `bcftools sort`
+
+```{r,eval=FALSE}
+usage_summary(process = "joint_genotyping", keyword = "sort") 
+```
+
+```{r, eval=FALSE}
+usage_facets(process = "joint_genotyping", keyword = "sort")
+```
+
+## `index_sort`
+
+* Index sorted whole-genome file using `bcftools index`
+
+```{r,eval=FALSE}
+usage_summary(process = "joint_genotyping", keyword = "index_sort") 
+```
+
+```{r, eval=FALSE}
+usage_facets(process = "joint_genotyping", keyword = "index_sort")
+```
+
+# `find_dups`
+
+## `extract_850K`
+
+* Extract 850K marker set from sorted whole-genome using `bcftools view`
+
+```{r,eval=FALSE}
+usage_summary(process = "joint_genotyping", keyword = "extract_850K") 
+```
+
+```{r, eval=FALSE}
+usage_facets(process = "joint_genotyping", keyword = "extract_850K")
+```
+
+## `index_850K`
+
+```{r,eval=FALSE}
+usage_summary(process = "joint_genotyping", keyword = "index_850K") 
+```
+
+```{r, eval=FALSE}
+usage_facets(process = "joint_genotyping", keyword = "index_850K")
+```

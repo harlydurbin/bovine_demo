@@ -80,7 +80,7 @@
     "index_sort":
     {
         "mail-type" : "END,FAIL",
-        "c" : 6,
+        "c" : 2,
         "mem" : 48G,
         "t": "12:00:00"
     }

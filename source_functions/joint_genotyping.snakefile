@@ -225,7 +225,6 @@ rule sort:
 		csi = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz.csi"
 	params:
 		bcftools_module = config['bcftools_module'],
-		nt = config['sort_nt'],
 		mem = config['sort_mem'],
 		tmp = "temp/joint_genotyping/sort",
 		psrecord = "log/psrecord/joint_genotyping/sort/sort.log"
@@ -234,7 +233,7 @@ rule sort:
 	shell:
 		"""
 		module load {params.bcftools_module}
-		psrecord "bcftools sort --max-mem {params.mem}G --temp-dir {params.tmp} --threads {params.nt} -O z -o {output.vcf} {input.bcf}" --log {params.psrecord} --include-children --interval 5
+		psrecord "bcftools sort --max-mem {params.mem}G --temp-dir {params.tmp} -O z -o {output.vcf} {input.bcf}" --log {params.psrecord} --include-children --interval 5
 		"""
 
 rule index_sort:
