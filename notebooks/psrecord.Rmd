@@ -153,6 +153,16 @@ usage_summary(process = "joint_genotyping", keyword = "format_filtration")
 usage_facets(process = "joint_genotyping", keyword = "format_filtration")
 ```
 
+## `index_filtered`
+
+```{r}
+usage_summary(process = "joint_genotyping", keyword = "index_filtered") 
+```
+
+```{r}
+usage_facets(process = "joint_genotyping", keyword = "index_filtered")
+```
+
 ## `concat`
 
 * Concatenating chromosome-level files into one whole-genome file using `bcftools concat`
@@ -175,30 +185,6 @@ usage_summary(process = "joint_genotyping", keyword = "index_concat")
 
 ```{r, eval=FALSE}
 usage_facets(process = "joint_genotyping", keyword = "index_concat")
-```
-
-## `sort`
-
-* Sort whole-genome file using `bcftools sort`
-
-```{r,eval=FALSE}
-usage_summary(process = "joint_genotyping", keyword = "sort") 
-```
-
-```{r, eval=FALSE}
-usage_facets(process = "joint_genotyping", keyword = "sort")
-```
-
-## `index_sort`
-
-* Index sorted whole-genome file using `bcftools index`
-
-```{r,eval=FALSE}
-usage_summary(process = "joint_genotyping", keyword = "index_sort") 
-```
-
-```{r, eval=FALSE}
-usage_facets(process = "joint_genotyping", keyword = "index_sort")
 ```
 
 # `find_dups`

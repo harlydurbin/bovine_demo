@@ -23,7 +23,7 @@ for x in expand("temp/joint_genotyping/{rules}", rules = config['rules']):
 
 rule all:
 	input:
-		"data/derived_data/joint_genotyping/bovine_demo.sorted_snps.vcf.gz", "data/derived_data/joint_genotyping/bovine_demo.sorted_snps.vcf.gz.tbi"
+		"data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz", "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz.tbi"
 
 rule combine_gvcfs:
 # Can't parallelize CombineGVCFs!!!
@@ -170,83 +170,66 @@ rule format_filtration:
 		nt = config['format_filtration_nt'],
 		psrecord = "log/psrecord/joint_genotyping/format_filtration/format_filtration.{chr}.log"
 	output:
-		bcf = "data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.bcf.gz",
-		csi = "data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.bcf.gz.csi"
+		vcf = "data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz"
 	shell:
 		"""
 		module load {params.bcftools_module}
-		psrecord "bcftools filter --threads {params.nt} -g 5 -S . -i {params.filter} -O b -o {output.bcf} {input.vcf}" --log {params.psrecord} --include-children --interval 5
-		tabix {output.bcf}
+		psrecord "bcftools filter --threads {params.nt} -g 5 -S . -i {params.filter} -O z -o {output.vcf} {input.vcf}" --log {params.psrecord} --include-children --interval 5
 		"""
+
+rule index_filtered:
+	input:
+		vcf = "data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz"
+	params:
+		bcftools_module = config['bcftools_module'],
+		psrecord = "log/psrecord/joint_genotyping/index_filtered/index_filtered.{chr}.log"
+	output:
+		tbi = "data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz.tbi"
+	shell:
+		"""
+		module load {params.bcftools_module}
+		psrecord "bcftools index --tbi {input.vcf}" --log {params.psrecord} --include-children --interval 5
+		"""
+
 rule concat_list:
 	input:
-		bcfs = expand("data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.bcf.gz", chr = config['chr']),
-		csis = expand("data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.bcf.gz.csi", chr = config['chr'])
+		vcfs = expand("data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz", chr = config['chr']),
+		tbis = expand("data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz.tbi", chr = config['chr'])
+	params:
+		concat_paths = lambda wildcards: expand("data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz\n", chr = config['chr'])
 	output:
-		list = "data/derived_data/joint_genotyping/concat/concat.list"
+		list = "data/derived_data/joint_genotyping/concat.list"
 	shell:
-		"ls -d data/derived_data/joint_genotyping/format_filtration/*.bcf.gz > {output.list}"
+		"echo -e '{params.concat_paths}' | sed 's/^ *//g' > {output.list}"
 
 rule concat:
 	input:
-		bcfs = expand("data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.bcf.gz", chr = config['chr']),
-		csis = expand("data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.bcf.gz.csi", chr = config['chr']),
-		list = "data/derived_data/joint_genotyping/concat/concat.list"
+		vcfs = expand("data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz", chr = config['chr']),
+		tbis = expand("data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz.tbi", chr = config['chr']),
+		list = "data/derived_data/joint_genotyping/concat.list"
 	params:
 		psrecord = "log/psrecord/joint_genotyping/concat/concat.log",
 		bcftools_module = config['bcftools_module'],
 		nt = config['concat_nt']
 	output:
-		bcf = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz"
+		vcf = "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz"
 	shell:
 		"""
 		module load {params.bcftools_module}
-		psrecord "bcftools concat -O b --threads {params.nt} -o {output.bcf} -f {input.list}" --log {params.psrecord} --include-children --interval 5
+		psrecord "bcftools concat -O z --threads {params.nt} -o {output.vcf} -f {input.list}" --log {params.psrecord} --include-children --interval 5
 		"""
 
 rule index_concat:
 	input:
-		bcf = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz"
+		vcf = "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz"
 	params:
 		bcftools_module = config['bcftools_module'],
 		nt = config['index_nt'],
 		psrecord = "log/psrecord/joint_genotyping/index_concat/index_concat.log",
 	output:
-		csi = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz.csi"
+		tbi = "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz.tbi"
 	shell:
 		"""
 		module load {params.bcftools_module}
-		psrecord "bcftools index --threads {params.nt} {input.bcf}" --log {params.psrecord} --include-children --interval 5
-		"""
-
-rule sort:
-	input:
-		bcf = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz",
-		csi = "data/derived_data/joint_genotyping/bovine_demo.snps.bcf.gz.csi"
-	params:
-		bcftools_module = config['bcftools_module'],
-		mem = config['sort_mem'],
-		tmp = "temp/joint_genotyping/sort",
-		psrecord = "log/psrecord/joint_genotyping/sort/sort.log"
-	output:
-		vcf = "data/derived_data/joint_genotyping/bovine_demo.sorted_snps.vcf.gz"
-	shell:
-		"""
-		module load {params.bcftools_module}
-		psrecord "bcftools sort --max-mem {params.mem}G --temp-dir {params.tmp} -O z -o {output.vcf} {input.bcf}" --log {params.psrecord} --include-children --interval 5
-		"""
-
-rule index_sort:
-	input:
-		vcf = "data/derived_data/joint_genotyping/bovine_demo.sorted_snps.vcf.gz"
-	params:
-		bcftools_module = config['bcftools_module'],
-		nt = config['concat_nt'],
-		psrecord = "log/psrecord/joint_genotyping/index_sort/index_sort.log",
-	output:
-		tbi = "data/derived_data/joint_genotyping/bovine_demo.sorted_snps.vcf.gz.tbi"
-	shell:
-		"""
-		module load {params.bcftools_module}
-		psrecord "bcftools index --threads {params.nt} --tbi {input.vcf}" --log {params.psrecord} --include-children --interval 5
+		psrecord "bcftools index --tbi --threads {params.nt} {input.vcf}" --log {params.psrecord} --include-children --interval 5
 		"""

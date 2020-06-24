@@ -53,6 +53,13 @@
         "t": "6:00:00",
         "mem" : 5G
     },
+    "index_filtered":
+    {
+        "c" : 1,
+        "t": "2:00:00",
+        "mem" : 5G,
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
     "concat_list":
     {
         "c" : 1,
@@ -62,26 +69,13 @@
     },
     "concat":
     {
-        "mail-type" : "END,FAIL"
+        "mail-type" : "END,FAIL",
+        "mem" : 10G
     },
     "index_concat":
     {
         "mail-type" : "END,FAIL",
         "c" : 6,
-        "t": "12:00:00"
-    },
-    "sort":
-    {
-        "mail-type" : "END,FAIL",
-        "c" : 12,
-        "mem" : 48G,
-        "t": "12:00:00"
-    },
-    "index_sort":
-    {
-        "mail-type" : "END,FAIL",
-        "c" : 2,
-        "mem" : 48G,
         "t": "12:00:00"
     }
 }
