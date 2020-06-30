@@ -15,8 +15,10 @@ import os
 
 configfile : "source_functions/config/ancient_preprocess.config.yaml"
 
+os.makedirs("log/slurm_out/ancient_preprocess", exist_ok = True)
+
 # Make log directories if they don't exist
-for x in expand("log/slurm_out/{rules}", rules = config['rules']):
+for x in expand("log/slurm_out/ancient_preprocess/{rules}", rules = config['rules']):
     os.makedirs(x, exist_ok = True)
 
 os.makedirs("log/psrecord/ancient_preprocess", exist_ok = True)

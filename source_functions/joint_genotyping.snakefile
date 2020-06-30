@@ -8,8 +8,10 @@ import os
 
 configfile: "source_functions/config/joint_genotyping.config.yaml"
 
+os.makedirs("log/slurm_out/joint_genotyping", exist_ok = True)
+
 # Make log directories if they don't exist
-for x in expand("log/slurm_out/{rules}", rules = config['rules']):
+for x in expand("log/slurm_out/joint_genotyping/{rules}", rules = config['rules']):
     os.makedirs(x, exist_ok = True)
 
 os.makedirs("log/psrecord/joint_genotyping", exist_ok = True)

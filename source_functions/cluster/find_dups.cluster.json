@@ -6,7 +6,7 @@
         "mem" : 24G,
         "c": 12,
         "t": "2:00:00",
-        "o": "log/slurm_out/{rule}/{wildcards}.%j.out",
+        "o": "log/slurm_out/find_dups/{rule}/{wildcards}.%j.out",
         "mail-user" : "hjdurbin@mail.missouri.edu",
         "mail-type" : "NONE"
     },
@@ -16,9 +16,18 @@
     },
     "extract_850K":
     {
-        "c" : 2,
+        "c" : 12,
+        "p" : "BioCompute,htc4,hpc5",
         "t": "12:00:00",
-        "mem" : 48G
+        "mem" : 400G,
+        "mail-type" : "END,FAIL"
+    },
+    "index_850K":
+    {
+        "c" : 12,
+        "t": "12:00:00",
+        "mem" : 64G,
+        "mail-type" : "END,FAIL"
     },
     "dups_plink":
     {

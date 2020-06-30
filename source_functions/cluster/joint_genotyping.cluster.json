@@ -6,7 +6,7 @@
         "mem" : 120G,
         "c": 12,
         "t": "24:00:00",
-        "o": "log/slurm_out/{rule}/{wildcards}.%j.out",
+        "o": "log/slurm_out/joint_genotyping/{rule}/{wildcards}.%j.out",
         "mail-user" : "hjdurbin@mail.missouri.edu",
         "mail-type" : "NONE"
     },
