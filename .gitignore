@@ -24,3 +24,5 @@ data/derived_data/coverage/*
 *.gz
 scratch.Rmd
 *.tsv
+*.variant_calling_detail_metrics
+*.variant_calling_summary_metrics
