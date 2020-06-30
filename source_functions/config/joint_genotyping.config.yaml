@@ -1,4 +1,4 @@
-rules: ["combine_gvcfs", "genotype_gvcfs_list", "genotype_gvcfs", "select_variants", "info_filtration", "remove_failed", "format_filtration", "index_filtered", "concat_list", "concat", "index_concat", "collect_metrics", "validate_variants"]
+rules: ["combine_gvcfs", "genotype_gvcfs_list", "genotype_gvcfs", "select_variants", "variant_filtration", "remove_failed", "concat_list", "concat", "index_concat", "collect_metrics", "validate_variants"]
 
 cohort : ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33']
 
@@ -24,15 +24,11 @@ select_variants_nt: 6
 
 select_variants_gc: 2
 
-info_filtration_gc: 6
+variant_filtration_gc: 6
 
-info_filtration_xmx: 8
+variant_filtration_xmx: 8
 
-info_filter: "-filter 'QD < 7.0' --filterName 'QD7' -filter 'FS > 60.0' --filterName 'FS60' -filter 'MQ < 15.0' --filterName 'MQ15'"
-
-format_filter: "'FORMAT/DP >= 8 && FORMAT/GQ >= 20'"
-
-format_filtration_nt: 6
+variant_filter: "-filter 'QD < 7.0' --filterName 'QD7' -filter 'FS > 60.0' --filterName 'FS60' -filter 'MQ < 15.0' --filterName 'MQ15' --genotypeFilterExpression 'DP < 8.0' --genotypeFilterName 'DP8' --genotypeFilterExpression 'GQ < 20.0' --genotypeFilterName 'GQ20'"
 
 bcftools_module: "bcftools"
 

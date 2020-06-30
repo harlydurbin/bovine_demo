@@ -1,0 +1,45 @@
+---
+title: "Joint genotyping"
+author: "Harly Durbin"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    df_print: paged
+    code_folding: show
+---
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(purrr)
+library(tidyr)
+```
+
+# Notes & questions
+
+# Setup
+
+```{r}
+variant_detail <-
+  read_table2(here::here("data/derived_data/joint_genotyping/bovine_demo.metrics.variant_calling_detail_metrics"), skip = 6) %>% 
+  janitor::clean_names() %>% 
+  rename(international_id = sample_alias) %>% 
+  # Removed indels, removed multi-allelics, physically removed SNPs that failed filtration
+  select(-contains("indels"), -contains("ins_del"), -contains("multiallelic"), -filtered_snps) %>% 
+  left_join(read_csv(here::here("data/derived_data/sample_metadata.csv")) %>% 
+              select(international_id, lab_id, population, species, avg_coverage)) %>% 
+  filter(!is.na(population))
+```
+
+# Summary
+
+```{r}
+read_table2(here::here("data/derived_data/joint_genotyping/bovine_demo.metrics.variant_calling_summary_metrics"), skip = 6) %>% 
+  janitor::clean_names() %>% 
+  select(-contains("indels"), -contains("ins_del"), -contains("multiallelic"), -filtered_snps) %>% 
+  mutate_at(c("total_snps", "num_in_db_snp", "novel_snps", "num_singletons"), ~ scales::comma(.))
+```
+

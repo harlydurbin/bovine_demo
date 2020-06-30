@@ -115,33 +115,33 @@ rule select_variants:
 		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -jar {params.gatk_path} -T SelectVariants -nt {params.nt} -R {params.ref_genome} -L {params.chr} -selectType SNP --restrictAllelesTo BIALLELIC -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 2
 		"""
 
-rule info_filtration:
+rule variant_filtration:
 	input:
 		vcf = "data/derived_data/joint_genotyping/select_variants/select_variants.{chr}.vcf.gz",
 		tbi = "data/derived_data/joint_genotyping/select_variants/select_variants.{chr}.vcf.gz.tbi"
 	params:
 		java_module = config['java_module'],
 		ref_genome = config['ref_genome'],
-		gc_threads = config['info_filtration_gc'],
-		xmx = config['info_filtration_xmx'],
+		gc_threads = config['variant_filtration_gc'],
+		xmx = config['variant_filtration_xmx'],
 		chr = "{chr}",
-		java_tmp = "temp/joint_genotyping/info_filtration/{chr}",
+		java_tmp = "temp/joint_genotyping/variant_filtration/{chr}",
 		gatk_path = config['gatk_path'],
-		filter = config['info_filter'],
-		psrecord = "log/psrecord/joint_genotyping/info_filtration/info_filtration.{chr}.log"
+		filter = config['variant_filter'],
+		psrecord = "log/psrecord/joint_genotyping/variant_filtration/variant_filtration.{chr}.log"
 	output:
-		vcf = "data/derived_data/joint_genotyping/info_filtration/info_filtration.{chr}.vcf.gz",
-		tbi = "data/derived_data/joint_genotyping/info_filtration/info_filtration.{chr}.vcf.gz.tbi"
+		vcf = "data/derived_data/joint_genotyping/variant_filtration/variant_filtration.{chr}.vcf.gz",
+		tbi = "data/derived_data/joint_genotyping/variant_filtration/variant_filtration.{chr}.vcf.gz.tbi"
 	shell:
 		"""
 		module load {params.java_module}
-		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.gatk_path} -T VariantFiltration -R {params.ref_genome} -L {params.chr} {params.filter} -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 5
+		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.gatk_path} -T VariantFiltration -R {params.ref_genome} -L {params.chr} {params.filter} --setFilteredGtToNocall -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 5
 		"""
 
 rule remove_failed:
 	input:
-		vcf = "data/derived_data/joint_genotyping/info_filtration/info_filtration.{chr}.vcf.gz",
-		tbi = "data/derived_data/joint_genotyping/info_filtration/info_filtration.{chr}.vcf.gz.tbi"
+		vcf = "data/derived_data/joint_genotyping/variant_filtration/variant_filtration.{chr}.vcf.gz",
+		tbi = "data/derived_data/joint_genotyping/variant_filtration/variant_filtration.{chr}.vcf.gz.tbi"
 	params:
 		java_module = config['java_module'],
 		ref_genome = config['ref_genome'],
@@ -157,48 +157,15 @@ rule remove_failed:
 	shell:
 		"""
 		module load {params.java_module}
-		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -jar {params.gatk_path} -L {params.chr} -T SelectVariants -nt {params.nt} -R {params.ref_genome} -ef -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 5
-		"""
-
-# Filter on FORMAT values
-# Remove SNPs within 5bp of an indel
-rule format_filtration:
-	input:
-		vcf = "data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz",
-		tbi = "data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi"
-	params:
-		bcftools_module = config['bcftools_module'],
-		filter = config['format_filter'],
-		nt = config['format_filtration_nt'],
-		psrecord = "log/psrecord/joint_genotyping/format_filtration/format_filtration.{chr}.log"
-	output:
-		vcf = "data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz"
-	shell:
-		"""
-		module load {params.bcftools_module}
-		psrecord "bcftools filter --threads {params.nt} -g 5 -S . -i {params.filter} -O z -o {output.vcf} {input.vcf}" --log {params.psrecord} --include-children --interval 5
-		"""
-
-rule index_filtered:
-	input:
-		vcf = "data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz"
-	params:
-		bcftools_module = config['bcftools_module'],
-		psrecord = "log/psrecord/joint_genotyping/index_filtered/index_filtered.{chr}.log"
-	output:
-		tbi = "data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz.tbi"
-	shell:
-		"""
-		module load {params.bcftools_module}
-		psrecord "bcftools index --tbi {input.vcf}" --log {params.psrecord} --include-children --interval 5
+		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -jar {params.gatk_path} -L {params.chr} -T SelectVariants -nt {params.nt} -R {params.ref_genome} -ef --removeUnusedAlternates -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 5
 		"""
 
 rule concat_list:
 	input:
-		vcfs = expand("data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz", chr = config['chr']),
-		tbis = expand("data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz.tbi", chr = config['chr'])
+		vcfs = expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz", chr = config['chr']),
+		tbis = expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi", chr = config['chr'])
 	params:
-		concat_paths = lambda wildcards: expand("data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz\n", chr = config['chr'])
+		concat_paths = lambda wildcards: expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz\n", chr = config['chr'])
 	output:
 		list = "data/derived_data/joint_genotyping/concat.list"
 	shell:
@@ -206,8 +173,8 @@ rule concat_list:
 
 rule concat:
 	input:
-		vcfs = expand("data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz", chr = config['chr']),
-		tbis = expand("data/derived_data/joint_genotyping/format_filtration/format_filtration.{chr}.vcf.gz.tbi", chr = config['chr']),
+		vcfs = expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz", chr = config['chr']),
+		tbis = expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi", chr = config['chr']),
 		list = "data/derived_data/joint_genotyping/concat.list"
 	params:
 		psrecord = "log/psrecord/joint_genotyping/concat/concat.log",
@@ -273,5 +240,5 @@ rule validate_variants:
 	shell:
 		"""
 		module load {params.java_module}
-		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.gatk_path} VlidateVariants -R {params.ref_genome} -V {input.vcf} > {output.report}" --log {params.psrecord} --include-children --interval 5
+		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.gatk_path} -T ValidateVariants -R {params.ref_genome} -V {input.vcf} --warnOnErrors &> {output.report}" --log {params.psrecord} --include-children --interval 5
 		"""
