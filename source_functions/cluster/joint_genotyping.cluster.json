@@ -84,5 +84,12 @@
         "c" : 20,
         "t": "12:00:00",
         "mem" : 24G
+    },
+    "validate_variants":
+    {
+        "mail-type" : "END,FAIL",
+        "c" : 1,
+        "t": "12:00:00",
+        "mem" : 24G
     }
 }

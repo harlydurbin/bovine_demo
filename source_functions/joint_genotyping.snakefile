@@ -1,4 +1,4 @@
-# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200629.joint_genotyping.log
+# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200630.joint_genotyping.log
 
 # paste(c(1:29, "X", "Y"), collapse = "', '")
 
@@ -25,7 +25,7 @@ for x in expand("temp/joint_genotyping/{rules}", rules = config['rules']):
 
 rule all:
 	input:
-		"data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz", "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz.tbi", "data/derived_data/joint_genotyping/bovine_demo.metrics"
+		"data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz", "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz.tbi", "data/derived_data/joint_genotyping/bovine_demo.metrics.variant_calling_detail_metrics", "data/derived_data/joint_genotyping/bovine_demo.metrics.variant_calling_summary_metrics", "data/derived_data/joint_genotyping/bovine_demo.validation_report.txt"
 
 rule combine_gvcfs:
 # Can't parallelize CombineGVCFs!!!
@@ -248,9 +248,30 @@ rule collect_metrics:
 		psrecord = "log/psrecord/joint_genotyping/collect_metrics/collect_metrics.log",
 		prefix = "data/derived_data/joint_genotyping/bovine_demo.metrics"
 	output:
-		"data/derived_data/joint_genotyping/bovine_demo.metrics.varant_calling_detail_metrics", "data/derived_data/joint_genotyping/bovine_demo.metrics.varant_calling_summary_metrics"
+		detail = "data/derived_data/joint_genotyping/bovine_demo.metrics.variant_calling_detail_metrics",
+		summary = "data/derived_data/joint_genotyping/bovine_demo.metrics.variant_calling_summary_metrics"
 	shell:
 		"""
 		module load {params.picard_module}
 		psrecord "java -jar {params.picard_path} CollectVariantCallingMetrics INPUT={input.vcf} OUTPUT={params.prefix} DBSNP={params.truth_file} THREAD_COUNT={params.nt}" --log {params.psrecord} --include-children --interval 5
+		"""
+
+rule validate_variants:
+	input:
+		vcf = "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz",
+		tbi = "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz.tbi"
+	params:
+		java_module = config['java_module'],
+		ref_genome = config['ref_genome'],
+		gc_threads = config['validate_variants_gc'],
+		xmx = config['validate_variants_xmx'],
+		java_tmp = "temp/joint_genotyping/validate_variants",
+		gatk_path = config['gatk_path'],
+		psrecord = "log/psrecord/joint_genotyping/validate_variants/validate_variants.log"
+	output:
+		report = "data/derived_data/joint_genotyping/bovine_demo.validation_report.txt"
+	shell:
+		"""
+		module load {params.java_module}
+		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.gatk_path} VlidateVariants -R {params.ref_genome} -V {input.vcf} > {output.report}" --log {params.psrecord} --include-children --interval 5
 		"""
