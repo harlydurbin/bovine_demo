@@ -157,7 +157,7 @@ rule remove_failed:
 	shell:
 		"""
 		module load {params.java_module}
-		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -jar {params.gatk_path} -L {params.chr} -T SelectVariants -nt {params.nt} -R {params.ref_genome} -ef --removeUnusedAlternates -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 5
+		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -jar {params.gatk_path} -L {params.chr} -T SelectVariants -nt {params.nt} -R {params.ref_genome} -ef --removeUnusedAlternates -env -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 5
 		"""
 
 rule concat_list:

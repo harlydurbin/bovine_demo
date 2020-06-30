@@ -24,9 +24,11 @@ select_variants_nt: 6
 
 select_variants_gc: 2
 
-variant_filtration_gc: 6
+variant_filtration_gc: 2
 
-variant_filtration_xmx: 8
+#variant_filtration_nt: 4
+
+variant_filtration_xmx: 20
 
 variant_filter: "-filter 'QD < 7.0' --filterName 'QD7' -filter 'FS > 60.0' --filterName 'FS60' -filter 'MQ < 15.0' --filterName 'MQ15' --genotypeFilterExpression 'DP < 8.0' --genotypeFilterName 'DP8' --genotypeFilterExpression 'GQ < 20.0' --genotypeFilterName 'GQ20'"
 

@@ -11,8 +11,7 @@ Evaluation of computing resources used for each step of genotype calling can be 
 3. After joint genotype calling, INFO field filter values and depth of coverage at each variant on chromosome 28 extracted in `source_functions/filter_eval.snakefile` using `GATK VariantsToTable` and `vcftools --site-mean-depth`. Descriptive statistics & distribution of these values explored in `notebooks/qc_eval.Rmd`. Results can be found in `html/qc_eval.html` and were used to inform filtering cutoffs in the next step
 4. Variant callset filtered in `source_functions/joint_genotyping.snakefile`
     + Variants restricted to biallelic SNPs using `GATK SelectVariants`
-    + Site-level filtering annotated using `GATK VariantFiltration` then failing variants removed using `GATK SelectVariants`
-    + Genotype-level filtering & removal of all SNPs within 5 bp of an indel using `bcftools filter`
+    + Site-level and genotype-level filtering annotated using `GATK VariantFiltration`. Then failing sites removed + failing genotypes set to missing using `GATK SelectVariants`
 5. Chromosome-by-chromosome files concatenated in order to one whole-genome file using `bcftools concat`
 6. Duplicate samples identified using `king` then removed in `source_functions/find_dups.snakefile`
 

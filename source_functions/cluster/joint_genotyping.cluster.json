@@ -32,14 +32,14 @@
     "select_variants":
     {
         "c" : 8,
-        "t": "10:00:00",
+        "t": "12:00:00",
         "mem" : 16G
     },
     "variant_filtration":
     {
-        "c" : 8,
-        "t": "12:00:00",
-        "mem" : 16G
+        "c" : 3,
+        "t": "24:00:00",
+        "mem" : 20G
     },
     "remove_failed":
     {
