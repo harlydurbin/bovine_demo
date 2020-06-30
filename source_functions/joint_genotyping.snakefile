@@ -1,4 +1,4 @@
-# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200624.joint_genotyping.log
+# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200629.joint_genotyping.log
 
 # paste(c(1:29, "X", "Y"), collapse = "', '")
 
@@ -23,7 +23,7 @@ for x in expand("temp/joint_genotyping/{rules}", rules = config['rules']):
 
 rule all:
 	input:
-		"data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz", "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz.tbi"
+		"data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz", "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz.tbi", "data/derived_data/joint_genotyping/bovine_demo.metrics"
 
 rule combine_gvcfs:
 # Can't parallelize CombineGVCFs!!!
@@ -232,4 +232,23 @@ rule index_concat:
 		"""
 		module load {params.bcftools_module}
 		psrecord "bcftools index --tbi --threads {params.nt} {input.vcf}" --log {params.psrecord} --include-children --interval 5
+		"""
+
+rule collect_metrics:
+	input:
+		vcf = "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz",
+		tbi = "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz.tbi"
+	params:
+		picard_module = config['picard_module'],
+		picard_path = config['picard_path'],
+		truth_file = config['truth_file'],
+		nt = config['collect_metrics_nt'],
+		psrecord = "log/psrecord/joint_genotyping/collect_metrics/collect_metrics.log",
+		prefix = "data/derived_data/joint_genotyping/bovine_demo.metrics"
+	output:
+		"data/derived_data/joint_genotyping/bovine_demo.metrics.varant_calling_detail_metrics", "data/derived_data/joint_genotyping/bovine_demo.metrics.varant_calling_summary_metrics"
+	shell:
+		"""
+		module load {params.picard_module}
+		psrecord "java -jar {params.picard_path} CollectVariantCallingMetrics INPUT={input.vcf} OUTPUT={params.prefix} DBSNP={params.truth_file} THREAD_COUNT={params.nt}" --log {params.psrecord} --include-children --interval 5
 		"""

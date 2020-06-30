@@ -77,5 +77,12 @@
         "mail-type" : "END,FAIL",
         "c" : 6,
         "t": "12:00:00"
+    },
+    "collect_metrics":
+    {
+        "mail-type" : "END,FAIL",
+        "c" : 20,
+        "t": "12:00:00",
+        "mem" : 24G
     }
 }

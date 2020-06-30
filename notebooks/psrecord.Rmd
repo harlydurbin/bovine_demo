@@ -160,7 +160,8 @@ usage_summary(process = "joint_genotyping", keyword = "index_filtered")
 ```
 
 ```{r}
-usage_facets(process = "joint_genotyping", keyword = "index_filtered")
+usage_facets(process = "joint_genotyping", keyword = "index_filtered
+")
 ```
 
 ## `concat`
@@ -185,6 +186,18 @@ usage_summary(process = "joint_genotyping", keyword = "index_concat")
 
 ```{r, eval=FALSE}
 usage_facets(process = "joint_genotyping", keyword = "index_concat")
+```
+
+## `collect_metrics`
+
+* Run `Picard CollectVariantCallingMetrics` on concatenated whole-genome file
+
+```{r,eval=FALSE}
+usage_summary(process = "joint_genotyping", keyword = "collect_metrics") 
+```
+
+```{r, eval=FALSE}
+usage_facets(process = "joint_genotyping", keyword = "collect_metrics")
 ```
 
 # `find_dups`
