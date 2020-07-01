@@ -160,47 +160,25 @@ rule remove_failed:
 		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -jar {params.gatk_path} -L {params.chr} -T SelectVariants -nt {params.nt} -R {params.ref_genome} -ef --removeUnusedAlternates -env -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 5
 		"""
 
-rule concat_list:
+rule concat:
 	input:
 		vcfs = expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz", chr = config['chr']),
 		tbis = expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi", chr = config['chr'])
 	params:
-		concat_paths = lambda wildcards: expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz\n", chr = config['chr'])
-	output:
-		list = "data/derived_data/joint_genotyping/concat.list"
-	shell:
-		"echo -e '{params.concat_paths}' | sed 's/^ *//g' > {output.list}"
-
-rule concat:
-	input:
-		vcfs = expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz", chr = config['chr']),
-		tbis = expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi", chr = config['chr']),
-		list = "data/derived_data/joint_genotyping/concat.list"
-	params:
 		psrecord = "log/psrecord/joint_genotyping/concat/concat.log",
-		bcftools_module = config['bcftools_module'],
-		nt = config['concat_nt']
+		ref_genome = config['ref_genome'],
+		java_tmp = "temp/joint_genotyping/concat",
+		gc_threads = config['concat_gc'],
+		xmx = config['concat_xmx'],
+		picard_module = config['picard_module'],
+		picard_path = config['picard_path'],
+		paths = lambda wildcards: expand("INPUT=data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz", chr = config['chr'])
 	output:
 		vcf = "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz"
 	shell:
 		"""
-		module load {params.bcftools_module}
-		psrecord "bcftools concat -O z --threads {params.nt} -o {output.vcf} -f {input.list}" --log {params.psrecord} --include-children --interval 5
-		"""
-
-rule index_concat:
-	input:
-		vcf = "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz"
-	params:
-		bcftools_module = config['bcftools_module'],
-		nt = config['index_nt'],
-		psrecord = "log/psrecord/joint_genotyping/index_concat/index_concat.log",
-	output:
-		tbi = "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz.tbi"
-	shell:
-		"""
-		module load {params.bcftools_module}
-		psrecord "bcftools index --tbi --threads {params.nt} {input.vcf}" --log {params.psrecord} --include-children --interval 5
+		module load {params.picard_module}
+		psrecord "java -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g {params.picard_path} GatherVcfs TMP_DIR={params.java_tmp} {params.paths} OUTPUT={output.vcf} R={params.ref_genome}" --log {params.psrecord} --include-children --interval 5
 		"""
 
 rule collect_metrics:
@@ -209,8 +187,12 @@ rule collect_metrics:
 		tbi = "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz.tbi"
 	params:
 		picard_module = config['picard_module'],
+		java_tmp = "temp/joint_genotyping/collect_metrics",
+		gc_threads = config['collect_metrics_gc'],
+		xmx = config['collect_metrics_xmx']
 		picard_path = config['picard_path'],
 		truth_file = config['truth_file'],
+		ref_genome = config['ref_genome'],
 		nt = config['collect_metrics_nt'],
 		psrecord = "log/psrecord/joint_genotyping/collect_metrics/collect_metrics.log",
 		prefix = "data/derived_data/joint_genotyping/bovine_demo.metrics"
@@ -220,7 +202,7 @@ rule collect_metrics:
 	shell:
 		"""
 		module load {params.picard_module}
-		psrecord "java -jar {params.picard_path} CollectVariantCallingMetrics INPUT={input.vcf} OUTPUT={params.prefix} DBSNP={params.truth_file} THREAD_COUNT={params.nt}" --log {params.psrecord} --include-children --interval 5
+		psrecord "java -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.picard_path} CollectVariantCallingMetrics TMP_DIR={params.java_tmp} INPUT={input.vcf} OUTPUT={params.prefix} DBSNP={params.truth_file} R={params.ref_genome} THREAD_COUNT={params.nt}" --log {params.psrecord} --include-children --interval 5
 		"""
 
 rule validate_variants:

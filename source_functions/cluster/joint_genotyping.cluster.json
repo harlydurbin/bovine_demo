@@ -57,18 +57,14 @@
     "concat":
     {
         "mail-type" : "END,FAIL",
-        "mem" : 10G
-    },
-    "index_concat":
-    {
-        "mail-type" : "END,FAIL",
-        "c" : 6,
-        "t": "12:00:00"
+        "c" : 7,
+        "t": "24:00:00",
+        "mem" : 150G
     },
     "collect_metrics":
     {
         "mail-type" : "END,FAIL",
-        "c" : 20,
+        "c" : 22,
         "t": "12:00:00",
         "mem" : 24G
     },

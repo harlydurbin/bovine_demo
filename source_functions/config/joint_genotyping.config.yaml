@@ -34,7 +34,9 @@ variant_filter: "-filter 'QD < 7.0' --filterName 'QD7' -filter 'FS > 60.0' --fil
 
 bcftools_module: "bcftools"
 
-concat_nt: 12
+concat_xmx: 150
+
+concat_gc: 6
 
 index_nt: 6
 
@@ -45,6 +47,10 @@ picard_path: "/cluster/software/picard/picard-2.7.1/picard.jar"
 truth_file: "/storage/hpc/group/UMAG/SNP/9913/1kbulls_ars1.2/190923_ALL.sorted.vcf.gz"
 
 collect_metrics_nt: 20
+
+collect_metrics_gc: 2
+
+collect_metrics_xmx: 24
 
 validate_variants_gc: 2
 

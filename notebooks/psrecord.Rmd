@@ -114,17 +114,17 @@ usage_summary(process = "joint_genotyping", keyword = "select_variants")
 usage_facets(process = "joint_genotyping", keyword = "select_variants")
 ```
 
-## `info_filtration`
+## `variant_filtration`
 
-* Site-level filtering using `GATK VariantFiltration`
-* For each chromosome, provided 8 threads
+* Site-level and genotype-level filtering using `GATK VariantFiltration`
+* Did not multi-thread beyond java GC threads
 
 ```{r}
-usage_summary(process = "joint_genotyping", keyword = "info_filtration") 
+usage_summary(process = "joint_genotyping", keyword = "variant_filtration") 
 ```
 
 ```{r}
-usage_facets(process = "joint_genotyping", keyword = "info_filtration")
+usage_facets(process = "joint_genotyping", keyword = "variant_filtration")
 ```
 
 ## `remove_failed`
@@ -140,33 +140,9 @@ usage_summary(process = "joint_genotyping", keyword = "remove_failed")
 usage_facets(process = "joint_genotyping", keyword = "remove_failed")
 ```
 
-## `format_filtration`
-
-* Genotype-level filtering using `bcftools filter`
-* For each chromosome, provided 6 threads
-
-```{r}
-usage_summary(process = "joint_genotyping", keyword = "format_filtration") 
-```
-
-```{r}
-usage_facets(process = "joint_genotyping", keyword = "format_filtration")
-```
-
-## `index_filtered`
-
-```{r}
-usage_summary(process = "joint_genotyping", keyword = "index_filtered") 
-```
-
-```{r}
-usage_facets(process = "joint_genotyping", keyword = "index_filtered
-")
-```
-
 ## `concat`
 
-* Concatenating chromosome-level files into one whole-genome file using `bcftools concat`
+* Concatenating chromosome-level files into one whole-genome file using `Picard GatherVcfs`
 
 ```{r,eval=FALSE}
 usage_summary(process = "joint_genotyping", keyword = "concat") 
@@ -174,18 +150,6 @@ usage_summary(process = "joint_genotyping", keyword = "concat")
 
 ```{r, eval=FALSE}
 usage_facets(process = "joint_genotyping", keyword = "concat")
-```
-
-## `index_concat`
-
-* Index concatenated whole-genome file using `bcftools index`
-
-```{r,eval=FALSE}
-usage_summary(process = "joint_genotyping", keyword = "index_concat") 
-```
-
-```{r, eval=FALSE}
-usage_facets(process = "joint_genotyping", keyword = "index_concat")
 ```
 
 ## `collect_metrics`

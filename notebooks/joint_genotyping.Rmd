@@ -31,7 +31,8 @@ variant_detail <-
   select(-contains("indels"), -contains("ins_del"), -contains("multiallelic"), -filtered_snps) %>% 
   left_join(read_csv(here::here("data/derived_data/sample_metadata.csv")) %>% 
               select(international_id, lab_id, population, species, avg_coverage)) %>% 
-  filter(!is.na(population))
+  filter(!is.na(population)) %>% 
+  select(population, avg_coverage, everything())
 ```
 
 # Summary
@@ -40,6 +41,18 @@ variant_detail <-
 read_table2(here::here("data/derived_data/joint_genotyping/bovine_demo.metrics.variant_calling_summary_metrics"), skip = 6) %>% 
   janitor::clean_names() %>% 
   select(-contains("indels"), -contains("ins_del"), -contains("multiallelic"), -filtered_snps) %>% 
-  mutate_at(c("total_snps", "num_in_db_snp", "novel_snps", "num_singletons"), ~ scales::comma(.))
+  mutate_at(c("total_snps", "num_in_db_snp", "novel_snps", "num_singletons"), ~ scales::comma(.)) 
+```
+
+```{r}
+variant_detail %>% 
+  group_by(population) %>% 
+  filter(n() > 50) %>%
+  ungroup() %>% 
+  mutate(filter = if_else(10 > avg_coverage, "FAIL", "PASS")) %>% 
+  group_by(population, filter) %>% 
+  tally() %>% 
+  ungroup() %>% 
+  tidyr::pivot_wider(names_from = filter, values_from = n)
 ```
 
