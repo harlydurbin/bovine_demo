@@ -12,11 +12,10 @@ Evaluation of computing resources used for each step of genotype calling can be 
 4. Variant callset filtered in `source_functions/joint_genotyping.snakefile`
     + Variants restricted to biallelic SNPs using `GATK SelectVariants`
     + Site-level and genotype-level filtering annotated using `GATK VariantFiltration`. Then failing sites removed + failing genotypes set to missing using `GATK SelectVariants`
-5. Chromosome-by-chromosome files concatenated in order to one whole-genome file using `bcftools concat`
-6. Duplicate samples identified using `king` then removed in `source_functions/find_dups.snakefile`
+5. Chromosome-by-chromosome files concatenated in order to one whole-genome file using `Picard GatherVcfs`
+6. Create summary of the resulting callset using `Picard CollectVariantCallingMetrics` then evaluate in `source_functions/joint_genotyping.Rmd`
+7. Duplicate samples identified using `king` then removed in `source_functions/find_dups.snakefile`
 
-
-    
 ## Meta-data processing
 
 1. SRA metadata scraped from downloaded XML files then initially tidied in `notebooks/xml_scraping.Rmd`
