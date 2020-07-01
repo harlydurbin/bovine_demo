@@ -38,7 +38,7 @@
     "variant_filtration":
     {
         "c" : 3,
-        "t": "24:00:00",
+        "t": "48:00:00",
         "mem" : 20G
     },
     "remove_failed":
@@ -58,7 +58,7 @@
     {
         "mail-type" : "END,FAIL",
         "c" : 7,
-        "t": "24:00:00",
+        "t": "48:00:00",
         "mem" : 150G
     },
     "collect_metrics":

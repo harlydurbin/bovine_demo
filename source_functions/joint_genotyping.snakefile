@@ -1,4 +1,4 @@
-# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200630.joint_genotyping.log
+# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200701.joint_genotyping.log
 
 # paste(c(1:29, "X", "Y"), collapse = "', '")
 
@@ -174,7 +174,8 @@ rule concat:
 		picard_path = config['picard_path'],
 		paths = lambda wildcards: expand("INPUT=data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz", chr = config['chr'])
 	output:
-		vcf = "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz"
+		vcf = "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz",
+		tbi = "data/derived_data/joint_genotyping/bovine_demo.snps.vcf.gz.tbi"
 	shell:
 		"""
 		module load {params.picard_module}
@@ -189,7 +190,7 @@ rule collect_metrics:
 		picard_module = config['picard_module'],
 		java_tmp = "temp/joint_genotyping/collect_metrics",
 		gc_threads = config['collect_metrics_gc'],
-		xmx = config['collect_metrics_xmx']
+		xmx = config['collect_metrics_xmx'],
 		picard_path = config['picard_path'],
 		truth_file = config['truth_file'],
 		ref_genome = config['ref_genome'],
