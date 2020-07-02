@@ -4,29 +4,35 @@
         "p" : "General,Lewis,BioCompute,htc4,hpc5",
         "account" : "animalsci",
         "mem" : 24G,
-        "c": 12,
+        "c": 1,
         "t": "2:00:00",
         "o": "log/slurm_out/find_dups/{rule}/{wildcards}.%j.out",
         "mail-user" : "hjdurbin@mail.missouri.edu",
         "mail-type" : "NONE"
     },
-    "index_map":
+    "targets_file":
     {
-        "c" : 2
+        "t": "0:10:00",
     },
     "extract_850K":
     {
-        "c" : 12,
+        "c" : 1,
         "p" : "BioCompute,htc4,hpc5",
         "t": "12:00:00",
-        "mem" : 400G,
+        "mem" : 24G,
         "mail-type" : "END,FAIL"
     },
     "index_850K":
     {
-        "c" : 12,
+        "c" : 4,
         "t": "12:00:00",
-        "mem" : 64G,
+        "mail-type" : "END,FAIL"
+    },
+    "index_850K":
+    {
+        "c" : 4,
+        "t": "12:00:00",
+        "mem" : 24G,
         "mail-type" : "END,FAIL"
     },
     "dups_plink":

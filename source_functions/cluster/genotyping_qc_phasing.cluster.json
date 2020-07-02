@@ -76,5 +76,38 @@
         "p" : "General,Lewis,BioCompute,htc4,hpc5",
         "mem" : 12G,
         "o": "data/derived_data/joint_genotyping/validate_variants/validate_variants.{wildcards.chr}.txt"
+    },
+    "targets_file":
+    {
+        "t": "0:10:00",
+    },
+    "extract_850K":
+    {
+        "c" : 1,
+        "p" : "BioCompute,htc4,hpc5",
+        "t": "12:00:00",
+        "mem" : 24G,
+        "mail-type" : "END,FAIL"
+    },
+    "index_850K":
+    {
+        "c" : 4,
+        "t": "12:00:00",
+        "mail-type" : "END,FAIL"
+    },
+    "index_850K":
+    {
+        "c" : 4,
+        "t": "12:00:00",
+        "mem" : 24G,
+        "mail-type" : "END,FAIL"
+    },
+    "dups_plink":
+    {
+        "mail-type" : "END,FAIL"
+    },
+    "find_dups":
+    {
+        "mail-type" : "END,FAIL"
     }
 }

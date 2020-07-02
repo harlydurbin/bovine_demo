@@ -23,7 +23,7 @@ for x in expand("log/psrecord/joint_genotyping/{rules}", rules = config['rules']
 for x in expand("temp/joint_genotyping/{rules}", rules = config['rules']):
     os.makedirs(x, exist_ok = True)
 
-rule all:
+rule joint_genotyping_all:
 	input:
 		expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz", chr = config['chr']), expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_detail_metrics", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics.{chr}.variant_calling_summary_metrics", chr = config['chr']), expand("data/derived_data/joint_genotyping/validate_variants/validate_variants.{chr}.txt", chr = config['chr'])
 

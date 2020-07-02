@@ -1,29 +1,30 @@
 # snakemake -s source_functions/find_dups.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/find_dups.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200629.find_dups.log
 
-include: "source_functions/joint_genotyping.snakefile"
+# include path is relative to the path of this file
+include: "joint_genotyping.snakefile"
+
+configfile: "source_functions/config/genotyping_qc_phasing.config.yaml"
 
 import os
-
-configfile: "source_functions/config/find_dups.config.yaml"
 
 os.makedirs("log/slurm_out/find_dups", exist_ok = True)
 
 # Make log directories if they don't exist
-for x in expand("log/slurm_out/find_dups/{rules}", rules = config['rules']):
+for x in expand("log/slurm_out/find_dups/{rules}", rules = config['find_dups_rules']):
     os.makedirs(x, exist_ok = True)
 
-for x in expand("log/psrecord/joint_genotyping/{rules}", rules = config['rules']):
+for x in expand("log/psrecord/joint_genotyping/{rules}", rules = config['find_dups_rules']):
     os.makedirs(x, exist_ok = True)
 
 os.makedirs("temp/find_dups", exist_ok = True)
 
-rule all:
+rule find_dups_all:
 	input:
-	 	"data/derived_data/joint_genotyping/find_dups/bovine_demo.850K.con"
+	 	"data/derived_data/joint_genotyping/find_dups/find_dups.con"
 
 rule targets_file:
 	input:
-		map = config['map']
+		map = config['850K_map']
 	params:
 		chr = "{chr}"
 	output:
@@ -71,7 +72,7 @@ rule make_bed:
 		tbi = "data/derived_data/joint_genotyping/find_dups/extract_850K.{chr}.vcf.gz.tbi"
 	params:
 		prefix = "data/derived_data/joint_genotyping/find_dups/make_bed.{chr}",
-		nt = config['plink_nt'],
+		nt = config['make_bed_nt'],
 		psrecord = "log/psrecord/joint_genotyping/make_bed/make_bed.{chr}.log"
 	output:
 		chr_bed = "data/derived_data/joint_genotyping/find_dups/make_bed.{chr}.bed"
@@ -97,7 +98,7 @@ rule merge_bed:
 		merge_list = "data/derived_data/find_dups/850K_merge_list.txt"
 	params:
 		prefix = "data/derived_data/joint_genotyping/find_dups/merge_bed",
-		nt = config['plink_nt'],
+		nt = config['merge_bed_nt'],
 		psrecord = "log/psrecord/joint_genotyping/merge_bed/merge_bed.log"
 	output:
 		bed = "data/derived_data/joint_genotyping/find_dups/merge_bed.bed"
