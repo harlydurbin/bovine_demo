@@ -79,6 +79,8 @@
     },
     "targets_file":
     {
+        "c" : 1,
+        "mem" : 1G,
         "t": "0:10:00",
     },
     "extract_850K":
@@ -91,23 +93,27 @@
     },
     "index_850K":
     {
-        "c" : 4,
-        "t": "12:00:00",
-        "mail-type" : "END,FAIL"
-    },
-    "index_850K":
-    {
-        "c" : 4,
-        "t": "12:00:00",
         "mem" : 24G,
-        "mail-type" : "END,FAIL"
+        "c" : 4,
+        "t": "12:00:00"
     },
-    "dups_plink":
+    "make_bed":
     {
-        "mail-type" : "END,FAIL"
+        "mem" : 24G,
+        "c" : 12,
+        "t": "12:00:00"
+    },
+    "merge_bed":
+    {
+        "mem" : 72G,
+        "c" : 36,
+        "t": "12:00:00"
     },
     "find_dups":
     {
-        "mail-type" : "END,FAIL"
+        "mail-type" : "END,FAIL",
+        "mem" : 24G,
+        "c" : 12,
+        "t": "12:00:00"
     }
 }

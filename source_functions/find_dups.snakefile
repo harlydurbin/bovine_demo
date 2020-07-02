@@ -31,7 +31,7 @@ rule targets_file:
 		targets_file = "data/derived_data/joint_genotyping/find_dups/{chr}.targets"
 	shell:
 		"""
-		grep "^{params.chr}" {input.map} | awk '{{print $1":"$2}}' > {output.map}
+		grep "^{params.chr}" {input.map} | awk '{{print $1":"$2}}' > {output.targets_file}
 		"""
 
 rule extract_850K:
