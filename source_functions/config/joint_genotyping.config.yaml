@@ -46,7 +46,7 @@ picard_path: "/cluster/software/picard/picard-2.7.1/picard.jar"
 
 truth_file: "/storage/hpc/group/UMAG/SNP/9913/1kbulls_ars1.2/190923_ALL.sorted.vcf.gz"
 
-collect_metrics_nt: 20
+collect_metrics_nt: 6
 
 collect_metrics_gc: 2
 
@@ -54,4 +54,4 @@ collect_metrics_xmx: 24
 
 validate_variants_gc: 2
 
-validate_variants_xmx: 24
+validate_variants_xmx: 12

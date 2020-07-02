@@ -64,15 +64,17 @@
     "collect_metrics":
     {
         "mail-type" : "END,FAIL",
-        "c" : 22,
+        "c" : 8,
         "t": "12:00:00",
         "mem" : 24G
     },
     "validate_variants":
     {
         "mail-type" : "END,FAIL",
-        "c" : 1,
-        "t": "12:00:00",
-        "mem" : 24G
+        "c" : 3,
+        "t": "2:00:00",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5",
+        "mem" : 12G,
+        "o": "data/derived_data/joint_genotyping/validate_variants/validate_variants.{wildcards.chr}.txt"
     }
 }
