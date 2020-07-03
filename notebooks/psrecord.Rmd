@@ -140,21 +140,9 @@ usage_summary(process = "joint_genotyping", keyword = "remove_failed")
 usage_facets(process = "joint_genotyping", keyword = "remove_failed")
 ```
 
-## `concat`
-
-* Concatenating chromosome-level files into one whole-genome file using `Picard GatherVcfs`
-
-```{r,eval=FALSE}
-usage_summary(process = "joint_genotyping", keyword = "concat") 
-```
-
-```{r, eval=FALSE}
-usage_facets(process = "joint_genotyping", keyword = "concat")
-```
-
 ## `collect_metrics`
 
-* Run `Picard CollectVariantCallingMetrics` on concatenated whole-genome file
+* Run `Picard CollectVariantCallingMetrics` on chromosome files
 
 ```{r,eval=FALSE}
 usage_summary(process = "joint_genotyping", keyword = "collect_metrics") 
@@ -164,11 +152,22 @@ usage_summary(process = "joint_genotyping", keyword = "collect_metrics")
 usage_facets(process = "joint_genotyping", keyword = "collect_metrics")
 ```
 
+## `validate_variants`
+
+* Run `GATK Validate` on chromosome files
+
+```{r,eval=FALSE}
+usage_summary(process = "joint_genotyping", keyword = "validate_variants") 
+```
+
+```{r, eval=FALSE}
+usage_facets(process = "joint_genotyping", keyword = "validate_variants")
+```
 # `find_dups`
 
 ## `extract_850K`
 
-* Extract 850K marker set from sorted whole-genome using `bcftools view`
+* Extract 850K marker set from each chromosome using `bcftools view`
 
 ```{r,eval=FALSE}
 usage_summary(process = "joint_genotyping", keyword = "extract_850K") 
@@ -186,4 +185,35 @@ usage_summary(process = "joint_genotyping", keyword = "index_850K")
 
 ```{r, eval=FALSE}
 usage_facets(process = "joint_genotyping", keyword = "index_850K")
+```
+
+
+## `make_bed`
+
+```{r,eval=FALSE}
+usage_summary(process = "joint_genotyping", keyword = "make_bed") 
+```
+
+```{r, eval=FALSE}
+usage_facets(process = "joint_genotyping", keyword = "make_bed")
+```
+
+## `merge_bed`
+
+```{r,eval=FALSE}
+usage_summary(process = "joint_genotyping", keyword = "merge_bed") 
+```
+
+```{r, eval=FALSE}
+usage_facets(process = "joint_genotyping", keyword = "merge_bed")
+```
+
+## `find_dups`
+
+```{r,eval=FALSE}
+usage_summary(process = "joint_genotyping", keyword = "find_dups") 
+```
+
+```{r, eval=FALSE}
+usage_facets(process = "joint_genotyping", keyword = "find_dups")
 ```

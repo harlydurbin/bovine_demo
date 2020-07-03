@@ -4,19 +4,23 @@
 
 Evaluation of computing resources used for each step of genotype calling can be found in `notebooks/psrecord.Rmd` with results in `html/psrecord.html`
 
-1. Ancient sample BAM files pre-processed and haplotypes called in `source_functions/ancient_preprocess.snakefile`
+1. Ancient samples pre-processed and haplotypes called in `source_functions/ancient_preprocess.snakefile`
+    + Trim 5 bp from ends of reads using `bamUtil trimBam`
+    + Realign indels using `GATK IndelRealigner`
+    + Call haplotypes using `GATK HaplotypeCaller`
 2. All samples combined and genotypes called in `source_functions/joint_genotyping.snakefile`
     + Sample cohorts combined using `GATK CombineGVCFs` (cohorts determined in `source_functions/genotyping_cohorts.R`)
     + Joint genotypes called using `GATK GenotypeGVCFs`
 3. After joint genotype calling, INFO field filter values and depth of coverage at each variant on chromosome 28 extracted in `source_functions/filter_eval.snakefile` using `GATK VariantsToTable` and `vcftools --site-mean-depth`. Descriptive statistics & distribution of these values explored in `notebooks/qc_eval.Rmd`. Results can be found in `html/qc_eval.html` and were used to inform filtering cutoffs in the next step
 4. Callset filtered in `source_functions/joint_genotyping.snakefile`
     + Variants restricted to biallelic SNPs using `GATK SelectVariants`
-    + Site-level and genotype-level filtering annotated using `GATK VariantFiltration`. Then failing sites removed, failing genotypes set to missing using `GATK SelectVariants`
-5. Final callset re-merged then evaluated in `source_functions/joint_genotyping.snakefile`
-    + Chromosome-by-chromosome files concatenated to one whole-genome VCF file using `Picard GatherVcfs`
-    + Summary generated `Picard CollectVariantCallingMetrics` then evaluate in `source_functions/joint_genotyping.Rmd`
-    + VCF format checked using `GATK ValidateVariants`
+    + Site-level and genotype-level filtering annotated using `GATK VariantFiltration`. Then failing sites removed and failing genotypes set to missing using `GATK SelectVariants`
+5. Summary stats for each chromosome generated using `Picard CollectVariantCallingMetrics` then evaluated in `source_functions/joint_genotyping.Rmd`, VCF format checked using `GATK ValidateVariants`
 6. Duplicate samples identified using `king` then removed in `source_functions/find_dups.snakefile`
+
+## Phasing
+
+TODO
 
 ## Meta-data processing
 

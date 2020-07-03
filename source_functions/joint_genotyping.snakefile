@@ -1,4 +1,4 @@
-# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/joint_genotyping.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200701.joint_genotyping.log
+# snakemake -s source_functions/joint_genotyping.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/genotyping_qc_phasing.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200703.joint_genotyping.log
 
 # paste(c(1:29, "X", "Y"), collapse = "', '")
 
@@ -6,21 +6,21 @@
 
 import os
 
-configfile: "source_functions/config/joint_genotyping.config.yaml"
+configfile: "source_functions/config/genotyping_qc_phasing.config.yaml"
 
 os.makedirs("log/slurm_out/joint_genotyping", exist_ok = True)
 
 # Make log directories if they don't exist
-for x in expand("log/slurm_out/joint_genotyping/{rules}", rules = config['rules']):
+for x in expand("log/slurm_out/joint_genotyping/{rules}", rules = config['joint_genotyping_rules']):
     os.makedirs(x, exist_ok = True)
 
 os.makedirs("log/psrecord/joint_genotyping", exist_ok = True)
 
-for x in expand("log/psrecord/joint_genotyping/{rules}", rules = config['rules']):
+for x in expand("log/psrecord/joint_genotyping/{rules}", rules = config['joint_genotyping_rules']):
     os.makedirs(x, exist_ok = True)
 
 # Make temp directories if they don't exist
-for x in expand("temp/joint_genotyping/{rules}", rules = config['rules']):
+for x in expand("temp/joint_genotyping/{rules}", rules = config['joint_genotyping_rules']):
     os.makedirs(x, exist_ok = True)
 
 rule joint_genotyping_all:

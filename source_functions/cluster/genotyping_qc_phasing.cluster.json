@@ -38,28 +38,14 @@
     "variant_filtration":
     {
         "c" : 3,
-        "t": "48:00:00",
-        "mem" : 20G
+        "t": "36:00:00",
+        "mem" : 10G
     },
     "remove_failed":
     {
         "c" : 8,
         "t": "12:00:00",
         "mem" : 16G
-    },
-    "concat_list":
-    {
-        "c" : 1,
-        "mem" : 1G,
-        "t": "1:00:00",
-        "p" : "General,Lewis,BioCompute,htc4,hpc5"
-    },
-    "concat":
-    {
-        "mail-type" : "END,FAIL",
-        "c" : 7,
-        "t": "48:00:00",
-        "mem" : 150G
     },
     "collect_metrics":
     {
@@ -82,6 +68,7 @@
         "c" : 1,
         "mem" : 1G,
         "t": "0:10:00",
+        "o": "log/slurm_out/find_dups/{rule}/{wildcards}.%j.out"
     },
     "extract_850K":
     {
@@ -89,31 +76,36 @@
         "p" : "BioCompute,htc4,hpc5",
         "t": "12:00:00",
         "mem" : 24G,
-        "mail-type" : "END,FAIL"
+        "mail-type" : "END,FAIL",
+        "o": "log/slurm_out/find_dups/{rule}/{wildcards}.%j.out"
     },
     "index_850K":
     {
         "mem" : 24G,
         "c" : 4,
-        "t": "12:00:00"
+        "t": "12:00:00",
+        "o": "log/slurm_out/find_dups/{rule}/{wildcards}.%j.out"
     },
     "make_bed":
     {
         "mem" : 24G,
         "c" : 12,
-        "t": "12:00:00"
+        "t": "12:00:00",
+        "o": "log/slurm_out/find_dups/{rule}/{wildcards}.%j.out"
     },
     "merge_bed":
     {
         "mem" : 72G,
         "c" : 36,
-        "t": "12:00:00"
+        "t": "12:00:00",
+        "o": "log/slurm_out/find_dups/{rule}/{wildcards}.%j.out"
     },
     "find_dups":
     {
         "mail-type" : "END,FAIL",
         "mem" : 24G,
         "c" : 12,
-        "t": "12:00:00"
+        "t": "12:00:00",
+        "o": "log/slurm_out/find_dups/{rule}/{wildcards}.%j.out"
     }
 }
