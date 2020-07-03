@@ -46,7 +46,7 @@ variant_filtration_xmx: 20
 
 variant_filter: "-filter 'QD < 7.0' --filterName 'QD7' -filter 'FS > 60.0' --filterName 'FS60' -filter 'MQ < 15.0' --filterName 'MQ15' --genotypeFilterExpression 'DP < 8.0' --genotypeFilterName 'DP8' --genotypeFilterExpression 'GQ < 20.0' --genotypeFilterName 'GQ20'"
 
-collect_metrics_nt: 6
+collect_metrics_nt: 8
 
 collect_metrics_gc: 2
 

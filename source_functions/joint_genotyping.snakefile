@@ -25,7 +25,7 @@ for x in expand("temp/joint_genotyping/{rules}", rules = config['joint_genotypin
 
 rule joint_genotyping_all:
 	input:
-		expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz", chr = config['chr']), expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_detail_metrics", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics.{chr}.variant_calling_summary_metrics", chr = config['chr']), expand("data/derived_data/joint_genotyping/validate_variants/validate_variants.{chr}.txt", chr = config['chr'])
+		expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz", chr = config['chr']), expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_detail_metrics", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_summary_metrics", chr = config['chr']), expand("data/derived_data/joint_genotyping/validate_variants/validate_variants.{chr}.txt", chr = config['chr'])
 
 rule combine_gvcfs:
 # Can't parallelize CombineGVCFs!!!
@@ -177,7 +177,7 @@ rule collect_metrics:
 		prefix = "data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}"
 	output:
 		detail = "data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_detail_metrics",
-		summary = "data/derived_data/joint_genotyping/collect_metrics.{chr}.variant_calling_summary_metrics"
+		summary = "data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_summary_metrics"
 	shell:
 		"""
 		module load {params.picard_module}

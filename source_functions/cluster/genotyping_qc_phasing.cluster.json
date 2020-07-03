@@ -50,7 +50,7 @@
     "collect_metrics":
     {
         "mail-type" : "END,FAIL",
-        "c" : 8,
+        "c" : 10,
         "t": "12:00:00",
         "mem" : 24G
     },
@@ -58,7 +58,7 @@
     {
         "mail-type" : "END,FAIL",
         "c" : 3,
-        "t": "2:00:00",
+        "t": "12:00:00",
         "p" : "General,Lewis,BioCompute,htc4,hpc5",
         "mem" : 12G,
         "o": "data/derived_data/joint_genotyping/validate_variants/validate_variants.{wildcards.chr}.txt"
