@@ -74,23 +74,23 @@
     {
         "c" : 1,
         "p" : "BioCompute,htc4,hpc5",
-        "t": "12:00:00",
-        "mem" : 24G,
+        "t": "6:00:00",
+        "mem" : 3G,
         "mail-type" : "END,FAIL",
         "o": "log/slurm_out/find_dups/{rule}/{wildcards}.%j.out"
     },
     "index_850K":
     {
-        "mem" : 24G,
+        "mem" : 3G,
         "c" : 4,
-        "t": "12:00:00",
+        "t": "1:00:00",
         "o": "log/slurm_out/find_dups/{rule}/{wildcards}.%j.out"
     },
     "make_bed":
     {
-        "mem" : 24G,
+        "mem" : 3G,
         "c" : 12,
-        "t": "12:00:00",
+        "t": "1:00:00",
         "o": "log/slurm_out/find_dups/{rule}/{wildcards}.%j.out"
     },
     "merge_bed":
