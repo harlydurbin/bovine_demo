@@ -27,3 +27,6 @@ scratch.Rmd
 *.variant_calling_detail_metrics
 *.variant_calling_summary_metrics
 *.targets
+*.bed
+*.bim
+*.fam

@@ -14,7 +14,7 @@ sample_metadata <-
   read_csv(here::here("data/derived_data/coverage/coverage.sample_metadata.csv"))
 
 dups <-
-  read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.con")) %>% 
+  read_table2(here::here("data/derived_data/joint_genotyping/find_dups/find_dups.con")) %>% 
   janitor::clean_names() %>% 
   select(-contains("fid")) 
 

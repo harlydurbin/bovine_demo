@@ -1,4 +1,4 @@
-# snakemake -s source_functions/find_dups.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/genotyping_qc_phasing.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200703.2.find_dups.log
+# snakemake -s source_functions/find_dups.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/genotyping_qc_phasing.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200704.find_dups.log
 
 # include path is relative to the path of this file
 include: "joint_genotyping.snakefile"
@@ -76,10 +76,11 @@ rule make_bed:
 		psrecord = "log/psrecord/joint_genotyping/make_bed/make_bed.{chr}.log"
 	output:
 		chr_bed = "data/derived_data/joint_genotyping/find_dups/make_bed.{chr}.bed"
+	# Need -set-missing-var-ids in order to avoid SNP id errors!
 	shell:
 		"""
 		module load plink
-		psrecord "plink --vcf {input.subset_file} --make-bed --double-id --cow --threads {params.nt} --out {params.prefix}" --log {params.psrecord} --include-children --interval 5
+		psrecord "plink --vcf {input.subset_file} --make-bed --double-id --cow -set-missing-var-ids @:#\$1\$2 --threads {params.nt} --out {params.prefix}" --log {params.psrecord} --include-children --interval 5
 		"""
 
 rule merge_list:
@@ -89,14 +90,14 @@ rule merge_list:
 	params:
 		prefixes = lambda wildcards: expand("data/derived_data/joint_genotyping/find_dups/make_bed.{chr}\n", chr = list(range(1,30)))
 	output:
-		merge_list = "data/derived_data/find_dups/850K_merge_list.txt"
+		merge_list = "data/derived_data/joint_genotyping/find_dups/850K_merge_list.txt"
 	shell:
 		"echo -e '{params.prefixes}' | sed 's/^ *//g' > {output.merge_list}"
 
 rule merge_bed:
 	input:
 		chr_bed = expand("data/derived_data/joint_genotyping/find_dups/make_bed.{chr}.bed", chr =  list(range(1,30))),
-		merge_list = "data/derived_data/find_dups/850K_merge_list.txt"
+		merge_list = "data/derived_data/joint_genotyping/find_dups/850K_merge_list.txt"
 	params:
 		prefix = "data/derived_data/joint_genotyping/find_dups/merge_bed",
 		nt = config['merge_bed_nt'],
@@ -106,7 +107,7 @@ rule merge_bed:
 	shell:
 		"""
 		module load plink
-		psrecord "plink --merge_list {input.merge_list} --make-bed --double-id --cow --threads {params.nt} --out {params.prefix}" --log {params.psrecord} --include-children --interval 5
+		psrecord "plink --merge-list {input.merge_list} --make-bed --double-id --cow --threads {params.nt} --out {params.prefix}" --log {params.psrecord} --include-children --interval 5
 		"""
 
 rule find_dups:
@@ -114,7 +115,7 @@ rule find_dups:
 		bed = "data/derived_data/joint_genotyping/find_dups/merge_bed.bed"
 	params:
 		king_path = config['king_path'],
-		prefix = "data/derived_data/joint_genotyping/find_dups/merge_bed",
+		prefix = "data/derived_data/joint_genotyping/find_dups/find_dups",
 		nt = config['king_nt'],
 		psrecord = "log/psrecord/joint_genotyping/find_dups/find_dups.log"
 	output:

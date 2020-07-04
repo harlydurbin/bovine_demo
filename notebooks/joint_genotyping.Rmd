@@ -23,25 +23,30 @@ library(tidyr)
 # Setup
 
 ```{r}
-variant_detail <-
-  read_table2(here::here("data/derived_data/joint_genotyping/bovine_demo.metrics.variant_calling_detail_metrics"), skip = 6) %>% 
+var_detail <-
+  c(1:29, "X", "Y") %>% 
+  purrr::set_names() %>% 
+  purrr::map_dfr(~ read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{.x}.variant_calling_detail_metrics")), skip = 6, col_types = cols(.default = "c")), .id = "chr") %>% 
   janitor::clean_names() %>% 
   rename(international_id = sample_alias) %>% 
   # Removed indels, removed multi-allelics, physically removed SNPs that failed filtration
   select(-contains("indels"), -contains("ins_del"), -contains("multiallelic"), -filtered_snps) %>% 
   left_join(read_csv(here::here("data/derived_data/sample_metadata.csv")) %>% 
               select(international_id, lab_id, population, species, avg_coverage)) %>% 
+  mutate_at(.vars = vars(het_homvar_ratio:num_singletons), ~ as.numeric(.)) %>% 
   filter(!is.na(population)) %>% 
-  select(population, avg_coverage, everything())
+  select(chr, population, avg_coverage, everything())
 ```
 
 # Summary
 
 ```{r}
-read_table2(here::here("data/derived_data/joint_genotyping/bovine_demo.metrics.variant_calling_summary_metrics"), skip = 6) %>% 
+c(1:29, "X", "Y") %>% 
+  purrr::set_names() %>% 
+  purrr::map_dfr(~ read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{.x}.variant_calling_summary_metrics")), skip = 6), .id = "chr") %>% 
   janitor::clean_names() %>% 
-  select(-contains("indels"), -contains("ins_del"), -contains("multiallelic"), -filtered_snps) %>% 
-  mutate_at(c("total_snps", "num_in_db_snp", "novel_snps", "num_singletons"), ~ scales::comma(.)) 
+  select(-contains("indels"), -contains("ins_del"), -contains("multiallelic"), -filtered_snps) # %>% 
+ # mutate_at(c("total_snps", "num_in_db_snp", "novel_snps", "num_singletons"), ~ scales::comma(.)) 
 ```
 
 ```{r}
