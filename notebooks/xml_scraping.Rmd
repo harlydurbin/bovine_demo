@@ -108,6 +108,7 @@ mu_ids <-
   pull(id)
 ```
 
+
 ## Import XML file
 
 ```{r, eval=FALSE}
@@ -342,6 +343,8 @@ flattened %<>%
 
 # Join flattened XML to processed genomes on hand
 
+* Find a lab ID 
+
 ```{r}
 joined <-
   flattened %>%
@@ -390,7 +393,6 @@ joined <-
   )) %>% 
   select(-Sex, -na)
 ```
-
 
 # Tidy population labels in `joined`
 
@@ -519,38 +521,66 @@ joined %<>%
 
 # 2020/06/10 ID snafu
 
-* Need to remove information for samples that I now have metadata for but didn't make it into genotyping
-* Need to create a list of samples to be removed (genotyped, but since found out they're bad)
+* List of samples that were actually genotyped
 
 ```{r}
-genotyped <- 
-  read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.idepth")) %>% 
-  pull(1)
+genotyped <-
+  read_table2(here::here("data/derived_data/bovine_demo.international_id.txt"), col_names = "international_id") %>% 
+  left_join(animal_table %>% 
+              select(international_id, lab_id = Lab_ID)) %>% 
+  mutate(
+    lab_id = 
+      case_when(
+        international_id == "A2494_Yenisei_River" ~ 118017,
+        international_id == "AANUSAU000006639770" ~ 91166,
+        international_id == "CPC98_Bprimigenius_EnglandDerbyshire_5936" ~ 185723,
+        international_id == "RANUSAM000000802442" ~ 91171,
+        international_id == "UMCUSAF000000118766" ~ 11876,
+        international_id == "UMCUSAM000000020076" ~ 20076,
+        international_id == "UMCUSAM000000020079" ~ 20079,
+        international_id == "UMCUSAM000000020098" ~ 20098,
+        international_id == "UMCUSAM000000020136" ~ 20136,
+        TRUE ~ as.numeric(lab_id)
+      ))
 ```
 
+* How many were genotyped but didn't make it into metadata?
+
+```{r}
+genotyped %>% 
+  filter(!lab_id %in% joined$lab_id)
+
+```
+
+## Modify metadata to samples that were actually genotyped
+
+```{r}
+joined %<>% 
+  # Only keep if was genotyped
+  filter(lab_id %in% genotyped$lab_id) %>% 
+  full_join(genotyped) %>% 
+  group_by(international_id) %>% 
+  # If international_matches up to multiple lab_id, use the entry with the most information
+  arrange(population, bio_sample) %>% 
+  slice(1) %>% 
+  ungroup()
+
+```
+
+## List of samples to be removed from genotyped set
+
+```{r}
+joined %>% 
+  filter(is.na(population)) %>% 
+  select(lab_id, international_id) %>% 
+  write_csv(here::here("data/derived_data/joint_genotyping/remove_unknown.csv"))
+```
 
 ```{r}
 joined %<>%
-  left_join(animal_table %>%
-              select(lab_id = Lab_ID, international_id) %>%
-              distinct()) %>% 
-  mutate(
-    international_id = 
-      case_when(
-        lab_id == 20076 ~ "UMCUSAM000000020076",
-        lab_id == 20079 ~ "UMCUSAM000000020079",
-        lab_id == 20098 ~ "UMCUSAM000000020098",
-        lab_id == 20136 ~ "UMCUSAM000000020136",
-        lab_id == 185723 ~ "CPC98_Bprimigenius_EnglandDerbyshire_5936",
-        lab_id == 118017 ~ "A2494_Yenisei_River", 
-        lab_id == 91166 ~ "AANUSAU000006639770", 
-        lab_id == 91171 ~ "RANUSAM000000802442", 
-        lab_id == 118766 ~ "UMCUSAF000000118766",
-        TRUE ~ international_id
-      )
-  ) %>% 
-  filter(international_id %in% genotyped) 
+  filter(!is.na(population))
 ```
+
 
 # Nest metadata columns
 

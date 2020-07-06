@@ -227,4 +227,9 @@ sorted %>%
   tally(sort = TRUE) 
 ```
 
+```{r}
+sorted %>% 
+  group_by(population) %>% 
+  tally(sort = TRUE)
+```
 

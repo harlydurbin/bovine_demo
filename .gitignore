@@ -20,6 +20,7 @@ data/derived_data/sample_metadata.csv
 data/derived_data/xml_scraping/*
 data/derived_data/categorizing/*
 data/derived_data/coverage/*
+data/derived_data/joint_genotyping/remove_unknown.csv
 *.tbi
 *.gz
 scratch.Rmd
@@ -31,3 +32,4 @@ scratch.Rmd
 *.bim
 *.fam
 *.nosex
+*.DS_Store

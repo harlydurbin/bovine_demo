@@ -16,9 +16,14 @@ library(dplyr)
 library(ggplot2)
 library(purrr)
 library(tidyr)
+library(tidylog)
 ```
 
 # Notes & questions
+
+* [CollectVariantCallingMetrics](https://broadinstitute.github.io/picard/picard-metric-definitions.html#CollectVariantCallingMetrics.VariantCallingDetailMetrics)
+    + HET_HOMVAR_RATIO: (count of hets)/(count of homozygous non-ref) for this sample
+    + SNP_REFERENCE_BIAS: The rate at which reference bases are observed at ref/alt heterozygous SNP sites.
 
 # Setup
 
@@ -38,10 +43,9 @@ var_detail <-
   select(chr, population, avg_coverage, everything())
 ```
 
-# Summary
-
 ```{r}
-c(1:29, "X", "Y") %>% 
+var_sum <-
+  c(1:29, "X", "Y") %>% 
   purrr::set_names() %>% 
   purrr::map_dfr(~ read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{.x}.variant_calling_summary_metrics")), skip = 6), .id = "chr") %>% 
   janitor::clean_names() %>% 
@@ -49,8 +53,27 @@ c(1:29, "X", "Y") %>%
  # mutate_at(c("total_snps", "num_in_db_snp", "novel_snps", "num_singletons"), ~ scales::comma(.)) 
 ```
 
+# Variant calling summary metrics
+
 ```{r}
-variant_detail %>% 
+var_sum
+```
+
+# Variant calling detail metrics
+
+```{r}
+var_detail %>% 
+  
+```
+
+```{r}
+var_detail %>% 
+  arrange(desc(het_homvar_ratio))
+```
+
+
+```{r}
+var_detail %>% 
   group_by(population) %>% 
   filter(n() > 50) %>%
   ungroup() %>% 
@@ -59,5 +82,60 @@ variant_detail %>%
   tally() %>% 
   ungroup() %>% 
   tidyr::pivot_wider(names_from = filter, values_from = n)
+```
+
+# Duplicate identification
+
+```
+srun -c 12 --mem=24G plink --vcf data/derived_data/joint_genotyping/select_variants/select_variants.28.vcf.gz --make-bed --double-id --cow -set-missing-var-ids @:#\$1\$2 --threads 12 --out select_variants.28 &> select_variants.28.plink.log
+srun -c 12 --mem=24G source_functions/king -b select_variants.28.bed --duplicate --prefix select_variants.28 --sexchr 30 --cpus 12
+
+srun -c 12 --mem=24G plink --vcf data/derived_data/joint_genotyping/select_variants/select_variants.29.vcf.gz --make-bed --double-id --cow -set-missing-var-ids @:#\$1\$2 --threads 12 --out select_variants.29 &> select_variants.29.plink.log
+srun -c 12 --mem=24G source_functions/king -b select_variants.29.bed --duplicate --prefix select_variants.29 --sexchr 30 --cpus 12
+```
+
+```{r}
+c(28, 29) %>% 
+  purrr::set_names() %>% 
+  purrr::map_dfr(~ read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/find_dups/select_variants.{.x}.con"))), .id = "chr") %>% 
+  janitor::clean_names() %>% 
+  select(-contains("fid")) %>% 
+  arrange(id1, id2) %>% 
+  # Remove only if identified as a duplicate on both chr28 and chr29
+  group_by(id1, id2) %>% 
+  filter(n_distinct(chr) == 2)
+```
+
+
+# Rename samples from international IDs to lab IDs
+
+```{r}
+animal_table <-
+  read_rds("~/googledrive/research_extension/hair_shed/data/derived_data/animal_table.rds")
+```
+
+```{r}
+source(here::here("source_functions/coalesce_join.R"))
+```
+
+I keep running into issues with matching up metadata based on international IDs that have been changed in the animal table since genotype calling, so I'm renaming all samples to their lab ID.
+
+`bcftools query -l data/derived_data/joint_genotyping/remove_failed/remove_failed.28.vcf.gz > data/derived_data/bovine_demo.international_id.txt`
+
+```{r}
+read_table2(here::here("data/derived_data/bovine_demo.international_id.txt"), col_names = "international_id") %>% 
+  left_join(read_csv(here::here("data/derived_data/sample_metadata.csv")) %>% 
+              select(lab_id, international_id)) %>% 
+  left_join(animal_table %>% 
+              select(international_id, Lab_ID)) %>% 
+  arrange(international_id) %>% 
+  mutate(lab_id = if_else(is.na(lab_id), as.numeric(Lab_ID), lab_id)) %>% 
+  select(international_id, lab_id) %>% 
+  distinct() %>% 
+  
+  group_by(international_id) %>% 
+  arrange(lab_id) %>% 
+  slice(1) %>% 
+  ungroup()
 ```
 

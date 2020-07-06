@@ -15,7 +15,7 @@ library(tidyr)
 library(readr)
 library(ggplot2)
 
-source(here::here("source_functions/qc_eval_functions.R"))
+source(here::here("source_functions/filter_eval_functions.R"))
 ```
 
 # Notes & questions
