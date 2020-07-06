@@ -68,4 +68,8 @@ merge_bed_nt: 36
 
 king_nt: 12
 
+#### reheader ####
+
+reheader_rules: ["remove_samples"]
+
 #### phasing ####

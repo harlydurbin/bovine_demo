@@ -10,7 +10,8 @@ library(tidyr)
 
 sample_metadata <- read_csv(here::here("data/derived_data/metadata/coverage/coverage.sample_metadata.csv"))
 
-c(28, 29) %>% 
+dups <-
+  c(28, 29) %>% 
   purrr::set_names() %>% 
   purrr::map_dfr(~ read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/find_dups/select_variants.{.x}.con"))), .id = "chr") %>% 
   janitor::clean_names() %>% 
@@ -29,5 +30,12 @@ c(28, 29) %>%
   mutate_at(vars(contains("cov")), ~ replace_na(., 0)) %>% 
   mutate(drop = if_else(cov1 > cov2 , id2, id1)) %>% 
   select(drop) %>% 
+  distinct() 
+
+# This is lazy but couldn't figure out how to programatically remove these samples that appear in both id1 and id2
+multiples <- tibble::tibble(drop = c("UMCUSAM000000196764", "UMCUSAU000000194604", "HOLGBRM000000598172"))
+
+dups %>% 
+  bind_rows(multiples) %>% 
   distinct() %>% 
-  write_delim(here::here("data/derived_data/joint_genotyping/find_dups/drop_dups.txt"), col_names = FALSE)
+  write_tsv(here::here("data/derived_data/joint_genotyping/find_dups/drop_dups.txt"), col_names = FALSE)

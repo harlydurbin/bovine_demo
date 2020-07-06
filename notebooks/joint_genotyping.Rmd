@@ -68,13 +68,48 @@ var_sum
 # Variant calling detail metrics
 
 ```{r}
-var_detail %>% 
-  arrange(desc(het_homvar_ratio))
+var_detail_wg <-
+  var_detail %>%
+  group_by(international_id, lab_id, avg_coverage, population, species) %>%
+  summarise_at(vars(
+    het_homvar_ratio,
+    pct_dbsnp,
+    dbsnp_titv,
+    novel_titv,
+    snp_reference_bias
+  ),
+  mean, na.rm = TRUE) %>%
+  ungroup() %>%
+  full_join(
+    var_detail %>%
+      group_by(international_id, lab_id, avg_coverage, population, species) %>%
+      summarise_at(
+        vars(
+          total_snps,
+          num_in_db_snp,
+          novel_snps,
+          num_singletons
+        ),
+        sum
+      ) %>%
+      ungroup()
+  )
+
+  
+  
+```
+
+```{r}
+var_detail_wg %>% 
+  arrange(desc(novel_titv))
+
+var_detail_wg %>% 
+  filter(population == "east african zebu")
 ```
 
 
 ```{r}
-var_detail %>% 
+var_detail_wg %>% 
   group_by(population) %>% 
   filter(n() > 50) %>%
   ungroup() %>% 
@@ -85,4 +120,20 @@ var_detail %>%
   tidyr::pivot_wider(names_from = filter, values_from = n)
 ```
 
+
+
+```{r}
+sample_metadata %>% 
+  filter(5 >= avg_coverage) %>% 
+  filter(species %in% c("bos taurus", "bos indicus", "composite")) %>% 
+  select(international_id)
+
+```
+
+
+
+
+```{r}
+
+```
 

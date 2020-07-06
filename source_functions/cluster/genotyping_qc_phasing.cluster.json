@@ -114,5 +114,12 @@
         "c" : 12,
         "t": "12:00:00",
         "o": "log/slurm_out/find_dups/{rule}/{wildcards}.%j.out"
-    }
+    },
+    "remove_samples":
+    {
+        "c" : 8,
+        "t": "12:00:00",
+        "mem" : 16G,
+        "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out"
+    },
 }
