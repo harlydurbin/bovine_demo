@@ -523,6 +523,8 @@ joined %<>%
 
 * List of samples that were actually genotyped
 
+`bcftools query -l data/derived_data/joint_genotyping/remove_failed/remove_failed.28.vcf.gz > data/derived_data/bovine_demo.international_id.txt`
+
 ```{r}
 genotyped <-
   read_table2(here::here("data/derived_data/bovine_demo.international_id.txt"), col_names = "international_id") %>% 
@@ -607,7 +609,7 @@ joined %<>%
 ```
 
 ```{r}
-write_rds(joined, path = here::here("data/derived_data/xml_scraping/scraped.sample_metadata.rds"))
+write_rds(joined, path = here::here("data/derived_data/metadata/xml_scraping/scraped.sample_metadata.rds"))
 
 ```
 

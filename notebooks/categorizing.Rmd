@@ -58,7 +58,7 @@ library(tidylog)
 
 ```{r}
 sorted <-  
-  read_rds(here::here("data/derived_data/xml_scraping/scraped.sample_metadata.rds")) %>%
+  read_rds(here::here("data/derived_data/metadata/xml_scraping/scraped.sample_metadata.rds")) %>%
   mutate(
     region = 
       case_when(
@@ -206,7 +206,7 @@ sorted %>%
 ```{r}
 sorted %>% 
   select(lab_id, international_id, sex, bio_sample, sra, population, region, continent, species, owner, geo_data, metadata) %>% 
-  write_rds(here::here("data/derived_data/categorizing/sorted.sample_metadata.rds"))
+  write_rds(here::here("data/derived_data/metadata/categorizing/sorted.sample_metadata.rds"))
 ```
 
 ```{r}

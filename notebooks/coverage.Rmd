@@ -22,13 +22,13 @@ cov_detail <-
   purrr::map_dfr(~ read_table2(.x, col_names = TRUE), .id = "lab_id") %>% 
   dplyr::mutate(lab_id = as.numeric(lab_id))
 
-write_rds(cov_detail, here::here("data/derived_data/coverage/cov_detail.rds"))
+write_rds(cov_detail, here::here("data/derived_data/metadata/coverage/cov_detail.rds"))
 
 ```
 
 ```{r, message = FALSE, warning = FALSE}
 cov_detail <- 
-  read_rds(here::here("data/derived_data/coverage/cov_detail.rds"))
+  read_rds(here::here("data/derived_data/metadata/coverage/cov_detail.rds"))
 ```
 
 ```{r}
@@ -38,7 +38,7 @@ animal_table <-
 
 ```{r}
 sorted <- 
-  read_rds(here::here("data/derived_data/categorizing/sorted.sample_metadata.rds"))
+  read_rds(here::here("data/derived_data/metadata/categorizing/sorted.sample_metadata.rds"))
 ```
 
 ```{r}
@@ -58,7 +58,7 @@ cov_detail %>%
   ungroup() %>% 
   right_join(sorted) %>% 
   select(lab_id, international_id, sex, bio_sample, population, region, continent, species, avg_coverage, owner) %>% 
-  write_csv(here::here("data/derived_data/coverage/coverage.sample_metadata.csv"), na = "")
+  write_csv(here::here("data/derived_data/metadata/coverage/coverage.sample_metadata.csv"), na = "")
 ```
 
 

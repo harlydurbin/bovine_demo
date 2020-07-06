@@ -16,10 +16,10 @@ fpconfig/*
 log/*
 data/derived_data/joint_genotyping/genotyping_cohorts/*
 data/raw_data/*
-data/derived_data/sample_metadata.csv
-data/derived_data/xml_scraping/*
-data/derived_data/categorizing/*
-data/derived_data/coverage/*
+data/derived_data/metadata/sample_metadata.csv
+data/derived_data/metadata/xml_scraping/*
+data/derived_data/metadata/categorizing/*
+data/derived_data/metadata/coverage/*
 data/derived_data/joint_genotyping/remove_unknown.csv
 *.tbi
 *.gz
