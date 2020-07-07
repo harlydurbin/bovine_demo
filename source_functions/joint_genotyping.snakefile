@@ -25,7 +25,7 @@ for x in expand("temp/joint_genotyping/{rules}", rules = config['joint_genotypin
 
 rule joint_genotyping_all:
 	input:
-		expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz", chr = config['chr']), expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_detail_metrics", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_summary_metrics", chr = config['chr']), expand("data/derived_data/joint_genotyping/validate_variants/validate_variants.{chr}.txt", chr = config['chr'])
+		expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz", chr = config['chr']), expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi", chr = config['chr']), expand("data/derived_data/joint_genotyping/validate_variants/validate_variants.{chr}.txt", chr = config['chr'])
 
 rule combine_gvcfs:
 # Can't parallelize CombineGVCFs!!!
@@ -158,30 +158,6 @@ rule remove_failed:
 		"""
 		module load {params.java_module}
 		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -jar {params.gatk_path} -L {params.chr} -T SelectVariants -nt {params.nt} -R {params.ref_genome} -ef --removeUnusedAlternates -env -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 5
-		"""
-
-rule collect_metrics:
-	input:
-		vcf = "data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz",
-		tbi = "data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi"
-	params:
-		picard_module = config['picard_module'],
-		java_tmp = "temp/joint_genotyping/collect_metrics/{chr}",
-		gc_threads = config['collect_metrics_gc'],
-		xmx = config['collect_metrics_xmx'],
-		picard_path = config['picard_path'],
-		truth_file = config['truth_file'],
-		ref_genome = config['ref_genome'],
-		nt = config['collect_metrics_nt'],
-		psrecord = "log/psrecord/joint_genotyping/collect_metrics/collect_metrics.{chr}.log",
-		prefix = "data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}"
-	output:
-		detail = "data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_detail_metrics",
-		summary = "data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_summary_metrics"
-	shell:
-		"""
-		module load {params.picard_module}
-		psrecord "java -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.picard_path} CollectVariantCallingMetrics TMP_DIR={params.java_tmp} INPUT={input.vcf} OUTPUT={params.prefix} DBSNP={params.truth_file} R={params.ref_genome} THREAD_COUNT={params.nt}" --log {params.psrecord} --include-children --interval 5
 		"""
 
 rule validate_variants:

@@ -61,7 +61,6 @@ cov_detail %>%
   write_csv(here::here("data/derived_data/metadata/coverage/coverage.sample_metadata.csv"), na = "")
 ```
 
-
 # Incorrect sex issues?
 
 ```{r}

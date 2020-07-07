@@ -47,13 +47,6 @@
         "t": "12:00:00",
         "mem" : 16G
     },
-    "collect_metrics":
-    {
-        "mail-type" : "END,FAIL",
-        "c" : 10,
-        "t": "12:00:00",
-        "mem" : 24G
-    },
     "validate_variants":
     {
         "mail-type" : "END,FAIL",
@@ -122,7 +115,15 @@
         "mem" : 16G,
         "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out"
     },
-    "samples_list":
+    "collect_metrics":
+    {
+        "mail-type" : "END,FAIL",
+        "c" : 10,
+        "t": "12:00:00",
+        "mem" : 24G,
+        "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out"
+    },
+    "sample_list":
     {
         "c" : 1,
         "t": "00:10:00",
@@ -130,7 +131,7 @@
         "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out",
         "p" : "General,Lewis,BioCompute,htc4,hpc5"
     },
-    "samples_key":
+    "sample_key":
     {
         "c" : 1,
         "t": "00:10:00",
@@ -140,12 +141,12 @@
     },
     "reheader":
     {
-        "c" : 4,
+        "c" : 1,
         "t": "12:00:00",
         "mem" : 16G,
         "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out"
     },
-    "index_850K":
+    "index_reheader":
     {
         "mem" : 3G,
         "c" : 1,

@@ -28,9 +28,8 @@ library(tidylog)
 # Setup
 
 ```{r}
-sample_metadata <- read_csv(here::here("data/derived_data/metadata/coverage/coverage.sample_metadata.csv"))
+sample_metadata <- read_csv(here::here("data/derived_data/metadata/bovine_demo.sample_metadata.csv"))
 ```
-
 
 ```{r}
 var_detail <-
@@ -41,31 +40,11 @@ var_detail <-
   rename(international_id = sample_alias) %>% 
   # Removed indels, removed multi-allelics, physically removed SNPs that failed filtration
   select(-contains("indels"), -contains("ins_del"), -contains("multiallelic"), -filtered_snps) %>% 
-  left_join(sample_metadata %>% 
+  right_join(sample_metadata %>% 
               select(international_id, lab_id, population, species, avg_coverage)) %>% 
-  filter(!is.na(lab_id)) %>% 
   mutate_at(.vars = vars(het_homvar_ratio:num_singletons), ~ as.numeric(.)) %>% 
-  filter(!is.na(population)) %>% 
   select(chr, population, avg_coverage, everything())
 ```
-
-```{r}
-var_sum <-
-  c(1:29, "X", "Y") %>% 
-  purrr::set_names() %>% 
-  purrr::map_dfr(~ read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{.x}.variant_calling_summary_metrics")), skip = 6), .id = "chr") %>% 
-  janitor::clean_names() %>% 
-  select(-contains("indels"), -contains("ins_del"), -contains("multiallelic"), -filtered_snps) # %>% 
- # mutate_at(c("total_snps", "num_in_db_snp", "novel_snps", "num_singletons"), ~ scales::comma(.)) 
-```
-
-# Variant calling summary metrics
-
-```{r}
-var_sum
-```
-
-# Variant calling detail metrics
 
 ```{r}
 var_detail_wg <-
@@ -83,30 +62,42 @@ var_detail_wg <-
   full_join(
     var_detail %>%
       group_by(international_id, lab_id, avg_coverage, population, species) %>%
-      summarise_at(
-        vars(
-          total_snps,
-          num_in_db_snp,
-          novel_snps,
-          num_singletons
+      summarise_at(vars(
+        total_snps,
+        num_in_db_snp,
+        novel_snps,
+        num_singletons
         ),
-        sum
-      ) %>%
+        sum) %>%
       ungroup()
-  )
+    )
 
-  
-  
 ```
+
+```{r}
+var_sum <-
+  c(1:29, "X", "Y") %>% 
+  purrr::set_names() %>% 
+  purrr::map_dfr(~ read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{.x}.variant_calling_summary_metrics")), skip = 6), .id = "chr") %>% 
+  janitor::clean_names() %>% 
+  select(-contains("indels"), -contains("ins_del"), -contains("multiallelic"), -filtered_snps) # %>% 
+ # mutate_at(c("total_snps", "num_in_db_snp", "novel_snps", "num_singletons"), ~ scales::comma(.)) 
+```
+
+# Variant calling summary metrics
+
+```{r}
+var_sum %>% 
+  summarise(sum(total_snps))
+```
+
+# Variant calling detail metrics
 
 ```{r}
 var_detail_wg %>% 
   arrange(desc(novel_titv))
 
-var_detail_wg %>% 
-  filter(population == "east african zebu")
 ```
-
 
 ```{r}
 var_detail_wg %>% 
@@ -121,19 +112,13 @@ var_detail_wg %>%
 ```
 
 
-
 ```{r}
 sample_metadata %>% 
-  filter(5 >= avg_coverage) %>% 
-  filter(species %in% c("bos taurus", "bos indicus", "composite")) %>% 
-  select(international_id)
+  filter(str_detect(population, "yak ")) %>% 
+  group_by(population) %>% 
+  tally()
 
-```
-
-
-
-
-```{r}
-
+sample_metadata %>% 
+  filter(population == "yak datong")
 ```
 

@@ -73,8 +73,6 @@ usage_summary(process = "ancient_preprocess", keyword = "merge_realigned")
 usage_facets(process = "ancient_preprocess", keyword = "merge_realigned")
 ```
 
-
-
 # `joint_genotyping`
 
 * ~ 2,900 multi-breed and multi-species *Bos* samples
@@ -144,76 +142,48 @@ usage_facets(process = "joint_genotyping", keyword = "remove_failed")
 
 * Run `Picard CollectVariantCallingMetrics` on chromosome files
 
-```{r,eval=FALSE}
+```{r}
 usage_summary(process = "joint_genotyping", keyword = "collect_metrics") 
 ```
 
-```{r, eval=FALSE}
+```{r}
 usage_facets(process = "joint_genotyping", keyword = "collect_metrics")
 ```
 
 ## `validate_variants`
 
-* Run `GATK Validate` on chromosome files
+* Run `GATK ValidateVariants` on chromosome files
 
-```{r,eval=FALSE}
+```{r}
 usage_summary(process = "joint_genotyping", keyword = "validate_variants") 
 ```
 
-```{r, eval=FALSE}
+```{r}
 usage_facets(process = "joint_genotyping", keyword = "validate_variants")
 ```
-# `find_dups`
 
-## `extract_850K`
+# `reheader`
 
-* Extract 850K marker set from each chromosome using `bcftools view`
+## `remove_samples`
+
+* Remove duplicate and low quality samples using `GATK SelectVariants`
+
+```{r}
+usage_summary(process = "joint_genotyping", keyword = "remove_samples") 
+```
+
+```{r}
+usage_facets(process = "joint_genotyping", keyword = "remove_samples")
+```
+
+## `reheader`
+
+* Rename samples from international_id --> lab_id using `bcftools reheader`
 
 ```{r,eval=FALSE}
-usage_summary(process = "joint_genotyping", keyword = "extract_850K") 
+usage_summary(process = "joint_genotyping", keyword = "reheader") 
 ```
 
 ```{r, eval=FALSE}
-usage_facets(process = "joint_genotyping", keyword = "extract_850K")
-```
-
-## `index_850K`
-
-```{r,eval=FALSE}
-usage_summary(process = "joint_genotyping", keyword = "index_850K") 
-```
-
-```{r, eval=FALSE}
-usage_facets(process = "joint_genotyping", keyword = "index_850K")
-```
-
-
-## `make_bed`
-
-```{r,eval=FALSE}
-usage_summary(process = "joint_genotyping", keyword = "make_bed") 
-```
-
-```{r, eval=FALSE}
-usage_facets(process = "joint_genotyping", keyword = "make_bed")
-```
-
-## `merge_bed`
-
-```{r,eval=FALSE}
-usage_summary(process = "joint_genotyping", keyword = "merge_bed") 
-```
-
-```{r, eval=FALSE}
-usage_facets(process = "joint_genotyping", keyword = "merge_bed")
-```
-
-## `find_dups`
-
-```{r,eval=FALSE}
-usage_summary(process = "joint_genotyping", keyword = "find_dups") 
-```
-
-```{r, eval=FALSE}
-usage_facets(process = "joint_genotyping", keyword = "find_dups")
+usage_facets(process = "joint_genotyping", keyword = "reheader")
 ```

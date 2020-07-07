@@ -24,7 +24,7 @@ r_module: "r/r-3.4.2"
 
 #### joint_genotyping ####
 
-joint_genotyping_rules: ["combine_gvcfs", "genotype_gvcfs_list", "genotype_gvcfs", "select_variants", "variant_filtration", "remove_failed", "collect_metrics", "validate_variants"]
+joint_genotyping_rules: ["combine_gvcfs", "genotype_gvcfs_list", "genotype_gvcfs", "select_variants", "variant_filtration", "remove_failed", "validate_variants"]
 
 cohort : ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33']
 
@@ -48,12 +48,6 @@ variant_filtration_xmx: 20
 
 variant_filter: "-filter 'QD < 7.0' --filterName 'QD7' -filter 'FS > 60.0' --filterName 'FS60' -filter 'MQ < 15.0' --filterName 'MQ15' --genotypeFilterExpression 'DP < 8.0' --genotypeFilterName 'DP8' --genotypeFilterExpression 'GQ < 20.0' --genotypeFilterName 'GQ20'"
 
-collect_metrics_nt: 8
-
-collect_metrics_gc: 2
-
-collect_metrics_xmx: 24
-
 validate_variants_gc: 2
 
 validate_variants_xmx: 12
@@ -72,8 +66,12 @@ king_nt: 12
 
 #### reheader ####
 
-reheader_rules: ["remove_samples", "sample_list", "sample_key", "reheader"]
+reheader_rules: ["remove_samples", "collect_metrics", "sample_list", "sample_key", "reheader"]
 
-reheader_nt: 4
+collect_metrics_nt: 8
+
+collect_metrics_gc: 2
+
+collect_metrics_xmx: 24
 
 #### phasing ####

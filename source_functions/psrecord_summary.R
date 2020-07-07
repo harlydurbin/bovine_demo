@@ -12,9 +12,9 @@ usage_summary <-
         col_names = c("time", "cpu_percent", "real_mb", "virtual_mb")
       ), .id = "file") %>%
       mutate(rule = keyword) %>%
-      summarise(max_time_minutes = max(time),
-                max_cpu_percent = max(cpu_percent),
-                max_mb = max(real_mb)) %>%
+      summarise(max_time_minutes = max(time, na.rm = TRUE),
+                max_cpu_percent = max(cpu_percent, na.rm = TRUE),
+                max_mb = max(real_mb, na.rm = TRUE)) %>%
       mutate(max_time_minutes = max_time_minutes / 60,
              max_gb = max_mb * 0.001)
     

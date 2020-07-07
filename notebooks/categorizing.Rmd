@@ -147,6 +147,8 @@ sorted %<>%
   mutate(
     species = 
       case_when(
+        #### ANCIENT ####
+        population == "ancient" ~ "bos primigenius",
         #### GRUNNIENS/MUTUS #####
         population %in% c("yak wild") ~ "bos mutus",
         population %in% c("yak unknown", "yak tianzhu white", "yak qtp", "yak datong", "yak jinchuan") ~ "bos grunniens",
@@ -168,8 +170,6 @@ sorted %<>%
         population == "south anatolian red" ~ "bos taurus",
         # east asia: china - bos taurus
         population %in% c("sichuan indigenous") ~ "bos taurus",       
-        #### ANCIENT ####
-        population == "ancient" ~ "bos primigenius",
         #### HYBRID ####
         # africa
         population %in% c("ankole", "boran") | str_detect(population, "fulani") ~ "composite",
