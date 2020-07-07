@@ -20,6 +20,8 @@ picard_path: "/cluster/software/picard/picard-2.7.1/picard.jar"
 
 king_path: "source_functions/king"
 
+r_module: "r/r-3.4.2"
+
 #### joint_genotyping ####
 
 joint_genotyping_rules: ["combine_gvcfs", "genotype_gvcfs_list", "genotype_gvcfs", "select_variants", "variant_filtration", "remove_failed", "collect_metrics", "validate_variants"]
@@ -70,6 +72,8 @@ king_nt: 12
 
 #### reheader ####
 
-reheader_rules: ["remove_samples"]
+reheader_rules: ["remove_samples", "sample_list", "sample_key", "reheader"]
+
+reheader_nt: 4
 
 #### phasing ####

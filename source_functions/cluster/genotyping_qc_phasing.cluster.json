@@ -122,4 +122,35 @@
         "mem" : 16G,
         "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out"
     },
+    "samples_list":
+    {
+        "c" : 1,
+        "t": "00:10:00",
+        "mem" : 1G,
+        "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "samples_key":
+    {
+        "c" : 1,
+        "t": "00:10:00",
+        "mem" : 1G,
+        "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "reheader":
+    {
+        "c" : 4,
+        "t": "12:00:00",
+        "mem" : 16G,
+        "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out"
+    },
+    "index_850K":
+    {
+        "mem" : 3G,
+        "c" : 1,
+        "t": "1:00:00",
+        "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    }
 }
