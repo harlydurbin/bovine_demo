@@ -16,7 +16,7 @@ Evaluation of computing resources used for each step of genotype calling can be 
     + Variants restricted to biallelic SNPs using `GATK SelectVariants`
     + Site-level and genotype-level filtering annotated using `GATK VariantFiltration`. Then failing sites removed and failing genotypes set to missing using `GATK SelectVariants`
 5. Summary stats for each chromosome generated using `Picard CollectVariantCallingMetrics` then evaluated in `source_functions/joint_genotyping.Rmd`, VCF format checked using `GATK ValidateVariants`
-6. Duplicate samples identified based on chromosome 28 and chromosome 29 variants using [`king`](http://people.virginia.edu/~wc9c/KING/manual.html) in `source_functions/find_dups.sh`. Duplicates and other low quality samples removed in `source_functions/reheader.snakemake`
+6. Duplicate samples identified based on chromosome 28 and chromosome 29 variants using [`king`](http://people.virginia.edu/~wc9c/KING/manual.html) in `source_functions/find_dups.sh`. Duplicates and other low quality samples + sites that are no longer variant after sample removal removed in `source_functions/reheader.snakemake`
 
 ## Phasing
 

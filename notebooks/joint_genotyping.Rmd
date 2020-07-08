@@ -84,11 +84,17 @@ var_sum <-
  # mutate_at(c("total_snps", "num_in_db_snp", "novel_snps", "num_singletons"), ~ scales::comma(.)) 
 ```
 
+```{r}
+writexl::write_xlsx(list("summary_chr" = var_sum,"detail_wg" = var_detail_wg, "detail_chr" = var_detail), here::here("data/derived_data/joint_genotyping/bovine_demo.variant_metrics.xlsx"))
+```
+
 # Variant calling summary metrics
 
 ```{r}
 var_sum %>% 
-  summarise(sum(total_snps))
+  summarise(`Total SNPs` = sum(total_snps)) %>% 
+  mutate(`Total SNPs` = scales::comma(`Total SNPs`))
+  
 ```
 
 # Variant calling detail metrics
@@ -97,28 +103,5 @@ var_sum %>%
 var_detail_wg %>% 
   arrange(desc(novel_titv))
 
-```
-
-```{r}
-var_detail_wg %>% 
-  group_by(population) %>% 
-  filter(n() > 50) %>%
-  ungroup() %>% 
-  mutate(filter = if_else(10 > avg_coverage, "FAIL", "PASS")) %>% 
-  group_by(population, filter) %>% 
-  tally() %>% 
-  ungroup() %>% 
-  tidyr::pivot_wider(names_from = filter, values_from = n)
-```
-
-
-```{r}
-sample_metadata %>% 
-  filter(str_detect(population, "yak ")) %>% 
-  group_by(population) %>% 
-  tally()
-
-sample_metadata %>% 
-  filter(population == "yak datong")
 ```
 
