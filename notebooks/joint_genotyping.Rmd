@@ -86,6 +86,15 @@ var_sum <-
 
 ```{r}
 writexl::write_xlsx(list("summary_chr" = var_sum,"detail_wg" = var_detail_wg, "detail_chr" = var_detail), here::here("data/derived_data/joint_genotyping/bovine_demo.variant_metrics.xlsx"))
+
+var_sum %>% 
+  write_csv(here::here("data/derived_data/joint_genotyping/bovine_demo.variant_metrics.summary_chr.csv"), na = "")
+
+var_detail_wg %>% 
+  write_csv(here::here("data/derived_data/joint_genotyping/bovine_demo.variant_metrics.summary_chr.detail_wg.csv"), na = "")
+
+var_detail %>% 
+  write_csv(here::here("data/derived_data/joint_genotyping/bovine_demo.variant_metrics.summary_chr.detail_chr.csv"), na = "")
 ```
 
 # Variant calling summary metrics

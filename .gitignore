@@ -20,7 +20,7 @@ data/derived_data/metadata/bovine_demo.sample_metadata.csv
 data/derived_data/metadata/xml_scraping/*
 data/derived_data/metadata/categorizing/*
 data/derived_data/metadata/coverage/*
-data/derived_data/joint_genotyping/remove_unknown.csv
+data/derived_data/joint_genotyping/*.csv
 *.tbi
 *.gz
 scratch.Rmd

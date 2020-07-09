@@ -153,5 +153,21 @@
         "t": "1:00:00",
         "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out",
         "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "snp_positions":
+    {
+        "mem" : 3G,
+        "c" : 1,
+        "t": "1:00:00",
+        "o": "log/slurm_out/phasing/{rule}/{wildcards}.%j.out",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "guess_ploidy":
+    {
+        "mem" : 24G,
+        "c" : 1,
+        "t": "12:00:00",
+        "o": "log/slurm_out/phasing/{rule}/{wildcards}.%j.out",
+        "p" : "BioCompute,htc4,hpc5"
     }
 }

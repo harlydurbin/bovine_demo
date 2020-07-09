@@ -75,3 +75,5 @@ collect_metrics_gc: 2
 collect_metrics_xmx: 24
 
 #### phasing ####
+
+phasing_rules: ["snp_positions", "guess_ploidy"]

@@ -21,10 +21,66 @@ library(tidylog)
 
 # Notes & questions
 
-* Use ShapeIt or something else?
-* Filter down to only sites with complete data?
-* Using a reference panel?
+* ~~Filter down to only sites with complete data?~~ Remove sites with >= 10% missingness
 * What genetic map? 
-    + What Troy said?
+    + 1 Mb/cM?
     + Yassine: "infer the map using the Li & Stephens (2003) LD based method"
-* Plink sex check
+    + Jared: "Use published 50K map"
+* Sample sex determination?
+    + ~~PLINK sex check~~
+    
+# Setup
+
+```{r}
+sample_metadata <- read_csv(here::here("data/derived_data/metadata/bovine_demo.sample_metadata.csv"))
+```
+
+```{r}
+sex_cov <-
+  read_rds(here::here("data/derived_data/metadata/coverage/cov_detail.rds")) %>% 
+  filter(chr %in% c("X", "Y")) %>% 
+  select(lab_id:mean, -total, -sid) %>% 
+  tidyr::pivot_wider(values_from = mean, names_from = chr) %>% 
+  right_join(sample_metadata %>% 
+               select(lab_id:sex, bio_sample, species, population, avg_coverage)) %>% 
+  select(lab_id, international_id, bio_sample, sex, population, species, everything()) %>% 
+  # I know already that my ancient samples are both males
+  mutate(sex = if_else(population == "ancient", "M", sex))
+  
+  
+```
+
+# Sex determination
+
+```{r}
+sex_cov %>% 
+  filter(is.na(sex)) %>% 
+  group_by(population) %>% 
+  tally(sort = TRUE)
+```
+
+```{r}
+sex_cov %>% 
+  tidyr::pivot_longer(cols = c("X", "Y")) %>% 
+  mutate(sex = if_else(is.na(sex), "U", sex)) %>% 
+  ggplot(aes(x = value, y = avg_coverage, color = sex)) +
+  geom_point(alpha = 0.4) +
+  theme_bw() +
+  labs(x = "Average coverage on the sex chromosome", y = "Average coverage across all autosomes", color = "Sex") +
+  facet_wrap(~ name)
+
+ggsave(here::here("figures/phasing/xy_cov.all.png"))
+```
+
+```{r}
+sex_cov %>% 
+  tidyr::pivot_longer(cols = c("X", "Y")) %>% 
+  filter(!is.na(sex)) %>% 
+  ggplot(aes(x = value, y = avg_coverage, color = sex)) +
+  geom_point(alpha = 0.4) +
+  theme_bw() +
+  labs(x = "Average coverage on the sex chromosome", y = "Average coverage across all autosomes", color = "Sex") +
+  facet_wrap(~ name)
+
+ggsave(here::here("figures/phasing/xy_cov.sex_known.png"))
+```
