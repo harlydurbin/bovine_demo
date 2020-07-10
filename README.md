@@ -19,11 +19,15 @@ Evaluation of computing resources used for each step of genotype calling can be 
     * **data/derived_data/joint_genotyping/bovine_demo.variant_metrics.summary_chr.csv** contains a summary by chromosome
     * **data/derived_data/joint_genotyping/bovine_demo.variant_metrics.detail_wg.csv** contains a summary by sample averaged/summed across all chromosomes
     * **data/derived_data/joint_genotyping/bovine_demo.variant_metrics.detail_chr.csv** contains a summary by sample and by chromosome
-6. Duplicate samples identified based on chromosome 28 and chromosome 29 variants using [`king`](http://people.virginia.edu/~wc9c/KING/manual.html) in `source_functions/find_dups.sh`. Duplicates and other low quality samples * sites that are no longer variant after sample removal removed in `source_functions/reheader.snakemake`
+6. Duplicate samples identified based on chromosome 28 and chromosome 29 variants using [`king`](http://people.virginia.edu/~wc9c/KING/manual.html) in `source_functions/find_dups.sh`. Duplicates and other low quality samples + sites that are no longer variant after sample removal removed in `source_functions/reheader.snakemake`
 
 ## Phasing
 
-TODO
+See `source_functions/phasing.snakefile` and `notebooks/phasing.Rmd`
+
+1a. In order to phase X chromosome, missing sexes imputed and incorrectly assigned sexes fixed 
+    * Ended up using the ratio of average coverage on the X chromosome/average coverage on all autosomes to determine cutoffs. Of all other tested metrics, I think this the only one that should be similar across all species in the dataset + agnostic to $N_e$
+1b. Genetic map inferred using several published cattle recombination maps
 
 ## Meta-data processing
 

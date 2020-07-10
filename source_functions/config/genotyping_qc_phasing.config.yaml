@@ -22,6 +22,8 @@ king_path: "source_functions/king"
 
 r_module: "r/r-3.4.2"
 
+shapeit_path: "PLACEHOLDER"
+
 #### joint_genotyping ####
 
 joint_genotyping_rules: ["combine_gvcfs", "genotype_gvcfs_list", "genotype_gvcfs", "select_variants", "variant_filtration", "remove_failed", "validate_variants"]
@@ -76,10 +78,18 @@ collect_metrics_xmx: 24
 
 #### phasing ####
 
-phasing_rules: ["snp_positions", "guess_ploidy", "plink_impute_sex", "phasing_autosomes", "phasing_x"]
+phasing_rules: ["snp_positions", "guess_ploidy", "plink_impute_sex", "phasing_qc", "phasing_qc_x", "phasing_qc_y", "shapeit_sex_check", "phase_autosomes", "phase_x", "phase_y"]
 
-genetic_map: "PLACEHOLDER"
+plink_nt: 12
+
+pab: 133300518
+
+genetic_map: "data/raw_data/placeholder.map"
 
 tag: ["GT", "PL"]
 
-sex_list: "PLACEHOLDER"
+imputed_sexes: "data/derived_data/joint_genotyping/impute_sex/imputed_sexes.txt"
+
+geno_filter: 0.10
+
+shapeit_nt: 12

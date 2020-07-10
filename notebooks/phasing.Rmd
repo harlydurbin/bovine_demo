@@ -30,7 +30,7 @@ library(magrittr)
 * Sample sex determination?
     + ~~PLINK sex check~~
     + `bcftools guess_ploidy`: need coordinates of PAR 
-        - ("The size of the PAR on the ARS-UCD1.2 reference genome assembly was 5,708,626 bp")[https://www.journalofdairyscience.org/article/S0022-0302(19)30102-X/fulltext]
+        - ["The size of the PAR on the ARS-UCD1.2 reference genome assembly was 5,708,626 bp"](https://doi.org/10.3168/jds.2018-15638)
         - PAB at ChrX:133,300,518
     + Coverage on the sex chromosomes
         - True females may show coverage on Y due to mis-mapping of PAR?
@@ -48,7 +48,7 @@ sample_metadata <- read_csv(here::here("data/derived_data/metadata/bovine_demo.s
 ```
 
 ```{r}
-sex_cov <-
+sex_impute <-
   read_rds(here::here("data/derived_data/metadata/coverage/cov_detail.rds")) %>% 
   filter(chr %in% c("X", "Y")) %>% 
   select(lab_id:mean, -total, -sid) %>% 
@@ -67,7 +67,7 @@ sex_cov <-
 ## How many samples with no sex listed?
 
 ```{r}
-sex_cov %>% 
+sex_impute %>% 
   filter(is.na(sex)) %>% 
   group_by(population) %>% 
   tally(sort = TRUE)
@@ -76,7 +76,7 @@ sex_cov %>%
 ## Based on coverage of sex chromosomes
 
 ```{r}
-sex_cov %>%
+sex_impute %>%
   tidyr::pivot_longer(cols = c("X", "Y"), names_to = "chr") %>%
   mutate(sex = if_else(is.na(sex), "U", sex)) %>%
   ggplot(aes(x = value, y = avg_coverage, color = sex)) +
@@ -92,7 +92,7 @@ sex_cov %>%
 ```
 
 ```{r, fig.height=12, fig.width=6}
-sex_cov %>%
+sex_impute %>%
   tidyr::pivot_longer(cols = c("X", "Y"), names_to = "chr") %>%
   mutate(sex = if_else(is.na(sex), "U", sex),
          species_group = 
@@ -118,7 +118,7 @@ sex_cov %>%
 #### Known females
 
 ```{r}
-sex_cov %>% 
+sex_impute %>% 
   filter(sex == "F") %>% 
   select(X, Y, avg_coverage) %>% 
   corrr::correlate(diagonal = 1)
@@ -126,7 +126,7 @@ sex_cov %>%
 #### Known males
 
 ```{r}
-sex_cov %>% 
+sex_impute %>% 
   filter(sex == "M") %>% 
   select(X, Y, avg_coverage) %>% 
   corrr::correlate(diagonal = 1)
@@ -135,7 +135,7 @@ sex_cov %>%
 ### Assign likely sex based on (mean coverage on X or Y/mean coverage on autosomes)
 
 ```{r}
-sex_cov %>%
+sex_impute %>%
   filter(!is.na(sex)) %>%
   mutate(y_vs_auto = Y / avg_coverage,
          x_vs_auto = X / avg_coverage) %>%
@@ -151,25 +151,20 @@ sex_cov %>%
 ```
 
 ```{r}
-sample_metadata %<>%
-  mutate(sex = if_else(is.na(sex), "U", sex)) %>%
-  left_join(
-    sex_cov %>%
-      mutate(
+
+sex_impute %<>% 
+  mutate(sex = if_else(is.na(sex), "U", sex),
         y_vs_auto = Y / avg_coverage,
         x_vs_auto = X / avg_coverage,
         sex_cov =
           case_when(x_vs_auto >= (0.9172331 - 0.12504436) ~ "F",
-                    TRUE ~ "M")
-      ) %>%
-      select(international_id, sex_cov, x_vs_auto)
-  )
+                    TRUE ~ "M"))
 ```
 
 ## Based on `bcftools +guess-ploidy`
 
 ```{r}
-sample_metadata %<>%
+sex_impute %<>%
   left_join(purrr::map(.x = c("GT", "PL"), ~ read_table2(
     here::here(
       glue::glue(
@@ -187,7 +182,7 @@ sample_metadata %<>%
 ## Based on X chromosome heterozygosity using `plink --impute-sex`
 
 ```{r}
-sample_metadata %<>%
+sex_impute %<>%
   left_join(
     read_table2(
       here::here(
@@ -209,42 +204,15 @@ sample_metadata %<>%
 ## Final determination based on all available information
 
 ```{r}
-sample_metadata %<>% 
-  select(lab_id, international_id, contains("sex"), x_vs_auto, f, everything())
+sex_impute %<>% 
+  select(international_id, contains("sex"), x_vs_auto, y_vs_auto, f, everything())
 ```
 
 
 * Quite a few `GT` inferred sexes disagree with other lines of evidence
 
-```{r}
-sample_metadata %>% 
-  filter(sex == sex_cov) %>% 
-  filter(sex == sex_GT) %>% 
-  filter(sex == sex_PL) %>% 
-  filter(sex == sex_het)
-```
-
-```{r}
-sample_metadata %>% 
-  filter(sex_cov == sex_GT) %>% 
-  filter(sex_cov == sex_PL) %>% 
-  filter(sex_cov == sex_het)
-```
-
-```{r}
-sample_metadata %>% 
-  filter(sex == sex_het) %>% 
-  filter(sex == sex_cov)
-```
-
-```{r}
-sample_metadata %>% 
-  mutate()
-```
-
-
 ```{r, fig.height=12, fig.width=6}
-sample_metadata %>%
+sex_impute %>%
   arrange(sex, sex_cov, sex_GT, sex_PL, sex_het) %>%
   mutate(international_id = forcats::fct_inorder(international_id)) %>% 
   select(international_id, contains("sex")) %>%
@@ -264,8 +232,55 @@ ggsave(here::here("figures/phasing/sex_consensus.png"))
 ---
 
 ```{r}
-sample_metadata %>% 
+sex_impute %>% 
   filter(x_vs_auto > 0.8) %>% 
-  filter(sex == "M")
+  filter(sex == "M") %>% 
+  pull(international_id) %>% 
+  datapasta::vector_construct()
+```
+
+```{r}
+sex_impute %>% 
+  filter(0.55 > x_vs_auto) %>% 
+  filter(sex == "F") 
+```
+
+```{r}
+sex_impute %<>% 
+  mutate(imputed_sex = 
+           case_when(
+             international_id %in% c("SIMDEUF000938065319", "UMCUSAM000000020087", "UMCUSAM000000033784", "UMCUSAM000000196770", "UMCUSAM000000198523", "UMCUSAM000000202633", "UMCUSAM000000204540", "UMCUSAM000000204542", "UMCUSAU000000194531", "UMCUSAU000000194532", "UMCUSAU000000194533", "UMCUSAU000000194535", "UMCUSAU000000194704") ~ "F",
+             international_id %in% c("UMCUSAU000000205014") ~ "M",
+             sex %in% c("M", "F") ~ sex,
+             TRUE ~ sex_cov
+           ))
+```
+
+```{r}
+sex_impute %>% 
+  group_by(imputed_sex) %>% 
+  tally()
+```
+
+### Output guide for PLINK 
+
+```{r}
+sex_impute %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid, imputed_sex) %>% 
+  write_tsv(here::here("data/derived_data/joint_genotyping/impute_sex/imputed_sexes.txt"), col_names = FALSE)
+```
+
+### Update metadata file
+
+```{r}
+sample_metadata %>%
+  left_join(sex_impute %>%
+              select(imputed_sex, international_id)) %>% 
+  mutate(sex = imputed_sex) %>% 
+  select(-imputed_sex) %>% 
+  rename(imputed_sex = sex) %>% 
+  write_csv(here::here("data/derived_data/metadata/bovine_demo.sample_metadata.csv"))
+
 ```
 

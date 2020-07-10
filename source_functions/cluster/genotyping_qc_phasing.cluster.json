@@ -177,5 +177,61 @@
         "t": "2:00:00",
         "o": "log/slurm_out/phasing/{rule}/{wildcards}.%j.out",
         "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "phasing_qc":
+    {
+        "mem" : 24G,
+        "c" : 12,
+        "t": "2:00:00",
+        "o": "log/slurm_out/phasing/{rule}/{wildcards}.%j.out",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "phasing_qc_x":
+    {
+        "mem" : 24G,
+        "c" : 12,
+        "t": "2:00:00",
+        "o": "log/slurm_out/phasing/{rule}/{wildcards}.%j.out",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "phasing_qc_y":
+    {
+        "mem" : 24G,
+        "c" : 12,
+        "t": "2:00:00",
+        "o": "log/slurm_out/phasing/{rule}/{wildcards}.%j.out",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "shapeit_sex_check":
+    {
+        "mem" : 24G,
+        "c" : 1,
+        "t": "2:00:00",
+        "o": "log/slurm_out/phasing/{rule}/{wildcards}.%j.out",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "phase_autosomes":
+    {
+        "mem" : 24G,
+        "c" : 12,
+        "t": "2:00:00",
+        "o": "log/slurm_out/phasing/{rule}/{wildcards}.%j.out",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "phase_x":
+    {
+        "mem" : 24G,
+        "c" : 12,
+        "t": "2:00:00",
+        "o": "log/slurm_out/phasing/{rule}/{wildcards}.%j.out",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "phase_y":
+    {
+        "mem" : 24G,
+        "c" : 12,
+        "t": "2:00:00",
+        "o": "log/slurm_out/phasing/{rule}/{wildcards}.%j.out",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
     }
 }
