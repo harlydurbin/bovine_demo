@@ -271,16 +271,4 @@ sex_impute %>%
   write_tsv(here::here("data/derived_data/joint_genotyping/impute_sex/imputed_sexes.txt"), col_names = FALSE)
 ```
 
-### Update metadata file
-
-```{r}
-sample_metadata %>%
-  left_join(sex_impute %>%
-              select(imputed_sex, international_id)) %>% 
-  mutate(sex = imputed_sex) %>% 
-  select(-imputed_sex) %>% 
-  rename(imputed_sex = sex) %>% 
-  write_csv(here::here("data/derived_data/metadata/bovine_demo.sample_metadata.csv"))
-
-```
 

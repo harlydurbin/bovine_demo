@@ -25,9 +25,14 @@ Evaluation of computing resources used for each step of genotype calling can be 
 
 See `source_functions/phasing.snakefile` and `notebooks/phasing.Rmd`
 
-1a. In order to phase X chromosome, missing sexes imputed and incorrectly assigned sexes fixed 
-    * Ended up using the ratio of average coverage on the X chromosome/average coverage on all autosomes to determine cutoffs. Of all other tested metrics, I think this the only one that should be similar across all species in the dataset + agnostic to $N_e$
-1b. Genetic map inferred using several published cattle recombination maps
+1. In order to phase X chromosome, missing sexes imputed and incorrectly assigned sexes fixed 
+    * Ended up using the ratio of average coverage on the X chromosome/average coverage on all autosomes to determine cutoffs. Of all other tested metrics, I think this the only one that should be similar across all species in the dataset + agnostic to effective population size
+2. Genetic map inferred using several published cattle recombination maps *TODO*
+3. Pre-phasing QC
+    * For all chromosomes, sites with > 10% missingness removed
+    * For all chromosomes, listed sex updated to imputed sex
+    * Pseudo-autosomal region removed from X chromosome
+    * Heterozygous genotypes set to missing on Y chromosome
 
 ## Meta-data processing
 
