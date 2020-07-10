@@ -22,7 +22,9 @@ king_path: "source_functions/king"
 
 r_module: "r/r-3.4.2"
 
-shapeit_path: "PLACEHOLDER"
+plink_module: "plink/plink-1.90b"
+
+shapeit_module: "shapeit/shapeit-2r837"
 
 #### joint_genotyping ####
 
