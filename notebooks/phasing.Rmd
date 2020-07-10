@@ -17,6 +17,7 @@ library(ggplot2)
 library(purrr)
 library(tidyr)
 library(tidylog)
+library(magrittr)
 ```
 
 # Notes & questions
@@ -28,6 +29,17 @@ library(tidylog)
     + Jared: "Use published 50K map"
 * Sample sex determination?
     + ~~PLINK sex check~~
+    + `bcftools guess_ploidy`: need coordinates of PAR 
+        - ("The size of the PAR on the ARS-UCD1.2 reference genome assembly was 5,708,626 bp")[https://www.journalofdairyscience.org/article/S0022-0302(19)30102-X/fulltext]
+        - PAB at ChrX:133,300,518
+    + Coverage on the sex chromosomes
+        - True females may show coverage on Y due to mis-mapping of PAR?
+    + Heterozygosity on the X
+    
+    
+plink --vcf data/derived_data/joint_genotyping/remove_samples/remove_samples.X.vcf.gz --make-bed --double-id --cow --chr X -set-missing-var-ids @:#\$1\$2 --threads 12 --from-bp 1 --to-bp 133300518 --out test_x
+
+plink --bfile test_x --double-id --cow --threads 12 --impute-sex --make-bed --out impute_sex
     
 # Setup
 
@@ -52,6 +64,8 @@ sex_cov <-
 
 # Sex determination
 
+## How many samples with no sex listed?
+
 ```{r}
 sex_cov %>% 
   filter(is.na(sex)) %>% 
@@ -59,28 +73,199 @@ sex_cov %>%
   tally(sort = TRUE)
 ```
 
+## Based on coverage of sex chromosomes
+
 ```{r}
-sex_cov %>% 
-  tidyr::pivot_longer(cols = c("X", "Y")) %>% 
-  mutate(sex = if_else(is.na(sex), "U", sex)) %>% 
+sex_cov %>%
+  tidyr::pivot_longer(cols = c("X", "Y"), names_to = "chr") %>%
+  mutate(sex = if_else(is.na(sex), "U", sex)) %>%
   ggplot(aes(x = value, y = avg_coverage, color = sex)) +
   geom_point(alpha = 0.4) +
+  scale_color_manual(values = c("F" = "#F8766D",
+                                "M" = "#00BFC4",
+                                "U" = "lightgrey")) +
   theme_bw() +
   labs(x = "Average coverage on the sex chromosome", y = "Average coverage across all autosomes", color = "Sex") +
-  facet_wrap(~ name)
+  facet_wrap(~ chr)
 
-ggsave(here::here("figures/phasing/xy_cov.all.png"))
+#ggsave(here::here("figures/phasing/xy_cov.all.png"))
+```
+
+```{r, fig.height=12, fig.width=6}
+sex_cov %>%
+  tidyr::pivot_longer(cols = c("X", "Y"), names_to = "chr") %>%
+  mutate(sex = if_else(is.na(sex), "U", sex),
+         species_group = 
+           case_when(
+             species %in% c("bos primigenius", "bos taurus", "composite", "bos indicus") ~ "Cattle",
+             species %in% c("bos grunniens", "bos mutus") ~ "Yaks",
+             TRUE ~ stringr::str_to_sentence(species)
+           )) %>%
+  ggplot(aes(x = value, y = avg_coverage, color = sex)) +
+  geom_point(alpha = 0.4) +
+  scale_color_manual(values = c("F" = "#F8766D",
+                                "M" = "#00BFC4",
+                                "U" = "lightgrey")) +
+  theme_bw() +
+  labs(x = "Average coverage on the sex chromosome", y = "Average coverage across all autosomes", color = "Sex") +
+  facet_grid(species_group ~ chr)
+
+#ggsave(here::here("figures/phasing/xy_cov.all.png"))
+```
+
+### Correlation between X coverage, Y coverage, and autosomal coverage
+
+#### Known females
+
+```{r}
+sex_cov %>% 
+  filter(sex == "F") %>% 
+  select(X, Y, avg_coverage) %>% 
+  corrr::correlate(diagonal = 1)
+```
+#### Known males
+
+```{r}
+sex_cov %>% 
+  filter(sex == "M") %>% 
+  select(X, Y, avg_coverage) %>% 
+  corrr::correlate(diagonal = 1)
+```
+
+### Assign likely sex based on (mean coverage on X or Y/mean coverage on autosomes)
+
+```{r}
+sex_cov %>%
+  filter(!is.na(sex)) %>%
+  mutate(y_vs_auto = Y / avg_coverage,
+         x_vs_auto = X / avg_coverage) %>%
+  group_by(sex) %>%
+  summarise(
+    `Mean (Y/autosomes)` = mean(y_vs_auto),
+    `Mean (X/autosomes)` = mean(x_vs_auto),
+    `SD (Y/autosomes)` = sd(y_vs_auto),
+    `SD (X/autosomes)` = sd(x_vs_auto)
+  ) %>%
+  select(Sex = sex, contains("X/"), contains("Y/"))
+
 ```
 
 ```{r}
-sex_cov %>% 
-  tidyr::pivot_longer(cols = c("X", "Y")) %>% 
-  filter(!is.na(sex)) %>% 
-  ggplot(aes(x = value, y = avg_coverage, color = sex)) +
-  geom_point(alpha = 0.4) +
-  theme_bw() +
-  labs(x = "Average coverage on the sex chromosome", y = "Average coverage across all autosomes", color = "Sex") +
-  facet_wrap(~ name)
-
-ggsave(here::here("figures/phasing/xy_cov.sex_known.png"))
+sample_metadata %<>%
+  mutate(sex = if_else(is.na(sex), "U", sex)) %>%
+  left_join(
+    sex_cov %>%
+      mutate(
+        y_vs_auto = Y / avg_coverage,
+        x_vs_auto = X / avg_coverage,
+        sex_cov =
+          case_when(x_vs_auto >= (0.9172331 - 0.12504436) ~ "F",
+                    TRUE ~ "M")
+      ) %>%
+      select(international_id, sex_cov, x_vs_auto)
+  )
 ```
+
+## Based on `bcftools +guess-ploidy`
+
+```{r}
+sample_metadata %<>%
+  left_join(purrr::map(.x = c("GT", "PL"), ~ read_table2(
+    here::here(
+      glue::glue(
+        "data/derived_data/joint_genotyping/impute_sex/bovine_demo.guess_ploidy.{.x}.txt"
+      )
+    ),
+    col_names = c("international_id", glue::glue("sex_{.x}"))
+  )) %>%
+    reduce(full_join))
+
+
+
+```
+
+## Based on X chromosome heterozygosity using `plink --impute-sex`
+
+```{r}
+sample_metadata %<>%
+  left_join(
+    read_table2(
+      here::here(
+        "data/derived_data/joint_genotyping/impute_sex/impute_sex.sexcheck"
+      )
+    ) %>%
+      janitor::clean_names() %>%
+      select(international_id = fid, sex_het = snpsex, f) %>%
+      mutate(sex_het =
+               case_when(
+                 sex_het == 0 ~ "U",
+                 sex_het == 1 ~ "M",
+                 sex_het == 2 ~ "F"
+               ))
+  )
+```
+
+
+## Final determination based on all available information
+
+```{r}
+sample_metadata %<>% 
+  select(lab_id, international_id, contains("sex"), x_vs_auto, f, everything())
+```
+
+
+* Quite a few `GT` inferred sexes disagree with other lines of evidence
+
+```{r}
+sample_metadata %>% 
+  filter(sex == sex_cov) %>% 
+  filter(sex == sex_GT) %>% 
+  filter(sex == sex_PL) %>% 
+  filter(sex == sex_het)
+```
+
+```{r}
+sample_metadata %>% 
+  filter(sex_cov == sex_GT) %>% 
+  filter(sex_cov == sex_PL) %>% 
+  filter(sex_cov == sex_het)
+```
+
+```{r}
+sample_metadata %>% 
+  filter(sex == sex_het) %>% 
+  filter(sex == sex_cov)
+```
+
+```{r}
+sample_metadata %>% 
+  mutate()
+```
+
+
+```{r, fig.height=12, fig.width=6}
+sample_metadata %>%
+  arrange(sex, sex_cov, sex_GT, sex_PL, sex_het) %>%
+  mutate(international_id = forcats::fct_inorder(international_id)) %>% 
+  select(international_id, contains("sex")) %>%
+  tidyr::pivot_longer(cols = contains("sex"), names_to = "metric") %>%
+  ggplot(aes(x = metric, y = international_id, fill = value)) +
+  geom_tile() +
+  scale_fill_manual(values = c("F" = "#F8766D",
+                                "M" = "#00BFC4",
+                                "U" = "lightgrey")) +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank())
+
+ggsave(here::here("figures/phasing/sex_consensus.png"))
+```
+
+---
+
+```{r}
+sample_metadata %>% 
+  filter(x_vs_auto > 0.8) %>% 
+  filter(sex == "M")
+```
+

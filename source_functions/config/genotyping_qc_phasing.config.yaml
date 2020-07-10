@@ -76,4 +76,10 @@ collect_metrics_xmx: 24
 
 #### phasing ####
 
-phasing_rules: ["snp_positions", "guess_ploidy"]
+phasing_rules: ["snp_positions", "guess_ploidy", "plink_impute_sex", "phasing_autosomes", "phasing_x"]
+
+genetic_map: "PLACEHOLDER"
+
+tag: ["GT", "PL"]
+
+sex_list: "PLACEHOLDER"

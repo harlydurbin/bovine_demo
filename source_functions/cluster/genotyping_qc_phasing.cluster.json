@@ -169,5 +169,13 @@
         "t": "12:00:00",
         "o": "log/slurm_out/phasing/{rule}/{wildcards}.%j.out",
         "p" : "BioCompute,htc4,hpc5"
+    },
+    "plink_impute_sex":
+    {
+        "mem" : 24G,
+        "c" : 12,
+        "t": "2:00:00",
+        "o": "log/slurm_out/phasing/{rule}/{wildcards}.%j.out",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
     }
 }

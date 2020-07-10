@@ -17,7 +17,7 @@ os.makedirs("temp/phasing", exist_ok = True)
 
 rule all:
 	input:
-		"data/derived_data/joint_genotyping/bovine_demo.guess_ploidy.txt", expand("data/derived_data/joint_genotyping/snp_positions/snp_positions.{chr}.txt", chr = config['chr'])
+		expand("data/derived_data/joint_genotyping/snp_positions/snp_positions.{chr}.txt", chr = config['chr']), expand("data/derived_data/joint_genotyping/impute_sex/bovine_demo.guess_ploidy.{tag}.txt", tag = config['tag']), expand("data/derived_data/joint_genotyping/phasing/phasing.{autosome}.vcf.gz", autosome = list(range(1,30)) "Y")), "data/derived_data/joint_genotyping/phasing/phasing.X.vcf.gz"
 
 rule snp_positions:
 	input:
@@ -37,11 +37,42 @@ rule guess_ploidy:
 		x_vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.X.vcf.gz"
 	params:
 		bcftools_module = config['bcftools_module'],
-		psrecord = "log/psrecord/joint_genotyping/guess_ploidy/guess_ploidy.log"
+		psrecord = "log/psrecord/joint_genotyping/guess_ploidy/guess_ploidy.{tag}.log",
+		tag = "{tag}"
 	output:
-		sex_list = "data/derived_data/joint_genotyping/bovine_demo.guess_ploidy.txt"
+		sex_list = "data/derived_data/joint_genotyping/impute_sex/bovine_demo.guess_ploidy.{tag}.txt"
 	shell:
 		"""
 		module load {params.bcftools_module}
-		psrecord "bcftools +guess-ploidy -r X:1-133300517 --tag GT {input.x_vcf} > {output.sex_list}" --log {params.psrecord} --include-children --interval 5
+		psrecord "bcftools +guess-ploidy -r X:1-133300517 --tag {params.tag} {input.x_vcf} > {output.sex_list}" --log {params.psrecord} --include-children --interval 5
 		"""
+
+rule plink_impute_sex:
+	input:
+		x_vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.X.vcf.gz"
+	params:
+		plink_module = config['plink_module'],
+	output:
+		fam = "data/derived_data/joint_genotyping/impute_sex/impute_sex.fam",
+		sexcheck = "data/derived_data/joint_genotyping/impute_sex/impute_sex.sexcheck"
+	shell:
+		"""
+		module load {params.plink_module}
+		plink --vcf {input.vcf} --make-bed --double-id --cow --chr X -set-missing-var-ids @:#\$1\$2 --threads 12 --from-bp 1 --to-bp 133300518 --out data/derived_data/joint_genotyping/impute_sex/remov_par
+		plink --bfile data/derived_data/joint_genotyping/impute_sex/remov_par --double-id --cow --threads 12 --impute-sex --make-bed --out data/derived_data/joint_genotyping/impute_sex/impute_sex
+		"""
+
+rule phasing_autosomes:
+	input:
+		vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.{autosome}.vcf.gz",
+		genetic_map = config['genetic_map']
+	output:
+		phased_vcf = "data/derived_data/joint_genotyping/phasing/phasing.{autosome}.vcf.gz"
+
+rule phasing_x:
+	input:
+		x_vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.X.vcf.gz",
+		genetic_map = config['genetic_map'],
+		sex_list = config['sex_list']
+	output:
+		phased_vcf = "data/derived_data/joint_genotyping/phasing/phasing.X.vcf.gz"

@@ -187,3 +187,17 @@ usage_summary(process = "joint_genotyping", keyword = "reheader")
 ```{r, eval=FALSE}
 usage_facets(process = "joint_genotyping", keyword = "reheader")
 ```
+
+# `phasing`
+
+## `guess_ploidy`
+
+* Use `bcftools +guess-ploidy` plugin to guess sexes of samples
+
+```{r,eval=FALSE}
+usage_summary(process = "joint_genotyping", keyword = "guess_ploidy") 
+```
+
+```{r, eval=FALSE}
+usage_facets(process = "joint_genotyping", keyword = "guess_ploidy")
+```
