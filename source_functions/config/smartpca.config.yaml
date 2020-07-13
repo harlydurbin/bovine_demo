@@ -1,0 +1,11 @@
+rules: ['recode_input', 'create_par', 'smartpca']
+
+downsample_dataset: ['20cattle']
+
+dataset: ['all', '20cattle']
+
+eigensoft_module: "eigensoft/eigensoft-7.2.1"
+
+#thin_p: ['superthin', 'onepercent']
+
+thin_p: ['superthin']

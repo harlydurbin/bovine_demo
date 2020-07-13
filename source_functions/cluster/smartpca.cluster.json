@@ -1,0 +1,28 @@
+{
+    "__default__":
+    {
+        "p" : "General,Lewis,BioCompute,htc4,hpc5",
+        "account" : "animalsci",
+        "mem" : 1G,
+        "c": 1,
+        "t": "12:00:00",
+        "o": "log/slurm_out/smartpca/{rule}/{wildcards}.%j.out",
+        "mail-user" : "hjdurbin@mail.missouri.edu",
+        "mail-type" : "NONE",
+        "qos": "normal"
+    },
+    "recode_input":
+    {
+        "t": "1:00:00"
+    },
+    "create_par":
+    {
+        "t": "1:00:00"
+    },
+    "smartpca":
+    {
+        "mem" : 24G,
+        "p" : "BioCompute,htc4,hpc5",
+        "mail-type" : "FAIL,END"
+    }
+}
