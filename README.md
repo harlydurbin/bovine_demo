@@ -1,5 +1,27 @@
 # Demographic and selection history of cattle and related species
 
+## Meta-data processing
+
+1. SRA metadata scraped from downloaded XML files then initially tidied in `notebooks/xml_scraping.Rmd`
+2. Population labels futher categorized by region, continent, and species in `notebooks/categorizing.Rmd`
+3. Coverage of samples in tidied dataset assessed `notebooks/coverage.Rmd`
+4. Duplicate and low quality samples removed from metadata in `source_functions/remove_samples.R`
+
+**Resulting sample metadata file: `data/derived_data/metadata/bovine_demo.sample_metadata.csv`**
+
+### Notes about population label assignment
+
+* I know little to nothing about yak breeds, but where I could I tried to use the same population designations for yak samples that were used in the papers they came from. These include:
+    * Wild yaks (*Bos mutus*)
+    * Datong yaks which were recently developed as a cross between wild and domesticated yaks [to be hornless](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0158642)
+    * [Tianzhu white yaks](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0158642), bred in the Qilian mountains of Gansu province
+    * Jinchuan yaks, which typically have an [additional thoracic vertebra](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-020-6598-9) and are found in Sichuan province
+    * [Qinghai-Tibet Plateau (QTP)](https://www.nature.com/articles/ncomms10283) yaks
+* Cattle samples with their species listed as "composite" are known taurus/indicus hybrids. These include:
+    * Breeds intentionally developed within the last 100 years in America and Australia (Beefmaster, Droughtmaster, Santa Gertrudis)
+    * African sanga & zenga breeds (Ankole, Boran, Fulani)
+    * Asian advanced generation composites (all others)
+
 ## Genotype calling
 
 Evaluation of computing resources used for each step of genotype calling can be found in `notebooks/psrecord.Rmd` with results in `html/psrecord.html`
@@ -34,24 +56,4 @@ See `source_functions/phasing.snakefile` and `notebooks/phasing.Rmd`
     * Pseudo-autosomal region removed from X chromosome
     * Heterozygous genotypes set to missing on Y chromosome
 
-## Meta-data processing
-
-1. SRA metadata scraped from downloaded XML files then initially tidied in `notebooks/xml_scraping.Rmd`
-2. Population labels futher categorized by region, continent, and species in `notebooks/categorizing.Rmd`
-3. Coverage of samples in tidied dataset assessed `notebooks/coverage.Rmd`
-4. Duplicate and low quality samples removed from metadata in `source_functions/remove_samples.R`
-
-**Resulting sample metadata file: `data/derived_data/metadata/bovine_demo.sample_metadata.csv`**
-
-### Notes about population label assignment
-
-* I know little to nothing about yak breeds, but where I could I tried to use the same population designations for yak samples that were used in the papers they came from. These include:
-    * Wild yaks (*Bos mutus*)
-    * Datong yaks which were recently developed as a cross between wild and domesticated yaks [to be hornless](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0158642)
-    * [Tianzhu white yaks](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0158642), bred in the Qilian mountains of Gansu province
-    * Jinchuan yaks, which typically have an [additional thoracic vertebra](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-020-6598-9) and are found in Sichuan province
-    * [Qinghai-Tibet Plateau (QTP)](https://www.nature.com/articles/ncomms10283) yaks
-* Cattle samples with their species listed as "composite" are known taurus/indicus hybrids. These include:
-    * Breeds intentionally developed within the last 100 years in America and Australia (Beefmaster, Droughtmaster, Santa Gertrudis)
-    * African sanga & zenga breeds (Ankole, Boran, Fulani)
-    * Asian advanced generation composites (all others)
+## fastStructure

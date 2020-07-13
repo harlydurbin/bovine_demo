@@ -1,18 +1,18 @@
-rules: ['thin_variants', 'merge']
+rules: ['thin_variants', 'merge_thinned', 'downsample_indiv', 'structure', 'structure_ml']
 
 chr: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', 'X', 'Y']
 
-k: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29']
+k: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20']
 
-downsample_dataset: ['20all', '20cattle']
+downsample_dataset: ['20cattle']
 
-dataset: ['all', '20all', '20cattle']
+dataset: ['all', '20cattle']
 
 plink_module: "plink/plink-1.90b"
 
 plink_nt: 12
 
-#thin_p_dict: {"superthin":".001", "onepercent":"0.01"}
+thin_p_dict: {"superthin":".001", "onepercent":"0.01"}
 
 #thin_p: ['superthin', 'onepercent']
 

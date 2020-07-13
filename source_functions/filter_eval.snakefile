@@ -1,3 +1,5 @@
+# snakemake -s source_functions/filter_eval.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --resources load=100 --config --cluster-config source_functions/cluster/filter_eval.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200713.filter_eval.log
+
 import os
 
 configfile: "source_functions/config/filter_eval.config.yaml"
@@ -13,7 +15,7 @@ for x in expand("temp/filter_eval/{rules}", rules = config['rules']):
 
 rule all:
 	input:
-	 	"data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.table", "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.ldepth.mean"
+	 	"data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.table", "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.ldepth.mean", "data/derived_data/joint_genotyping/filter_eval/filter_eval.post.table"
 
 # Create a chr28 vcf with snps & indels to evaluate how many indels are within
 # 5bp of an inel, filtering values
@@ -63,6 +65,23 @@ rule table_28:
 		java_tmp = "temp/joint_genotyping/table_28"
 	output:
 		table = "data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.table"
+	shell:
+		"""
+		module load {params.java_module}
+		java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads=2 -jar {params.gatk_path} -R {params.ref_genome} -L 28 -T VariantsToTable -V {input.vcf} -F POS -F TYPE -F TRANSITION -F QD -F FS -F MQ -F ReadPosRankSum -F MQRankSum -F NO-CALL -F N-CALLED -F VAR -o {output.table}
+		"""
+
+rule table_28_post:
+	input:
+		vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.28.vcf.gz",
+		tbi = "data/derived_data/joint_genotyping/remove_samples/remove_samples.28.vcf.gz.tbi"
+	params:
+		java_module = config['java_module'],
+		ref_genome = config['ref_genome'],
+		gatk_path = config['gatk_path'],
+		java_tmp = "temp/joint_genotyping/table_28_post"
+	output:
+		table = "data/derived_data/joint_genotyping/filter_eval/filter_eval.post.table"
 	shell:
 		"""
 		module load {params.java_module}

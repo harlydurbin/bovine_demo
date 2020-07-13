@@ -31,7 +31,8 @@ library(tidylog)
 ```{r}
 tibble::tribble(
   ~ Name, ~ Description,
-  "all", "All 2,362 samples"
+  "all", "All 2,362 samples",
+  "20cattle", "Bos taurus, B.indicus, composite, and ancient samples only. Up to 20 (ranked by coverage) samples per population label"
 )
 ```
 
@@ -40,13 +41,27 @@ tibble::tribble(
 ```{r}
 tibble::tribble(
   ~ Name, ~ Description,
-  "superthin", "Randomly retain 0.001% of variants from "
+  "superthin", "Randomly retain 0.001% of SNPs from each chromosome"
 )
 ```
 
 # Setup
 
 ```{r}
+sample_metadata <- read_csv(here::here("data/derived_data/metadata/bovine_demo.sample_metadata.csv"))
+```
 
+## Dataset creation
+
+### `20cattle`
+
+```{r}
+sample_metadata %>% 
+  filter(species %in% c("bos primigenius", "bos taurus", "composite", "bos indicus")) %>% 
+  group_by(population) %>% 
+  top_n(20, avg_coverage) %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid) %>% 
+  write_tsv(here::here("data/derived_data/faststructure/thin_variants/keeplist.20cattle.txt"), col_names = FALSE)
 ```
 

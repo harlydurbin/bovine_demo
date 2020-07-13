@@ -1,7 +1,6 @@
-# snakemake -s source_functions/madtom.faststructure.snakefile -j 4 --rerun-incomplete --latency-wait 30 --config -p &> log/snakemake_log/200325.madtom.faststructure.log
+# snakemake -s source_functions/faststructure.bovine_demo.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --use-conda --resources load=100 --config --cluster-config source_functions/cluster/faststructure.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type} --qos {cluster.qos}" -p &> log/snakemake_log/faststructure/200713.faststructure.log
 
 configfile: "source_functions/config/faststructure.config.yaml"
-
 
 #Make log directories if they don't exist
 os.makedirs("log/slurm_out/faststructure", exist_ok = True)
@@ -28,8 +27,10 @@ rule thin_variants:
 		plink_module = config['plink_module'],
 		nt = config['plink_nt'],
 		in_prefix = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.{chr}",
-		out_prefix = "data/derived_data/faststructure/thin_variants/thin_variants.{chr}.{thin_p}",
+		out_prefix = "data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{thin_p}",
 		thin_p = thin_chooser
+	resources:
+		load = 1
 	output:
 		thinned_bed = temp("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{thin_p}.bed"),
 		thinned_bim = temp("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{thin_p}.bim"),
@@ -37,7 +38,7 @@ rule thin_variants:
 	shell:
 		"""
 		module load {params.plink_module}
-		plink --bfile {params.in_prefix} --mac 1 --thin {params.thin_p} --make-bed --double-id --cow --threads {params.nt} --out {params.out_prefix}
+		plink --bfile {params.in_prefix} --maf .0001 --thin {params.thin_p} --make-bed --double-id --cow --threads {params.nt} --out {params.out_prefix}
 		"""
 
 # Input is all chromosomes for the specified thinning parameter
@@ -47,6 +48,8 @@ rule merge_thinned:
 		thinned_bed = expand("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{{thin_p}}.bed", chr = config['chr']),
 		thinned_bim = expand("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{{thin_p}}.bim", chr = config['chr']),
 		thinned_fam = expand("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{{thin_p}}.fam", chr = config['chr'])
+	resources:
+		load = 1
 	params:
 		plink_module = config['plink_module'],
 		nt = config['plink_nt'],
@@ -71,6 +74,8 @@ rule downsample_indiv:
 		merged_bim = "data/derived_data/faststructure/thin_variants/merge_thinned.all.{thin_p}.bim",
 		merged_fam = "data/derived_data/faststructure/thin_variants/merge_thinned.all.{thin_p}.fam",
 		keep_list = "data/derived_data/faststructure/thin_variants/keeplist.{downsample_dataset}.txt"
+	resources:
+		load = 1
 	params:
 		plink_module = config['plink_module'],
 		nt = config['plink_nt'],
@@ -83,7 +88,7 @@ rule downsample_indiv:
 	shell:
 		"""
 		module load {params.plink_module}
-		plink --bfile {params.in_prefix} --double-id --cow --threads {params.nt} --keep {input.keep_list} --make-bed --out {params.out_prefix}
+		plink --bfile {params.in_prefix} --double-id --cow --threads {params.nt} --keep {input.keep_list} --maf .0001 --make-bed --out {params.out_prefix}
 		"""
 
 rule structure:
@@ -91,8 +96,11 @@ rule structure:
 		merged_bed = "data/derived_data/faststructure/thin_variants/merge_thinned.{dataset}.{thin_p}.bed",
 		merged_bim = "data/derived_data/faststructure/thin_variants/merge_thinned.{dataset}.{thin_p}.bim",
 		merged_fam = "data/derived_data/faststructure/thin_variants/merge_thinned.{dataset}.{thin_p}.fam"
+	# Snakemake looks for envs/ relative to the snakefile
 	conda:
-		"source_functions/envs/faststructure.yaml"
+		"envs/faststructure.yaml"
+	resources:
+		load = 10
 	params:
 		in_prefix = "data/derived_data/faststructure/thin_variants/merge_thinned.{dataset}.{thin_p}",
 		out_prefix = "data/derived_data/faststructure/structure/{dataset}.{thin_p}/structure.{dataset}.{thin_p}.k{k}",
@@ -109,8 +117,10 @@ rule structure:
 rule structure_ml:
 	input:
 		structure_files = expand("data/derived_data/faststructure/structure/{{dataset}}.{{thin_p}}/structure.{{dataset}}.{{thin_p}}.k{k}.{suffix}", k = config['k'], suffix = ["meanP", "meanQ", "varP", "varQ"])
+	resources:
+		load = 1
 	conda:
-		"source_functions/envs/faststructure.yaml"
+		"envs/faststructure.yaml"
 	params:
 		prefix = "data/derived_data/faststructure/structure/{dataset}.{thin_p}/structure.{dataset}.{thin_p}"
 	output:

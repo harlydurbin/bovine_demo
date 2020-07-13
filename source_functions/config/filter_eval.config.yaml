@@ -1,4 +1,4 @@
-rules: ["biallelic_28", "depth_28", "table_28"]
+rules: ["biallelic_28", "depth_28", "table_28", "table_28_post"]
 
 ref_genome: "/storage/hpc/group/UMAG/REF_GENOME/ARS-UCD1.2_Btau5.0.1Y.fa"
 
