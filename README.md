@@ -57,3 +57,10 @@ See `source_functions/phasing.snakefile` and `notebooks/phasing.Rmd`
     * Heterozygous genotypes set to missing on Y chromosome
 
 ## fastStructure
+
+* Using output of pre-phasing QC in `source_functions/phasing.snakefile`, variants removed from each chromosome with an X% probability of being retained 
+* Downsample individuals
+   
+See `source_functions/faststructure.bovine_demo.snakefile` for analysis and `notebooks/faststructure.Rmd` for thinning/downsampling dataset designations & results
+
+## PCA
