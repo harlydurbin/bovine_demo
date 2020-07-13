@@ -1,0 +1,52 @@
+---
+title: "fastStructure"
+author: "Harly Durbin"
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(readr)
+library(dplyr)
+library(stringr)
+library(magrittr)
+library(purrr)
+library(tidyr)
+library(tidylog)
+```
+
+# Notes & questions
+
+* In order to [install via conda](https://bioconda.github.io/recipes/faststructure/README.html), need a Python 2.7 environment, which means you can't run Snakemake
+
+---
+
+## Dataset key
+
+* Which samples
+
+```{r}
+tibble::tribble(
+  ~ Name, ~ Description,
+  "all", "All 2,362 samples"
+)
+```
+
+* Thinning parameter
+
+```{r}
+tibble::tribble(
+  ~ Name, ~ Description,
+  "superthin", "Randomly retain 0.001% of variants from "
+)
+```
+
+# Setup
+
+```{r}
+
+```
+
