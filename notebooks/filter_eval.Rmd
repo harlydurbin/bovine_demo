@@ -33,13 +33,23 @@ source(here::here("source_functions/filter_eval_functions.R"))
 
 ```{r}
 eval_28 <- 
-  read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.table")) %>% 
+  c("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.table", "data/derived_data/joint_genotyping/filter_eval/filter_eval.post.table") %>% 
+  purrr::set_names(c("pre", "post")) %>% 
+  purrr::map_dfr(~ read_table2(here::here(.x)),
+             .id = "stage") %>% 
   janitor::clean_names() %>% 
   left_join(
     read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.ldepth.mean")) %>% 
       select(-CHROM) %>% 
       janitor::clean_names())
 ```
+
+```{r}
+eval_28 %>% 
+  filter(stage == "post") %>% 
+  filter(no_call > 236)
+```
+
 
 ```{r}
 indel_range <- 
@@ -56,6 +66,7 @@ indel_range <-
 ```{r, echo=FALSE}
 in_range_length <-
   eval_28 %>% 
+  filter(stage == "pre") %>% 
   filter(type == "SNP") %>% 
   filter(pos %in% indel_range) %>% 
   pull(pos) %>% 
@@ -63,6 +74,7 @@ in_range_length <-
 
 snp_length <-
   eval_28 %>%
+  filter(stage == "pre") %>% 
   filter(type == "SNP") %>%
   pull(pos) %>%
   length(.)
