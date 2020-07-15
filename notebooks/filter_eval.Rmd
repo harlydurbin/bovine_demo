@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(dplyr)
 library(tidyr)
 library(readr)
+library(magrittr)
 library(ggplot2)
 
 source(here::here("source_functions/filter_eval_functions.R"))
@@ -28,8 +29,16 @@ source(here::here("source_functions/filter_eval_functions.R"))
     + Depth of coverage per individual
     + Mean coverage per site (Yassine says limit to 8)
     + GQ per site (Yassine says limit to 20)
+* 2,764 samples pre-filtering, 2,362 samples post-filtering
+
+`shuf -n N input > output`
 
 # Setup 
+
+```{r}
+sample_metadata <- read_csv(here::here("data/derived_data/metadata/bovine_demo.sample_metadata.csv"))
+```
+
 
 ```{r}
 eval_28 <- 
@@ -45,11 +54,23 @@ eval_28 <-
 ```
 
 ```{r}
-eval_28 %>% 
-  filter(stage == "post") %>% 
-  filter(no_call > 236)
+nocalls <-
+  eval_28 %>% 
+  filter(type == "SNP") %>% 
+  select(stage, pos, no_call) 
 ```
 
+```{r}
+gq <-
+  read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.28_random.GQ.txt"), na = ".") %>% 
+  tidyr::pivot_longer(cols = all_of(3:2766), names_to = "international_id", values_to = "gq") %>% 
+  janitor::clean_names() %>% 
+  filter(international_id %in% sample_metadata$international_id) %>% 
+  select(-chrom)
+```
+
+
+# How many SNPs within 5 bp of an indel?
 
 ```{r}
 indel_range <- 
@@ -60,8 +81,6 @@ indel_range <-
   unnest(list) %>% 
   pull(list)
 ```
-
-# How many SNPs within 5 bp of an indel?
 
 ```{r, echo=FALSE}
 in_range_length <-
@@ -163,7 +182,7 @@ eval_28 %>%
   geom_vline(xintercept = 8, color = "red")
 ```
 
-# #Summary
+# Summary
 
 ```{r}
 
@@ -188,17 +207,112 @@ eval_28 %>%
       summarize_dropped(var = read_pos_rank_sum, cutoff = -8)) 
 ```
 
-# Number of no calls across the chromosome
+## What percentage of SNPs actually were dropped?
 
 ```{r}
-eval_28 %>% 
-  filter(type == "SNP") %>% 
-  arrange(pos) %>% 
-  ggplot(aes(x = pos, y = no_call)) +
-  geom_smooth(color = "red")
+nocalls %>% 
+  tidyr::pivot_wider(values_from = no_call, names_from = stage) %>% 
+  summarise(`Percent dropped` = sum(is.na(post))/sum(!is.na(pre)))
 ```
 
+# No-calls
 
+* 7/14/2020: Removing SNPs with 10% or greater missingness removed nearly all SNPs. What went wrong?
+
+## How many SNPs were actually set to missing by genotype-level filtering?
+
+```{r}
+nocalls %>% 
+  filter(!is.na(no_call)) %>% 
+  mutate(percent_missing = 
+           case_when(
+             stage == "post" ~ no_call/2362,
+             stage == "pre" ~ no_call/2764
+             )) %>% 
+  group_by(stage) %>% 
+  summarise(`Min missing` = min(percent_missing),
+            `Max missing` = max(percent_missing),
+            `Avg missing` = mean(percent_missing))
+```
+
+```{r}
+nocalls %>% 
+  mutate(percent_missing = 
+           case_when(
+             stage == "post" ~ no_call/2362,
+             stage == "pre" ~ no_call/2764
+             )) %>% 
+  ggplot(aes(x = percent_missing)) +
+  geom_histogram() +
+  facet_wrap(~ stage, nrow = 2, scales = "free_y")
+```
+
+## Re-evaluate starting genotype quality using 5,000 randomly selected chromosome 28 SNPs
+
+### Summary across all sites and all individuals
+
+```{r}
+gq %>% 
+  mutate(gq = if_else(20 > gq, NA_integer_, as.integer(gq))) %>% 
+  summarise(`% genotypes with GQ < 20` = sum(is.na(gq))/(sum(is.na(gq))+sum(!is.na(gq))))
+```
+
+```{r}
+gq %>% 
+  mutate(stage = "pre") %>% 
+  plot_filter_density(gq) +
+  geom_vline(xintercept = 20, color = "red") +
+  labs(title = "Density of GQ values, all genotypes at all sites")
+```
+
+### Summary averaged by site
+
+```{r}
+gq %>% 
+  group_by(pos) %>% 
+  summarise(gq = mean(gq, na.rm = TRUE)) %>% 
+  mutate(stage = "pre") %>% 
+  plot_filter_density(gq) +
+  geom_vline(xintercept = 20, color = "red") +
+  labs(title = "Density of GQ values, averaged by site")
+```
+
+### How many sites where > 10% of samples with GQ < 20?
+
+```{r}
+gqfail <-
+  gq %>% 
+  mutate(dropped = if_else(20 > gq, "TRUE", NA_character_)) %>% 
+  group_by(pos) %>% 
+  summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>% 
+  filter(percent_fail > 0.1) %>% 
+  ungroup() %>% 
+  pull(pos) %>% 
+  length(.)
+```
+
+Of 5,000 randomly pulled sites on chr 28, `r gqfail %>% scales::comma(.)` where > 10% of the samples would fail/have GQ < 20
+
+```{r}
+gq %>% 
+  mutate(dropped = if_else(20 > gq, "TRUE", NA_character_)) %>% 
+  group_by(pos) %>% 
+  summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
+  ungroup() %>% 
+  summarise(`Min % fail` = min(percent_fail), 
+            `Max % fail` = max(percent_fail),
+            `Mean % fail` = mean(percent_fail))
+```
+
+```{r}
+gq %>% 
+  mutate(dropped = if_else(20 > gq, "TRUE", NA_character_)) %>% 
+  group_by(pos) %>% 
+  summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
+  ungroup() %>% 
+  ggplot(aes(x = percent_fail)) +
+  geom_histogram()
+```
 
 
 # Commentary
