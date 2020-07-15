@@ -29,6 +29,7 @@ source(here::here("source_functions/filter_eval_functions.R"))
     + Depth of coverage per individual
     + Mean coverage per site (Yassine says limit to 8)
     + GQ per site (Yassine says limit to 20)
+* Re: Phred scale: "For many purposes, a Phred Score of 20 or above is acceptable, because this means that whatever it qualifies is 99% accurate, with a 1% chance of error."
 * 2,764 samples pre-filtering, 2,362 samples post-filtering
 
 `shuf -n N input > output`
@@ -248,6 +249,8 @@ nocalls %>%
 ```
 
 ## Re-evaluate starting genotype quality using 5,000 randomly selected chromosome 28 SNPs
+
+* "[GQ](https://gatk.broadinstitute.org/hc/en-us/articles/360035531692) represents the Phred-scaled confidence that the genotype assignment (GT) is correct, derived from the genotype PLs. *Specifically, the GQ is the difference between the PL of the second most likely genotype, and the PL of the most likely genotype.* Basically the GQ gives you the difference between the likelihoods of the two most likely genotypes. If it is low, you can tell there is not much confidence in the genotype, i.e. there was not enough evidence to confidently choose one genotype over another."
 
 ### Summary across all sites and all individuals
 
