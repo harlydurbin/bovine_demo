@@ -1,4 +1,4 @@
-# snakemake -s source_functions/filter_eval.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --resources load=100 --config --cluster-config source_functions/cluster/filter_eval.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200718.filter_eval.log
+# snakemake -s source_functions/filter_eval.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --resources load=100 --config --cluster-config source_functions/cluster/filter_eval.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200720.filter_eval.log
 
 import os
 
@@ -124,5 +124,5 @@ rule extract_gq:
 	shell:
 		"""
 		module load vcftools
-		vcftools --gzvcf {input.vcf} --get-INFO GQ --out
+		vcftools --gzvcf {input.vcf} --extract-FORMAT-info GQ --out {params.prefix}
 		"""
