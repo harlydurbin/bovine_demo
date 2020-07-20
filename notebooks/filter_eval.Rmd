@@ -63,10 +63,21 @@ nocalls <-
 
 ```{r}
 gq <-
-  read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.28_random.GQ.txt"), na = ".") %>% 
-  tidyr::pivot_longer(cols = all_of(3:2766), names_to = "international_id", values_to = "gq") %>% 
-  janitor::clean_names() %>% 
+  read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.bovine_demo.28_random.GQ.FORMAT"),
+              na = ".") %>% 
+  tidyr::pivot_longer(cols = all_of(3:2766),
+                      names_to = "international_id",
+                      values_to = "gq") %>% 
   filter(international_id %in% sample_metadata$international_id) %>% 
+  mutate(dataset = "bovine_demo") %>% 
+  bind_rows(
+    read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.1kbulls_tranche100.28_random.GQ.FORMAT"),
+                na = ".") %>% 
+      tidyr::pivot_longer(cols = all_of(3:4933),
+                          names_to = "international_id",
+                          values_to = "gq") %>% 
+      mutate(dataset = "1kbulls")) %>% 
+  janitor::clean_names() %>% 
   select(-chrom)
 ```
 
@@ -257,12 +268,13 @@ nocalls %>%
 ```{r}
 gq %>% 
   mutate(gq = if_else(20 > gq, NA_integer_, as.integer(gq))) %>% 
+  group_by(dataset) %>% 
   summarise(`% genotypes with GQ < 20` = sum(is.na(gq))/(sum(is.na(gq))+sum(!is.na(gq))))
 ```
 
 ```{r}
 gq %>% 
-  mutate(stage = "pre") %>% 
+  rename(stage = dataset) %>% 
   plot_filter_density(gq) +
   geom_vline(xintercept = 20, color = "red") +
   labs(title = "Density of GQ values, all genotypes at all sites")
@@ -272,9 +284,9 @@ gq %>%
 
 ```{r}
 gq %>% 
-  group_by(pos) %>% 
+  rename(stage = dataset) %>% 
+  group_by(pos, dataset) %>% 
   summarise(gq = mean(gq, na.rm = TRUE)) %>% 
-  mutate(stage = "pre") %>% 
   plot_filter_density(gq) +
   geom_vline(xintercept = 20, color = "red") +
   labs(title = "Density of GQ values, averaged by site")
@@ -283,25 +295,39 @@ gq %>%
 ### How many sites where > 10% of samples with GQ < 20?
 
 ```{r}
-gqfail <-
+gqfail_demo <-
   gq %>% 
+  filter(dataset = "bovine_demo") %>% 
   mutate(dropped = if_else(20 > gq, "TRUE", NA_character_)) %>% 
   group_by(pos) %>% 
-  summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>% 
+  summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
+  filter(percent_fail > 0.1) %>% 
+  ungroup() %>% 
+  pull(pos) %>% 
+  length(.)
+
+
+gqfail_1k <-
+  gq %>% 
+  filter(dataset = "bovine_demo") %>% 
+  mutate(dropped = if_else(20 > gq, "TRUE", NA_character_)) %>% 
+  group_by(pos) %>% 
+  summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
   filter(percent_fail > 0.1) %>% 
   ungroup() %>% 
   pull(pos) %>% 
   length(.)
 ```
 
-Of 5,000 randomly pulled sites on chr 28, `r gqfail %>% scales::comma(.)` where > 10% of the samples would fail/have GQ < 20
+Of 5,000 randomly pulled sites on chr 28, `r gqfail_demo %>% scales::comma(.)` where > 10% of the samples would fail/have GQ < 20 for bovine demo dataset and `r gqfail_1k %>% scales::comma(.)` where > 10% of the samples would fail/have GQ < 20 for 1K Bulls tranche100 dataset
 
 ```{r}
 gq %>% 
   mutate(dropped = if_else(20 > gq, "TRUE", NA_character_)) %>% 
-  group_by(pos) %>% 
+  group_by(pos, dataset) %>% 
   summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
   ungroup() %>% 
+  group_by(dataset) %>% 
   summarise(`Min % fail` = min(percent_fail), 
             `Max % fail` = max(percent_fail),
             `Mean % fail` = mean(percent_fail))
@@ -310,11 +336,12 @@ gq %>%
 ```{r}
 gq %>% 
   mutate(dropped = if_else(20 > gq, "TRUE", NA_character_)) %>% 
-  group_by(pos) %>% 
+  group_by(pos, dataset) %>% 
   summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
   ungroup() %>% 
   ggplot(aes(x = percent_fail)) +
-  geom_histogram()
+  geom_histogram() +
+  facet_wrap(~ dataset)
 ```
 
 

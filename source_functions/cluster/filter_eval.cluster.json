@@ -17,6 +17,13 @@
         "t": "8:00:00",
         "mail-type" : "END,FAIL"
     },
+    "downsample_tranche":
+    {
+        "c" : 8,
+        "mem" : 24G,
+        "t": "8:00:00",
+        "mail-type" : "END,FAIL"
+    },
     "depth_28":
     {
         "c" : 1,
