@@ -19,7 +19,7 @@
     },
     "downsample_tranche":
     {
-        "c" : 8,
+        "c" : 1,
         "mem" : 24G,
         "t": "8:00:00",
         "mail-type" : "END,FAIL"
@@ -32,13 +32,6 @@
         "p" : "General,Lewis,BioCompute,htc4,hpc5"
     },
     "table_28":
-    {
-        "c" : 3,
-        "mem" : 24G,
-        "t": "8:00:00",
-        "mail-type" : "END,FAIL"
-    },
-    "table_28_post":
     {
         "c" : 3,
         "mem" : 24G,

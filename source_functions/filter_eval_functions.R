@@ -14,7 +14,7 @@ plot_filter_density <-
         }
     
     df %>%
-      ggplot(aes(x = !!fvar)) +
+      ggplot(aes(x = !!fvar, fill = dataset)) +
       geom_density(alpha = 0.3) +
       theme_bw() +
       labs(
@@ -31,6 +31,7 @@ var_sum <-
     
     df %>%
       filter(!is.infinite(!!var)) %>%
+      group_by(dataset) %>% 
       summarise(
         !!glue::glue("{rlang::quo_name(var)}_min") := min(!!var, na.rm = TRUE),
         !!glue::glue("{rlang::quo_name(var)}_max") := max(!!var, na.rm = TRUE),
@@ -46,6 +47,7 @@ summarize_dropped <-
     
     total <-
       df %>% 
+      filter(dataset == "bovine_demo_pre") %>% 
       filter(!is.na(!!var)) %>% 
       filter(!is.infinite(!!var)) %>% 
       pull(!!var) %>% 
@@ -53,6 +55,7 @@ summarize_dropped <-
     
     fail <-
       df %>% 
+      filter(dataset == "bovine_demo_pre") %>% 
       filter(!is.na(!!var)) %>% 
       filter(!is.infinite(!!var)) %>% 
       filter(!!var < cutoff) %>% 

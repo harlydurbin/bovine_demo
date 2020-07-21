@@ -26,7 +26,6 @@ source(here::here("source_functions/filter_eval_functions.R"))
     + NO-CALL (count of no-call genotypes)
     + VAR (count of non-reference genotypes)
 * Need to plot
-    + Depth of coverage per individual
     + Mean coverage per site (Yassine says limit to 8)
     + GQ per site (Yassine says limit to 20)
 * Re: Phred scale: "For many purposes, a Phred Score of 20 or above is acceptable, because this means that whatever it qualifies is 99% accurate, with a 1% chance of error."
@@ -42,43 +41,44 @@ sample_metadata <- read_csv(here::here("data/derived_data/metadata/bovine_demo.s
 
 
 ```{r}
-eval_28 <- 
-  c("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.table", "data/derived_data/joint_genotyping/filter_eval/filter_eval.post.table") %>% 
-  purrr::set_names(c("pre", "post")) %>% 
-  purrr::map_dfr(~ read_table2(here::here(.x)),
-             .id = "stage") %>% 
-  janitor::clean_names() %>% 
-  left_join(
-    read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.28.ldepth.mean")) %>% 
-      select(-CHROM) %>% 
-      janitor::clean_names())
+eval_28 <-
+  c("1kbulls_tranche100", "bovine_demo") %>%
+  purrr::set_names("1kbulls_tranche100", "demo_pre") %>%
+  purrr::map_dfr(
+    ~ read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/filter_eval/filter_eval.{.x}.28.table"))) %>%
+      left_join(read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/filter_eval/filter_eval.{.x}.28.ldepth.mean")))),
+    .id = "dataset") %>%
+  select(-CHROM, -TYPE) %>% 
+  janitor::clean_names()
+```
+
+```{r}
+with_indels <-
+  read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.with_indels.table")) %>% 
+  janitor::clean_names()
+
 ```
 
 ```{r}
 nocalls <-
   eval_28 %>% 
-  filter(type == "SNP") %>% 
-  select(stage, pos, no_call) 
+  select(dataset, pos, no_call) 
 ```
 
 ```{r}
 gq <-
-  read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.bovine_demo.28_random.GQ.FORMAT"),
-              na = ".") %>% 
-  tidyr::pivot_longer(cols = all_of(3:2766),
-                      names_to = "international_id",
-                      values_to = "gq") %>% 
-  filter(international_id %in% sample_metadata$international_id) %>% 
-  mutate(dataset = "bovine_demo") %>% 
-  bind_rows(
-    read_table2(here::here("data/derived_data/joint_genotyping/filter_eval/filter_eval.1kbulls_tranche100.28_random.GQ.FORMAT"),
-                na = ".") %>% 
-      tidyr::pivot_longer(cols = all_of(3:4933),
+  c("1kbulls_tranche100", "1kbulls_tranche90", "bovine_demo", "post") %>%
+  purrr::set_names("1kbulls_tranche100", "1kbulls_tranche90", "demo_pre", "demo_post") %>%
+  purrr::map2_dfr(
+    .y = c(4933, 2766),
+    ~ read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/filter_eval/filter_eval.{.x}.28_random.GQ.FORMAT")), na = ".") %>%
+      tidyr::pivot_longer(cols = all_of(3:.y),
                           names_to = "international_id",
-                          values_to = "gq") %>% 
-      mutate(dataset = "1kbulls")) %>% 
+                          values_to = "gq"),
+    .id = "dataset") %>% 
   janitor::clean_names() %>% 
   select(-chrom)
+
 ```
 
 
@@ -86,7 +86,7 @@ gq <-
 
 ```{r}
 indel_range <- 
-  eval_28 %>% 
+  with_indels %>% 
   filter(type == "INDEL") %>% 
   select(pos) %>% 
   mutate(list = purrr::map(.x = pos, ~ seq(from = .x-5, to = .x+5))) %>% 
@@ -96,16 +96,14 @@ indel_range <-
 
 ```{r, echo=FALSE}
 in_range_length <-
-  eval_28 %>% 
-  filter(stage == "pre") %>% 
+  with_indels %>% 
   filter(type == "SNP") %>% 
   filter(pos %in% indel_range) %>% 
   pull(pos) %>% 
   length(.) 
 
 snp_length <-
-  eval_28 %>%
-  filter(stage == "pre") %>% 
+  with_indels %>%
   filter(type == "SNP") %>%
   pull(pos) %>%
   length(.)
@@ -124,7 +122,6 @@ Not to be confused with the sample-level annotation GQ; see this FAQ article for
 
 ```{r}
 eval_28 %>% 
-  filter(type == "SNP") %>% 
   plot_filter_density(var = qd, plot_title = "Density of QD values, chromosome 28") + 
   geom_vline(xintercept = 10, color = "red")
 ```
@@ -136,7 +133,6 @@ eval_28 %>%
 
 ```{r}
 eval_28 %>% 
-  filter(type == "SNP") %>% 
   plot_filter_density(var = fs, plot_title = "Density of FS values, chromosome 28") + 
   geom_vline(xintercept = 60, color = "red")
 ```
@@ -145,7 +141,6 @@ The GATK team [reccomends](http://mbontrager.org/blog/2016/08/17/Variant-Explora
 
 ```{r}
 eval_28 %>% 
-  filter(type == "SNP") %>% 
   plot_filter_density(var = fs, plot_title = "Density of FS values, chromosome 28") +
   scale_x_continuous(trans = 'log10') +
   labs(x = "log10(FS)")
@@ -158,7 +153,6 @@ eval_28 %>%
 
 ```{r}
 eval_28 %>% 
-  filter(type == "SNP") %>% 
   plot_filter_density(var = mq, plot_title = "Density of MQ values, chromosome 28") +
   geom_vline(xintercept = 15, color = "red")
 ```
@@ -169,7 +163,6 @@ eval_28 %>%
 
 ```{r}
 eval_28 %>% 
-  filter(type == "SNP") %>% 
   plot_filter_density(var = mq_rank_sum, plot_title = "Density of MQRankSum values, chromosome 28") +
   geom_vline(xintercept = -12.5, color = "red")
 ```
@@ -180,7 +173,6 @@ eval_28 %>%
 
 ```{r}
 eval_28 %>% 
-  filter(type == "SNP") %>% 
   plot_filter_density(var = read_pos_rank_sum, "Density of ReadPosRankSum values, chromosome 28") +
   geom_vline(xintercept = -8)
 ```
@@ -189,7 +181,6 @@ eval_28 %>%
 
 ```{r}
 eval_28 %>% 
-  filter(type == "SNP") %>% 
   plot_filter_density(var = mean_depth, "Mean depth per site, chromosome 28") +
   geom_vline(xintercept = 8, color = "red")
 ```
@@ -199,23 +190,18 @@ eval_28 %>%
 ```{r}
 
 eval_28 %>%
-  filter(type == "SNP") %>%
   summarize_dropped(var = mean_depth, cutoff = 8) %>%
   bind_rows(
     eval_28 %>%
-      filter(type == "SNP") %>%
       summarize_dropped(var = qd, cutoff = 10)) %>% 
   bind_rows(
     eval_28 %>%
-      filter(type == "SNP") %>%
       summarize_dropped(var = mq, cutoff = 15)) %>% 
   bind_rows(
     eval_28 %>%
-      filter(type == "SNP") %>%
       summarize_dropped(var = mq_rank_sum, cutoff = -12.5)) %>% 
   bind_rows(
     eval_28 %>%
-      filter(type == "SNP") %>%
       summarize_dropped(var = read_pos_rank_sum, cutoff = -8)) 
 ```
 
@@ -238,25 +224,28 @@ nocalls %>%
   filter(!is.na(no_call)) %>% 
   mutate(percent_missing = 
            case_when(
-             stage == "post" ~ no_call/2362,
-             stage == "pre" ~ no_call/2764
+             dataset == "demo_post" ~ no_call/2362,
+             dataset == "demo_pre" ~ no_call/2764,
+             stringr::str_detect(dataset, "1kbulls") ~ no_call/4931
              )) %>% 
-  group_by(stage) %>% 
+  group_by(dataset) %>% 
   summarise(`Min missing` = min(percent_missing),
             `Max missing` = max(percent_missing),
             `Avg missing` = mean(percent_missing))
+
 ```
 
 ```{r}
 nocalls %>% 
   mutate(percent_missing = 
            case_when(
-             stage == "post" ~ no_call/2362,
-             stage == "pre" ~ no_call/2764
+             dataset == "demo_post" ~ no_call/2362,
+             dataset == "demo_pre" ~ no_call/2764,
+             stringr::str_detect(dataset, "1kbulls") ~ no_call/4931
              )) %>% 
   ggplot(aes(x = percent_missing)) +
   geom_histogram() +
-  facet_wrap(~ stage, nrow = 2, scales = "free_y")
+  facet_wrap(~ dataset, nrow = 2, scales = "free_y")
 ```
 
 ## Re-evaluate starting genotype quality using 5,000 randomly selected chromosome 28 SNPs
@@ -274,19 +263,20 @@ gq %>%
 
 ```{r}
 gq %>% 
-  rename(stage = dataset) %>% 
   plot_filter_density(gq) +
   geom_vline(xintercept = 20, color = "red") +
   labs(title = "Density of GQ values, all genotypes at all sites")
 ```
 
+
+
 ### Summary averaged by site
 
 ```{r}
 gq %>% 
-  rename(stage = dataset) %>% 
   group_by(pos, dataset) %>% 
   summarise(gq = mean(gq, na.rm = TRUE)) %>% 
+  ungroup() %>% 
   plot_filter_density(gq) +
   geom_vline(xintercept = 20, color = "red") +
   labs(title = "Density of GQ values, averaged by site")
@@ -297,7 +287,7 @@ gq %>%
 ```{r}
 gqfail_demo <-
   gq %>% 
-  filter(dataset = "bovine_demo") %>% 
+  filter(dataset = "demo_pre") %>% 
   mutate(dropped = if_else(20 > gq, "TRUE", NA_character_)) %>% 
   group_by(pos) %>% 
   summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
@@ -306,20 +296,9 @@ gqfail_demo <-
   pull(pos) %>% 
   length(.)
 
-
-gqfail_1k <-
-  gq %>% 
-  filter(dataset = "bovine_demo") %>% 
-  mutate(dropped = if_else(20 > gq, "TRUE", NA_character_)) %>% 
-  group_by(pos) %>% 
-  summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
-  filter(percent_fail > 0.1) %>% 
-  ungroup() %>% 
-  pull(pos) %>% 
-  length(.)
 ```
 
-Of 5,000 randomly pulled sites on chr 28, `r gqfail_demo %>% scales::comma(.)` where > 10% of the samples would fail/have GQ < 20 for bovine demo dataset and `r gqfail_1k %>% scales::comma(.)` where > 10% of the samples would fail/have GQ < 20 for 1K Bulls tranche100 dataset
+Of 5,000 randomly pulled sites on chr 28, `r gqfail_demo %>% scales::comma(.)` where > 10% of the samples would fail/have GQ < 20 for bovine demo dataset
 
 ```{r}
 gq %>% 

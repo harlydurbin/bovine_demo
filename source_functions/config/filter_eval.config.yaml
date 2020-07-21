@@ -1,4 +1,4 @@
-rules: ["biallelic_28", "downsample_tranche", "depth_28", "table_28", "table_28_post", "select_random", "extract_gq"]
+rules: ["biallelic_28", "downsample_tranche", "depth_28", "table_28", "select_random", "extract_gq"]
 
 ref_genome: "/storage/hpc/group/UMAG/REF_GENOME/ARS-UCD1.2_Btau5.0.1Y.fa"
 
@@ -10,14 +10,16 @@ vcftools_module: "vcftools"
 
 biallelic_28_nt: 6
 
-dataset: ['bovine_demo', '1kbulls_tranche100', '1kbulls_tranche99', '1kbulls_tranche90']
+dataset: ['bovine_demo', '1kbulls_tranche100', '1kbulls_tranche99', '1kbulls_tranche90', 'post']
 
 full_dataset: ['bovine_demo', '1kbulls_tranche100']
 
-dataset_input: {"bovine_demo": "data/derived_data/joint_genotyping/genotype_gvcfs/genotype_gvcfs.28.vcf.gz", "1kbulls_tranche100": "/storage/htc/schnabellab/results/9913/wgs/1kbulls_ars1.2/vcf/200627_Run8_TauInd/Chr28-Run8-TAUIND-raw-toDistribute.vcf.gz"}
+dataset_start: {"bovine_demo": "data/derived_data/joint_genotyping/genotype_gvcfs/genotype_gvcfs.28.vcf.gz", "1kbulls_tranche100": "/storage/htc/schnabellab/results/9913/wgs/1kbulls_ars1.2/vcf/200627_Run8_TauInd/Chr28-Run8-TAUIND-raw-toDistribute.vcf.gz"}
+
+post_input: "data/derived_data/joint_genotyping/remove_samples/remove_samples.28.vcf.gz"
 
 tranche: ['1kbulls_tranche99', '1kbulls_tranche90']
 
-tranche_filter: {"1kbulls_tranche90": "PASS", "1kbulls_tranche99": "VQSRTrancheSNP99.90to100.00"}
+tranche_filter: {"1kbulls_tranche90": "PASS", "1kbulls_tranche99": "PASS,VQSRTrancheSNP90.00to99.00"}
 
 fraction: 0.002
