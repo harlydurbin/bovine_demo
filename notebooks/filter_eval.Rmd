@@ -42,8 +42,8 @@ sample_metadata <- read_csv(here::here("data/derived_data/metadata/bovine_demo.s
 
 ```{r}
 eval_28 <-
-  c("1kbulls_tranche100", "bovine_demo") %>%
-  purrr::set_names("1kbulls_tranche100", "demo_pre") %>%
+  c("1kbulls_tranche100", "1kbulls_tranche99", "1kbulls_tranche90", "bovine_demo", "post") %>%
+  purrr::set_names("1kbulls_tranche100", "1kbulls_tranche99", "1kbulls_tranche90", "demo_pre", "demo_post") %>%
   purrr::map_dfr(
     ~ read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/filter_eval/filter_eval.{.x}.28.table"))) %>%
       left_join(read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/filter_eval/filter_eval.{.x}.28.ldepth.mean")))),
@@ -51,6 +51,7 @@ eval_28 <-
   select(-CHROM, -TYPE) %>% 
   janitor::clean_names()
 ```
+
 
 ```{r}
 with_indels <-
@@ -67,10 +68,10 @@ nocalls <-
 
 ```{r}
 gq <-
-  c("1kbulls_tranche100", "1kbulls_tranche90", "bovine_demo", "post") %>%
-  purrr::set_names("1kbulls_tranche100", "1kbulls_tranche90", "demo_pre", "demo_post") %>%
+  c("1kbulls_tranche100", "1kbulls_tranche99", "1kbulls_tranche90", "bovine_demo", "post") %>%
+  purrr::set_names("1kbulls_tranche100", "1kbulls_tranche99", "1kbulls_tranche90", "demo_pre", "demo_post") %>%
   purrr::map2_dfr(
-    .y = c(4933, 2766),
+    .y = c(4933, 4933, 4933, 2766, 2364),
     ~ read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/filter_eval/filter_eval.{.x}.28_random.GQ.FORMAT")), na = ".") %>%
       tidyr::pivot_longer(cols = all_of(3:.y),
                           names_to = "international_id",
@@ -80,7 +81,6 @@ gq <-
   select(-chrom)
 
 ```
-
 
 # How many SNPs within 5 bp of an indel?
 
@@ -256,18 +256,34 @@ nocalls %>%
 
 ```{r}
 gq %>% 
+  filter(stringr::str_detect(dataset, "demo")) %>%
+  plot_filter_density(gq) +
+  geom_vline(xintercept = 20, color = "red") +
+  geom_vline(xintercept = 13, color = "blue") +
+  labs(title = "Density of GQ values, all genotypes at all sites")
+```
+
+
+> Using 20 
+
+```{r}
+gq %>% 
+  filter(stringr::str_detect(dataset, "demo")) %>% 
   mutate(gq = if_else(20 > gq, NA_integer_, as.integer(gq))) %>% 
   group_by(dataset) %>% 
   summarise(`% genotypes with GQ < 20` = sum(is.na(gq))/(sum(is.na(gq))+sum(!is.na(gq))))
 ```
 
+> Using 13
+
 ```{r}
 gq %>% 
-  plot_filter_density(gq) +
-  geom_vline(xintercept = 20, color = "red") +
-  labs(title = "Density of GQ values, all genotypes at all sites")
-```
+  filter(stringr::str_detect(dataset, "demo")) %>% 
+  mutate(gq = if_else(13 > gq, NA_integer_, as.integer(gq))) %>% 
+  group_by(dataset) %>% 
+  summarise(`% genotypes with GQ < 13` = sum(is.na(gq))/(sum(is.na(gq))+sum(!is.na(gq))))
 
+```
 
 
 ### Summary averaged by site
@@ -279,15 +295,25 @@ gq %>%
   ungroup() %>% 
   plot_filter_density(gq) +
   geom_vline(xintercept = 20, color = "red") +
+  geom_vline(xintercept = 13, color = "blue") +
   labs(title = "Density of GQ values, averaged by site")
 ```
 
-### How many sites where > 10% of samples with GQ < 20?
+### How many sites where > 10% of samples fail based on GQ?
 
 ```{r}
-gqfail_demo <-
+gqtotal <-
   gq %>% 
-  filter(dataset = "demo_pre") %>% 
+  filter(dataset == "demo_pre") %>% 
+  distinct(pos) %>% 
+  pull(pos) %>% 
+  length(.)
+```
+
+```{r}
+gqfail20 <-
+  gq %>% 
+  filter(dataset == "demo_pre") %>% 
   mutate(dropped = if_else(20 > gq, "TRUE", NA_character_)) %>% 
   group_by(pos) %>% 
   summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
@@ -298,10 +324,27 @@ gqfail_demo <-
 
 ```
 
-Of 5,000 randomly pulled sites on chr 28, `r gqfail_demo %>% scales::comma(.)` where > 10% of the samples would fail/have GQ < 20 for bovine demo dataset
+```{r}
+gqfail13 <-
+  gq %>% 
+  filter(dataset == "demo_pre") %>% 
+  mutate(dropped = if_else(13 > gq, "TRUE", NA_character_)) %>% 
+  group_by(pos) %>% 
+  summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
+  filter(percent_fail > 0.1) %>% 
+  ungroup() %>% 
+  pull(pos) %>% 
+  length(.)
+
+```
+
+Using GQ cutoff of 20, `r scales::percent(gqfail20/gqtotal)` of variants would be removed. Using GQ cutoff of 13, `r scales::percent(gqfail13/gqtotal)` of variants would be removed.
+
+> Using 20
 
 ```{r}
 gq %>% 
+  filter(dataset == "demo_pre") %>% 
   mutate(dropped = if_else(20 > gq, "TRUE", NA_character_)) %>% 
   group_by(pos, dataset) %>% 
   summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
@@ -321,6 +364,101 @@ gq %>%
   ggplot(aes(x = percent_fail)) +
   geom_histogram() +
   facet_wrap(~ dataset)
+```
+
+> Using 13
+
+```{r}
+gq %>% 
+  filter(dataset == "demo_pre") %>% 
+  mutate(dropped = if_else(13 > gq, "TRUE", NA_character_)) %>% 
+  group_by(pos, dataset) %>% 
+  summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
+  ungroup() %>% 
+  group_by(dataset) %>% 
+  summarise(`Min % fail` = min(percent_fail), 
+            `Max % fail` = max(percent_fail),
+            `Mean % fail` = mean(percent_fail))
+```
+
+```{r}
+gq %>% 
+  mutate(dropped = if_else(13 > gq, "TRUE", NA_character_)) %>% 
+  group_by(pos, dataset) %>% 
+  summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
+  ungroup() %>% 
+  ggplot(aes(x = percent_fail)) +
+  geom_histogram() +
+  facet_wrap(~ dataset)
+```
+
+# Problem samples?
+
+```{r}
+gq_demo <-
+  gq %>% 
+  filter(dataset == "demo_pre") %>% 
+  left_join(sample_metadata %>% 
+              select(international_id, population, species)) %>% 
+  mutate(removed = if_else(is.na(population), "yes", "no"))
+```
+
+## What if I took out samples with median GQ < 13? 
+
+* As expected, this ends up being by my far removed outgroup samples
+
+```{r}
+gq_demo %>% 
+  group_by(international_id, removed, population, species) %>% 
+  summarise(median = median(gq, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  filter(removed == "no") %>% 
+  filter(13 > median) %>% 
+  group_by(population) %>% 
+  tally(sort = TRUE)
+
+```
+
+```{r}
+drop <-
+  gq_demo %>% 
+  group_by(international_id, removed, population, species) %>% 
+  summarise(median = median(gq, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  filter(removed == "no") %>% 
+  filter(13 > median) %>% 
+  filter(!population %in% c("ancient"))
+
+```
+
+* Even if I do remove those outgroup samples, I still theoretically would remove ~half of sites due to missingness
+
+```{r}
+gq_demo %>% 
+  filter(removed == "no") %>% 
+  filter(!international_id %in% drop$international_id) %>% 
+  mutate(dropped = if_else(13 > gq, "TRUE", NA_character_)) %>% 
+  group_by(pos) %>% 
+  summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
+  filter(percent_fail > 0.1) %>% 
+  ungroup() %>% 
+  pull(pos) %>% 
+  length(.)
+
+```
+
+```{r}
+gq_demo %>% 
+  filter(removed == "no") %>% 
+  #filter(!international_id %in% drop$international_id) %>% 
+  mutate(dropped = if_else(10 > gq, "TRUE", NA_character_)) %>% 
+  group_by(pos) %>% 
+  summarise(percent_fail = sum(!is.na(dropped))/(sum(!is.na(dropped))+sum(is.na(dropped)))) %>%
+  filter(percent_fail > 0.1) %>% 
+  ungroup() %>% 
+  pull(pos) %>% 
+  length(.)
+
 ```
 
 
