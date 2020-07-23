@@ -159,24 +159,3 @@ rule remove_failed:
 		module load {params.java_module}
 		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -jar {params.gatk_path} -L {params.chr} -T SelectVariants -nt {params.nt} -R {params.ref_genome} -ef --removeUnusedAlternates -env -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 5
 		"""
-
-rule validate_variants:
-	input:
-		vcf = "data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz",
-		tbi = "data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi"
-	params:
-		java_module = config['java_module'],
-		ref_genome = config['ref_genome'],
-		gc_threads = config['validate_variants_gc'],
-		xmx = config['validate_variants_xmx'],
-		java_tmp = "temp/joint_genotyping/validate_variants/{chr}",
-		gatk_path = config['gatk_path'],
-		psrecord = "log/psrecord/joint_genotyping/validate_variants/validate_variants.{chr}.log",
-		chr = "{chr}"
-	output:
-		report = "data/derived_data/joint_genotyping/validate_variants/validate_variants.{chr}.txt"
-	shell:
-		"""
-		module load {params.java_module}
-		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.gatk_path} -T ValidateVariants -R {params.ref_genome} -V {input.vcf} -L {params.chr} --warnOnErrors &> {output.report}" --log {params.psrecord} --include-children --interval 5
-		"""

@@ -72,58 +72,23 @@ rule collect_metrics:
 		psrecord "java -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.picard_path} CollectVariantCallingMetrics TMP_DIR={params.java_tmp} INPUT={input.vcf} OUTPUT={params.prefix} DBSNP={params.truth_file} R={params.ref_genome} THREAD_COUNT={params.nt}" --log {params.psrecord} --include-children --interval 5
 		"""
 
-rule sample_list:
+rule validate_variants:
 	input:
-		vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.28.vcf.gz"
+		vcf = "data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz",
+		tbi = "data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi"
 	params:
-		bcftools_module = config['bcftools_module']
+		java_module = config['java_module'],
+		ref_genome = config['ref_genome'],
+		gc_threads = config['validate_variants_gc'],
+		xmx = config['validate_variants_xmx'],
+		java_tmp = "temp/joint_genotyping/validate_variants/{chr}",
+		gatk_path = config['gatk_path'],
+		psrecord = "log/psrecord/joint_genotyping/validate_variants/validate_variants.{chr}.log",
+		chr = "{chr}"
 	output:
-		sample_list = "data/derived_data/joint_genotyping/reheader/sample_list.txt"
+		report = "data/derived_data/joint_genotyping/validate_variants/validate_variants.{chr}.txt"
 	shell:
 		"""
-		module load {params.bcftools_module}
-		bcftools query -l {input.vcf} > {output.sample_list}
-		"""
-
-rule sample_key:
-	input:
-		sample_list = "data/derived_data/joint_genotyping/reheader/sample_list.txt",
-		script = "source_functions/sample_key.R"
-	params:
-		r_module = config['r_module']
-	output:
-		sample_key = "data/derived_data/joint_genotyping/reheader/sample_key.txt"
-	shell:
-		"""
-		module load {params.r_module}
-		Rscript --vanilla {input.script}
-		"""
-
-rule reheader:
-	input:
-		sample_key = "data/derived_data/joint_genotyping/reheader/sample_key.txt",
-		vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.{chr}.vcf.gz",
-		tbi = "data/derived_data/joint_genotyping/remove_samples/remove_samples.{chr}.vcf.gz.tbi"
-	params:
-		bcftools_module = config['bcftools_module'],
-		psrecord = "log/psrecord/joint_genotyping/reheader/reheader.{chr}.log"
-	output:
-		vcf = "data/derived_data/joint_genotyping/reheader/bovine_demo.{chr}.vcf.gz"
-	shell:
-		"""
-		module load {params.bcftools_module}
-		psrecord "bcftools reheader --samples {input.sample_key} -o {output.vcf} {input.vcf}" --log {params.psrecord} --include-children --interval 5
-		"""
-
-rule index_reheader:
-	input:
-		vcf = "data/derived_data/joint_genotyping/reheader/bovine_demo.{chr}.vcf.gz"
-	params:
-		bcftools_module = config['bcftools_module']
-	output:
-		tbi = "data/derived_data/joint_genotyping/reheader/bovine_demo.{chr}.vcf.gz.tbi"
-	shell:
-		"""
-		module load {params.bcftools_module}
-		tabix {input.vcf}
+		module load {params.java_module}
+		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.gatk_path} -T ValidateVariants -R {params.ref_genome} -V {input.vcf} -L {params.chr} --warnOnErrors &> {output.report}" --log {params.psrecord} --include-children --interval 5
 		"""
