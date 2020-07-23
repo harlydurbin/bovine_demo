@@ -1,4 +1,4 @@
-# snakemake -s source_functions/reheader.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/genotyping_qc_phasing.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" --until collect_metrics -p &> log/snakemake_log/joint_genotyping/200707.reheader.log
+# snakemake -s source_functions/post_process.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/genotyping_qc_phasing.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200723.joint_genotyping.log
 
 # include path is relative to the path of this file
 include: "joint_genotyping.snakefile"
@@ -7,23 +7,23 @@ configfile: "source_functions/config/genotyping_qc_phasing.config.yaml"
 
 import os
 
-os.makedirs("log/slurm_out/reheader", exist_ok = True)
+os.makedirs("log/slurm_out/post_process", exist_ok = True)
 
 # Make log directories if they don't exist
-for x in expand("log/slurm_out/reheader/{rules}", rules = config['reheader_rules']):
+for x in expand("log/slurm_out/post_process/{rules}", rules = config['post_process_rules']):
     os.makedirs(x, exist_ok = True)
 
-for x in expand("log/psrecord/joint_genotyping/{rules}", rules = config['reheader_rules']):
+for x in expand("log/psrecord/joint_genotyping/{rules}", rules = config['post_process_rules']):
     os.makedirs(x, exist_ok = True)
 
-os.makedirs("temp/reheader", exist_ok = True)
-for x in expand("temp/reheader/{rules}", rules = config['reheader_rules']):
+os.makedirs("temp/post_process", exist_ok = True)
+for x in expand("temp/post_process/{rules}", rules = config['post_process_rules']):
     os.makedirs(x, exist_ok = True)
 
-
-rule reheader_all:
+rule post_process_all:
 	input:
-	 	expand("data/derived_data/joint_genotyping/reheader/bovine_demo.{chr}.vcf.gz.tbi", chr = config['chr']), expand("data/derived_data/joint_genotyping/reheader/bovine_demo.{chr}.vcf.gz", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_detail_metrics", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_summary_metrics", chr = config['chr'])
+	 	expand("data/derived_data/joint_genotyping/remove_samples/bovine_demo.{chr}.vcf.gz", chr = config['chr']), expand("data/derived_data/joint_genotyping/remove_samples/bovine_demo.{chr}.vcf.gz.tbi", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_detail_metrics", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_summary_metrics", chr = config['chr']),
+		expand("data/derived_data/joint_genotyping/validate_variants/validate_variants.{chr}.txt", chr = config['chr'])
 
 rule remove_samples:
 	input:
@@ -36,12 +36,12 @@ rule remove_samples:
 		gc_threads = config['select_variants_gc'],
 		nt = config['select_variants_nt'],
 		chr = "{chr}",
-		java_tmp = "temp/reheader/remove_samples/{chr}",
+		java_tmp = "temp/post_process/remove_samples/{chr}",
 		gatk_path = config['gatk_path'],
 		psrecord = "log/psrecord/joint_genotyping/remove_samples/remove_samples.{chr}.log"
 	output:
-		vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.{chr}.vcf.gz",
-		tbi = "data/derived_data/joint_genotyping/remove_samples/remove_samples.{chr}.vcf.gz.tbi"
+		vcf = "data/derived_data/joint_genotyping/remove_samples/bovine_demo.{chr}.vcf.gz",
+		tbi = "data/derived_data/joint_genotyping/remove_samples/bovine_demo.{chr}.vcf.gz.tbi"
 	shell:
 		"""
 		module load {params.java_module}
@@ -50,8 +50,8 @@ rule remove_samples:
 
 rule collect_metrics:
 	input:
-		vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.{chr}.vcf.gz",
-		tbi = "data/derived_data/joint_genotyping/remove_samples/remove_samples.{chr}.vcf.gz.tbi"
+		vcf = "data/derived_data/joint_genotyping/remove_samples/bovine_demo.{chr}.vcf.gz",
+		tbi = "data/derived_data/joint_genotyping/remove_samples/bovine_demo.{chr}.vcf.gz.tbi"
 	params:
 		picard_module = config['picard_module'],
 		java_tmp = "temp/joint_genotyping/collect_metrics/{chr}",
@@ -74,8 +74,8 @@ rule collect_metrics:
 
 rule validate_variants:
 	input:
-		vcf = "data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz",
-		tbi = "data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi"
+		vcf = "data/derived_data/joint_genotyping/remove_samples/bovine_demo.{chr}.vcf.gz",
+		tbi = "data/derived_data/joint_genotyping/remove_samples/bovine_demo.{chr}.vcf.gz.tbi"
 	params:
 		java_module = config['java_module'],
 		ref_genome = config['ref_genome'],

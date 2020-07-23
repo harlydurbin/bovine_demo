@@ -25,7 +25,7 @@ for x in expand("temp/joint_genotyping/{rules}", rules = config['joint_genotypin
 
 rule joint_genotyping_all:
 	input:
-		expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz", chr = config['chr']), expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi", chr = config['chr']), expand("data/derived_data/joint_genotyping/validate_variants/validate_variants.{chr}.txt", chr = config['chr'])
+		expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz", chr = config['chr']), expand("data/derived_data/joint_genotyping/remove_failed/remove_failed.{chr}.vcf.gz.tbi", chr = config['chr'])
 
 rule combine_gvcfs:
 # Can't parallelize CombineGVCFs!!!
@@ -135,7 +135,7 @@ rule variant_filtration:
 	shell:
 		"""
 		module load {params.java_module}
-		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.gatk_path} -T VariantFiltration -R {params.ref_genome} -L {params.chr} {params.filter} --setFilteredGtToNocall -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 5
+		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.gatk_path} -T VariantFiltration -R {params.ref_genome} -L {params.chr} {params.filter} -V {input.vcf} -o {output.vcf}" --log {params.psrecord} --include-children --interval 5
 		"""
 
 rule remove_failed:

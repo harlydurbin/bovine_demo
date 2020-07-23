@@ -47,15 +47,6 @@
         "t": "12:00:00",
         "mem" : 16G
     },
-    "validate_variants":
-    {
-        "mail-type" : "END,FAIL",
-        "c" : 3,
-        "t": "12:00:00",
-        "p" : "General,Lewis,BioCompute,htc4,hpc5",
-        "mem" : 12G,
-        "o": "data/derived_data/joint_genotyping/validate_variants/validate_variants.{wildcards.chr}.txt"
-    },
     "targets_file":
     {
         "c" : 1,
@@ -113,7 +104,16 @@
         "c" : 8,
         "t": "12:00:00",
         "mem" : 16G,
-        "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out"
+        "o": "log/slurm_out/post_process/{rule}/{wildcards}.%j.out"
+    },
+    "validate_variants":
+    {
+        "mail-type" : "END,FAIL",
+        "c" : 3,
+        "t": "12:00:00",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5",
+        "mem" : 12G,
+        "o": "data/derived_data/joint_genotyping/validate_variants/validate_variants.{wildcards.chr}.txt"
     },
     "collect_metrics":
     {
@@ -121,38 +121,7 @@
         "c" : 10,
         "t": "12:00:00",
         "mem" : 24G,
-        "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out"
-    },
-    "sample_list":
-    {
-        "c" : 1,
-        "t": "00:10:00",
-        "mem" : 1G,
-        "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out",
-        "p" : "General,Lewis,BioCompute,htc4,hpc5"
-    },
-    "sample_key":
-    {
-        "c" : 1,
-        "t": "00:10:00",
-        "mem" : 1G,
-        "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out",
-        "p" : "General,Lewis,BioCompute,htc4,hpc5"
-    },
-    "reheader":
-    {
-        "c" : 1,
-        "t": "12:00:00",
-        "mem" : 16G,
-        "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out"
-    },
-    "index_reheader":
-    {
-        "mem" : 3G,
-        "c" : 1,
-        "t": "1:00:00",
-        "o": "log/slurm_out/reheader/{rule}/{wildcards}.%j.out",
-        "p" : "General,Lewis,BioCompute,htc4,hpc5"
+        "o": "log/slurm_out/post_process/{rule}/{wildcards}.%j.out"
     },
     "snp_positions":
     {

@@ -28,7 +28,7 @@ shapeit_module: "shapeit/shapeit-2r837"
 
 #### joint_genotyping ####
 
-joint_genotyping_rules: ["combine_gvcfs", "genotype_gvcfs_list", "genotype_gvcfs", "select_variants", "variant_filtration", "remove_failed", "validate_variants"]
+joint_genotyping_rules: ["combine_gvcfs", "genotype_gvcfs_list", "genotype_gvcfs", "select_variants", "variant_filtration", "remove_failed"]
 
 cohort : ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33']
 
@@ -50,7 +50,7 @@ variant_filtration_gc: 2
 
 variant_filtration_xmx: 20
 
-variant_filter: "-filter 'QD < 7.0' --filterName 'QD7' -filter 'FS > 60.0' --filterName 'FS60' -filter 'MQ < 15.0' --filterName 'MQ15' --genotypeFilterExpression 'DP < 8.0' --genotypeFilterName 'DP8' --genotypeFilterExpression 'GQ < 20.0' --genotypeFilterName 'GQ20'"
+variant_filter: "-filter 'QD < 7.0' --filterName 'QD7' -filter 'FS > 60.0' --filterName 'FS60' -filter 'MQ < 15.0' --filterName 'MQ15'"
 
 validate_variants_gc: 2
 
@@ -68,9 +68,9 @@ merge_bed_nt: 36
 
 king_nt: 12
 
-#### reheader ####
+#### post_process ####
 
-reheader_rules: ["remove_samples", "collect_metrics", "sample_list", "sample_key", "reheader"]
+post_process_rules: ["remove_samples", "collect_metrics", "validate_variants"]
 
 collect_metrics_nt: 8
 

@@ -5,7 +5,7 @@ library(tidylog)
 
 sample_metadata <- read_csv(here::here("data/derived_data/metadata/coverage/coverage.sample_metadata.csv"))
 
-# List of duplicates, unknown pops, low coverage to be removed
+# List of duplicates, unknown pops, low coverage, poor GQ to be removed
 
 remove <-
   read_tsv(
@@ -23,7 +23,13 @@ remove <-
       filter(5 >= avg_coverage) %>%
       filter(species %in% c("bos taurus", "bos indicus", "composite")) %>%
       select(international_id)
-  ) %>% 
+  ) %>%
+  bind_rows(read_tsv(
+    here::here(
+      "data/derived_data/joint_genotyping/filter_eval/remove_gq.txt"
+    ),
+    col_names = "international_id"
+  )) %>%
   distinct()
 
 
