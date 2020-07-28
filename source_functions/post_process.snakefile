@@ -92,3 +92,17 @@ rule validate_variants:
 		module load {params.java_module}
 		psrecord "java -Djava.io.tmpdir={params.java_tmp} -XX:ParallelGCThreads={params.gc_threads} -Xmx{params.xmx}g -jar {params.gatk_path} -T ValidateVariants -R {params.ref_genome} -V {input.vcf} -L {params.chr} --warnOnErrors &> {output.report}" --log {params.psrecord} --include-children --interval 5
 		"""
+
+# Need physiscal positions in order to construct genetic map
+rule snp_positions:
+	input:
+		vcf = "data/derived_data/joint_genotyping/remove_samples/bovine_demo.{chr}.vcf.gz"
+	params:
+		bcftools_module = config['bcftools_module']
+	output:
+		pos_list = "data/derived_data/joint_genotyping/snp_positions/snp_positions.{chr}.txt"
+	shell:
+		"""
+		module load {params.bcftools_module}
+		bcftools query -f "%CHROM\\t%POS\\n" {input.vcf} >  {output.pos_list}
+		"""

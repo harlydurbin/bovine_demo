@@ -2,6 +2,9 @@
 
 import os
 
+# include path is relative to the path of this file
+include: "post_process.snakefile"
+
 configfile: "source_functions/config/genotyping_qc_phasing.config.yaml"
 
 os.makedirs("log/slurm_out/phasing", exist_ok = True)
@@ -16,55 +19,6 @@ for x in expand("log/psrecord/joint_genotyping/{rules}", rules = config['phasing
 rule all:
 	input:
 		expand("data/derived_data/joint_genotyping/snp_positions/snp_positions.{chr}.txt", chr = config['chr']), expand("data/derived_data/joint_genotyping/impute_sex/bovine_demo.guess_ploidy.{tag}.txt", tag = config['tag']), expand("data/derived_data/joint_genotyping/phasing/phasing.{autosome}.haps.gz", autosome = list(range(1,30))), "data/derived_data/joint_genotyping/phasing/phasing.X.haps.gz", "data/derived_data/joint_genotyping/phasing/phasing.Y.haps.gz"
-
-# Need physiscal positions in order to construct genetic map
-rule snp_positions:
-	input:
-		vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.{chr}.vcf.gz"
-	params:
-		bcftools_module = config['bcftools_module']
-	output:
-		pos_list = "data/derived_data/joint_genotyping/snp_positions/snp_positions.{chr}.txt"
-	shell:
-		"""
-		module load {params.bcftools_module}
-		bcftools query -f "%CHROM\\t%POS\\n" {input.vcf} >  {output.pos_list}
-		"""
-
-#### SEX IMPUTATION ####
-rule guess_ploidy:
-	input:
-		x_vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.X.vcf.gz"
-	params:
-		bcftools_module = config['bcftools_module'],
-		psrecord = "log/psrecord/joint_genotyping/guess_ploidy/guess_ploidy.{tag}.log",
-		tag = "{tag}",
-		pab = config['pab']
-	output:
-		sex_list = "data/derived_data/joint_genotyping/impute_sex/bovine_demo.guess_ploidy.{tag}.txt"
-	shell:
-		"""
-		module load {params.bcftools_module}
-		psrecord "bcftools +guess-ploidy -r X:1-{params.pab} --tag {params.tag} {input.x_vcf} > {output.sex_list}" --log {params.psrecord} --include-children --interval 5
-		"""
-
-rule plink_impute_sex:
-	input:
-		x_vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.X.vcf.gz"
-	params:
-		plink_module = config['plink_module'],
-		pab = config['pab'],
-		remove_par_prefix = "data/derived_data/joint_genotyping/impute_sex/remove_par",
-		impute_sex_prefix = "data/derived_data/joint_genotyping/impute_sex/impute_sex"
-	output:
-		fam = "data/derived_data/joint_genotyping/impute_sex/impute_sex.fam",
-		sexcheck = "data/derived_data/joint_genotyping/impute_sex/impute_sex.sexcheck"
-	shell:
-		"""
-		module load {params.plink_module}
-		plink --vcf {input.vcf} --make-bed --double-id --cow --chr X -set-missing-var-ids @:#\$1\$2 --threads 12 --from-bp 1 --to-bp {params.pab} --out {params.remove_par_prefix}
-		plink --bfile data/derived_data/joint_genotyping/impute_sex/remov_par --double-id --cow --threads 12 --impute-sex --make-bed --out {params.impute_sex_prefix}
-		"""
 
 #### PHASING ####
 

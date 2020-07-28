@@ -78,17 +78,21 @@ collect_metrics_gc: 2
 
 collect_metrics_xmx: 24
 
-#### phasing ####
+#### sex_imputation ####
 
-phasing_rules: ["snp_positions", "guess_ploidy", "plink_impute_sex", "phasing_qc", "phasing_qc_x", "phasing_qc_y", "shapeit_sex_check", "phase_autosomes", "phase_x", "phase_y"]
+sex_imputation_rules: ["guess_ploidy", "plink_impute_sex"]
+
+tag: ["GT", "PL"]
 
 plink_nt: 12
 
 pab: 133300518
 
-genetic_map: "data/raw_data/placeholder.map"
+#### phasing ####
 
-tag: ["GT", "PL"]
+phasing_rules: ["snp_positions", "phasing_qc", "phasing_qc_x", "phasing_qc_y", "shapeit_sex_check", "phase_autosomes", "phase_x", "phase_y"]
+
+genetic_map: "data/raw_data/placeholder.map"
 
 imputed_sexes: "data/derived_data/joint_genotyping/impute_sex/imputed_sexes.txt"
 
