@@ -138,6 +138,20 @@ usage_summary(process = "joint_genotyping", keyword = "remove_failed")
 usage_facets(process = "joint_genotyping", keyword = "remove_failed")
 ```
 
+# `post_process`
+
+## `remove_samples`
+
+* Remove duplicate and low quality samples using `GATK SelectVariants`
+
+```{r}
+usage_summary(process = "joint_genotyping", keyword = "remove_samples") 
+```
+
+```{r}
+usage_facets(process = "joint_genotyping", keyword = "remove_samples")
+```
+
 ## `collect_metrics`
 
 * Run `Picard CollectVariantCallingMetrics` on chromosome files
@@ -162,33 +176,7 @@ usage_summary(process = "joint_genotyping", keyword = "validate_variants")
 usage_facets(process = "joint_genotyping", keyword = "validate_variants")
 ```
 
-# `reheader`
-
-## `remove_samples`
-
-* Remove duplicate and low quality samples using `GATK SelectVariants`
-
-```{r}
-usage_summary(process = "joint_genotyping", keyword = "remove_samples") 
-```
-
-```{r}
-usage_facets(process = "joint_genotyping", keyword = "remove_samples")
-```
-
-## `reheader`
-
-* Rename samples from international_id --> lab_id using `bcftools reheader`
-
-```{r,eval=FALSE}
-usage_summary(process = "joint_genotyping", keyword = "reheader") 
-```
-
-```{r, eval=FALSE}
-usage_facets(process = "joint_genotyping", keyword = "reheader")
-```
-
-# `phasing`
+# `sex_imputation`
 
 ## `guess_ploidy`
 
@@ -201,3 +189,5 @@ usage_summary(process = "joint_genotyping", keyword = "guess_ploidy")
 ```{r, eval=FALSE}
 usage_facets(process = "joint_genotyping", keyword = "guess_ploidy")
 ```
+
+# `phasing`
