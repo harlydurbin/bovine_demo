@@ -32,10 +32,6 @@ library(magrittr)
     + Heterozygosity on the X
     
     
-plink --vcf data/derived_data/joint_genotyping/remove_samples/remove_samples.X.vcf.gz --make-bed --double-id --cow --chr X -set-missing-var-ids @:#\$1\$2 --threads 12 --from-bp 1 --to-bp 133300518 --out test_x
-
-plink --bfile test_x --double-id --cow --threads 12 --impute-sex --make-bed --out impute_sex
-    
 # Setup
 
 ```{r}
@@ -163,7 +159,7 @@ sex_impute %<>%
   left_join(purrr::map(.x = c("GT", "PL"), ~ read_table2(
     here::here(
       glue::glue(
-        "data/derived_data/joint_genotyping/impute_sex/bovine_demo.guess_ploidy.{.x}.txt"
+        "data/derived_data/joint_genotyping/sex_imputation/bovine_demo.guess_ploidy.{.x}.txt"
       )
     ),
     col_names = c("international_id", glue::glue("sex_{.x}"))
@@ -181,7 +177,7 @@ sex_impute %<>%
   left_join(
     read_table2(
       here::here(
-        "data/derived_data/joint_genotyping/impute_sex/impute_sex.sexcheck"
+        "data/derived_data/joint_genotyping/sex_imputation/bovine_demo.impute_sex.sexcheck"
       )
     ) %>%
       janitor::clean_names() %>%
@@ -263,7 +259,7 @@ sex_impute %>%
 sex_impute %>% 
   mutate(fid = international_id) %>% 
   select(international_id, fid, imputed_sex) %>% 
-  write_tsv(here::here("data/derived_data/joint_genotyping/impute_sex/imputed_sexes.txt"), col_names = FALSE)
+  write_tsv(here::here("data/derived_data/joint_genotyping/sex_imputation/imputed_sexes.txt"), col_names = FALSE)
 ```
 
 

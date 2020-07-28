@@ -22,7 +22,7 @@ for x in expand("temp/post_process/{rules}", rules = config['post_process_rules'
 
 rule post_process_all:
 	input:
-	 	expand("data/derived_data/joint_genotyping/remove_samples/bovine_demo.{chr}.vcf.gz", chr = config['chr']), expand("data/derived_data/joint_genotyping/remove_samples/bovine_demo.{chr}.vcf.gz.tbi", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_detail_metrics", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_summary_metrics", chr = config['chr']),
+	 	expand("data/derived_data/joint_genotyping/remove_samples/bovine_demo.{chr}.vcf.gz", chr = config['chr']), expand("data/derived_data/joint_genotyping/remove_samples/bovine_demo.{chr}.vcf.gz.tbi", chr = config['chr']), expand("data/derived_data/joint_genotyping/snp_positions/snp_positions.{chr}.txt", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_detail_metrics", chr = config['chr']), expand("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{chr}.variant_calling_summary_metrics", chr = config['chr']),
 		expand("data/derived_data/joint_genotyping/validate_variants/validate_variants.{chr}.txt", chr = config['chr'])
 
 rule remove_samples:

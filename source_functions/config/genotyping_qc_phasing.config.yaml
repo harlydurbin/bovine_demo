@@ -70,7 +70,7 @@ king_nt: 12
 
 #### post_process ####
 
-post_process_rules: ["remove_samples", "collect_metrics", "validate_variants"]
+post_process_rules: ["snp_positions", "remove_samples", "collect_metrics", "validate_variants"]
 
 collect_metrics_nt: 8
 
@@ -88,14 +88,18 @@ plink_nt: 12
 
 pab: 133300518
 
-#### phasing ####
+#### plink_qc ####
 
-phasing_rules: ["snp_positions", "phasing_qc", "phasing_qc_x", "phasing_qc_y", "shapeit_sex_check", "phase_autosomes", "phase_x", "phase_y"]
-
-genetic_map: "data/raw_data/placeholder.map"
+plink_qc_rules: ["qc_autosomes", "qc_x", "qc_y"]
 
 imputed_sexes: "data/derived_data/joint_genotyping/impute_sex/imputed_sexes.txt"
 
 geno_filter: 0.10
+
+#### phasing ####
+
+phasing_rules: ["shapeit_sex_check", "phase_autosomes", "phase_x", "phase_y"]
+
+genetic_map: "data/raw_data/placeholder.map"
 
 shapeit_nt: 12

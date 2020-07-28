@@ -33,7 +33,7 @@ sample_metadata <- read_csv(here::here("data/derived_data/metadata/bovine_demo.s
 
 ```{r}
 var_detail <-
-  c(1:29, "X", "Y") %>% 
+  c(2:29, "X", "Y") %>% 
   purrr::set_names() %>% 
   purrr::map_dfr(~ read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{.x}.variant_calling_detail_metrics")), skip = 6, col_types = cols(.default = "c")), .id = "chr") %>% 
   janitor::clean_names() %>% 
@@ -76,7 +76,7 @@ var_detail_wg <-
 
 ```{r}
 var_sum <-
-  c(1:29, "X", "Y") %>% 
+  c(2:29, "X", "Y") %>% 
   purrr::set_names() %>% 
   purrr::map_dfr(~ read_table2(here::here(glue::glue("data/derived_data/joint_genotyping/collect_metrics/collect_metrics.{.x}.variant_calling_summary_metrics")), skip = 6), .id = "chr") %>% 
   janitor::clean_names() %>% 

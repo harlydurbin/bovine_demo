@@ -1,5 +1,7 @@
 # snakemake -s source_functions/faststructure.bovine_demo.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --use-conda --resources load=100 --config --cluster-config source_functions/cluster/faststructure.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type} --qos {cluster.qos}" -p &> log/snakemake_log/faststructure/200713.faststructure.log
 
+include: "plink_qc.snakefile"
+
 configfile: "source_functions/config/faststructure.config.yaml"
 
 #Make log directories if they don't exist
@@ -20,13 +22,13 @@ def thin_chooser(WC):
 # Output is all samples, variant density thinned to specified thinning parameter, chromosome-by-chromosome
 rule thin_variants:
 	input:
-		bed = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.{chr}.bed",
-		bim = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.{chr}.bim",
-		fam = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.{chr}.fam"
+		bed = "data/derived_data/joint_genotyping/plink_qc/qc.{chr}.bed",
+		bim = "data/derived_data/joint_genotyping/plink_qc/qc.{chr}.bim",
+		fam = "data/derived_data/joint_genotyping/plink_qc/qc.{chr}.fam"
 	params:
 		plink_module = config['plink_module'],
 		nt = config['plink_nt'],
-		in_prefix = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.{chr}",
+		in_prefix = "data/derived_data/joint_genotyping/plink_qc/qc.{chr}",
 		out_prefix = "data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{thin_p}",
 		thin_p = thin_chooser
 	resources:

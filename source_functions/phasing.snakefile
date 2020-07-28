@@ -2,8 +2,7 @@
 
 import os
 
-# include path is relative to the path of this file
-include: "post_process.snakefile"
+include: "plink_qc.snakefile"
 
 configfile: "source_functions/config/genotyping_qc_phasing.config.yaml"
 
@@ -18,82 +17,20 @@ for x in expand("log/psrecord/joint_genotyping/{rules}", rules = config['phasing
 
 rule all:
 	input:
-		expand("data/derived_data/joint_genotyping/snp_positions/snp_positions.{chr}.txt", chr = config['chr']), expand("data/derived_data/joint_genotyping/impute_sex/bovine_demo.guess_ploidy.{tag}.txt", tag = config['tag']), expand("data/derived_data/joint_genotyping/phasing/phasing.{autosome}.haps.gz", autosome = list(range(1,30))), "data/derived_data/joint_genotyping/phasing/phasing.X.haps.gz", "data/derived_data/joint_genotyping/phasing/phasing.Y.haps.gz"
-
-#### PHASING ####
-
-rule phasing_qc:
-	input:
-		vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.{autosome}.vcf.gz",
-		imputed_sexes = config['imputed_sexes']
-	params:
-		plink_module = config['plink_module'],
-		prefix = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.{autosome}",
-		nt = config['plink_nt'],
-		geno_filter = config['geno_filter'],
-		autosome = "{autosome}"
-	output:
-		bed = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.{autosome}.bed",
-		bim = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.{autosome}.bim",
-		fam = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.{autosome}.fam"
-	shell:
-		"""
-		module load {params.plink_module}
-		plink --vcf {input.vcf} --make-bed --double-id --cow --chr {params.autosome} -set-missing-var-ids @:#\$1\$2 --threads {params.nt} --update-sex {input.imputed_sexes} --geno {params.geno_filter} --out {params.prefix}
-		"""
-
-rule phasing_qc_x:
-	input:
-		vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.X.vcf.gz",
-		imputed_sexes = config['imputed_sexes']
-	params:
-		plink_module = config['plink_module'],
-		pab = config['pab'],
-		prefix = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.X",
-		nt = config['plink_nt'],
-		geno_filter = config['geno_filter']
-	output:
-		bed = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.X.bed",
-		bim = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.X.bim",
-		fam = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.X.fam"
-	shell:
-		"""
-		module load {params.plink_module}
-		plink --vcf {input.vcf} --make-bed --double-id --cow --chr X -set-missing-var-ids @:#\$1\$2 --threads {params.nt} --from-bp 1 --to-bp {params.pab} --update-sex {input.imputed_sexes} --geno {params.geno_filter} --out {params.prefix}
-		"""
-
-# set heterozygous calls to missing on the Y
-rule phasing_qc_y:
-	input:
-		vcf = "data/derived_data/joint_genotyping/remove_samples/remove_samples.Y.vcf.gz",
-		imputed_sexes = config['imputed_sexes']
-	params:
-		plink_module = config['plink_module'],
-		nt = config['plink_nt'],
-		prefix = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.Y",
-		geno_filter = config['geno_filter']
-	output:
-		bed = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.Y.bed",
-		bim = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.Y.bim",
-		fam = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.Y.fam"
-	shell:
-		"""
-		module load {params.plink_module}
-		plink --vcf {input.vcf} --make-bed --double-id --cow --chr Y --set-hh-missing --geno {params.geno_filter} -set-missing-var-ids @:#\$1\$2 --threads {params.nt} --update-sex {input.imputed_sexes} --out {params.prefix}
-		"""
+		expand("data/derived_data/joint_genotyping/phasing/phasing.{autosome}.haps.gz", autosome = list(range(1,30))), "data/derived_data/joint_genotyping/phasing/phasing.X.haps.gz", "data/derived_data/joint_genotyping/phasing/phasing.Y.haps.gz"
 
 rule shapeit_sex_check:
 	input:
-		bed = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.X.bed",
-		bim = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.X.bim",
-		fam = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.X.fam"
+		bed = "data/derived_data/joint_genotyping/plink_qc/plink_qc.X.bed",
+		bim = "data/derived_data/joint_genotyping/plink_qc/plink_qc.X.bim",
+		fam = "data/derived_data/joint_genotyping/plink_qc/plink_qc.X.fam"
 	params:
 		shapeit_module = config['shapeit_module'],
 		psrecord = "log/psrecord/joint_genotyping/shapeit_sex_check/shapeit_sex_check.log"
 	output:
-		log = "data/derived_data/joint_genotyping/phasing_qc/shapeit_sex_check.log",
-		snp_hh = "data/derived_data/joint_genotyping/phasing_qc/shapeit_sex_check.snp.hh",
-		ind_hh = "data/derived_data/joint_genotyping/phasing_qc/shapeit_sex_check.ind.hh"
+		log = "data/derived_data/joint_genotyping/shapeit_sex_check/shapeit_sex_check.log",
+		snp_hh = "data/derived_data/joint_genotyping/shapeit_sex_check/shapeit_sex_check.snp.hh",
+		ind_hh = "data/derived_data/joint_genotyping/shapeit_sex_check/shapeit_sex_check.ind.hh"
 	shell:
 		"""
 		module load {params.shapeit_module}
@@ -102,9 +39,9 @@ rule shapeit_sex_check:
 
 rule phase_autosomes:
 	input:
-		bed = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.{autosome}.bed",
-		bim = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.{autosome}.bim",
-		fam = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.{autosome}.fam",
+		bed = "data/derived_data/joint_genotyping/plink_qc/plink_qc.{autosome}.bed",
+		bim = "data/derived_data/joint_genotyping/plink_qc/plink_qc.{autosome}.bim",
+		fam = "data/derived_data/joint_genotyping/plink_qc/plink_qc.{autosome}.fam",
 		genetic_map = config['genetic_map']
 	params:
 		shapeit_module = config['shapeit_module'],
@@ -121,13 +58,13 @@ rule phase_autosomes:
 
 rule phase_x:
 	input:
-		bed = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.X.bed",
-		bim = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.X.bim",
-		fam = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.X.fam",
+		bed = "data/derived_data/joint_genotyping/plink_qc/plink_qc.X.bed",
+		bim = "data/derived_data/joint_genotyping/plink_qc/plink_qc.X.bim",
+		fam = "data/derived_data/joint_genotyping/plink_qc/plink_qc.X.fam",
 		genetic_map = config['genetic_map'],
-		log = "data/derived_data/joint_genotyping/phasing_qc/shapeit_sex_check.log",
-		snp_hh = "data/derived_data/joint_genotyping/phasing_qc/shapeit_sex_check.snp.hh",
-		ind_hh = "data/derived_data/joint_genotyping/phasing_qc/shapeit_sex_check.ind.hh"
+		log = "data/derived_data/joint_genotyping/shapeit_sex_check/shapeit_sex_check.log",
+		snp_hh = "data/derived_data/joint_genotyping/shapeit_sex_check/shapeit_sex_check.snp.hh",
+		ind_hh = "data/derived_data/joint_genotyping/shapeit_sex_check/shapeit_sex_check.ind.hh"
 	params:
 		shapeit_module = config['shapeit_module'],
 		psrecord = "log/psrecord/joint_genotyping/phase_x/phase_x.log",
@@ -143,9 +80,9 @@ rule phase_x:
 
 rule phase_y:
 	input:
-		bed = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.Y.bed",
-		bim = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.Y.bim",
-		fam = "data/derived_data/joint_genotyping/phasing_qc/phasing_qc.Y.fam",
+		bed = "data/derived_data/joint_genotyping/plink_qc/plink_qc.Y.bed",
+		bim = "data/derived_data/joint_genotyping/plink_qc/plink_qc.Y.bim",
+		fam = "data/derived_data/joint_genotyping/plink_qc/phasing_qc.Y.fam",
 		genetic_map = config['genetic_map']
 	params:
 		shapeit_module = config['shapeit_module'],
