@@ -79,7 +79,7 @@ sex_impute %>%
   labs(x = "Average coverage on the sex chromosome", y = "Average coverage across all autosomes", color = "Sex") +
   facet_wrap(~ chr)
 
-#ggsave(here::here("figures/phasing/xy_cov.all.png"))
+ggsave(here::here("figures/sex_imputation/xy_cov.all.png"))
 ```
 
 ```{r, fig.height=12, fig.width=6}
@@ -101,7 +101,7 @@ sex_impute %>%
   labs(x = "Average coverage on the sex chromosome", y = "Average coverage across all autosomes", color = "Sex") +
   facet_grid(species_group ~ chr)
 
-#ggsave(here::here("figures/phasing/xy_cov.all.png"))
+ggsave(here::here("figures/sex_imputation/xy_cov.by_species.png"))
 ```
 
 ### Correlation between X coverage, Y coverage, and autosomal coverage
@@ -148,7 +148,7 @@ sex_impute %<>%
         y_vs_auto = Y / avg_coverage,
         x_vs_auto = X / avg_coverage,
         sex_cov =
-          case_when(x_vs_auto >= (0.9172331 - 0.12504436) ~ "F",
+          case_when(x_vs_auto >= (0.9189398 - 0.12223447) ~ "F",
                     TRUE ~ "M"))
 ```
 
@@ -217,12 +217,12 @@ sex_impute %>%
         axis.ticks.y = element_blank(),
         axis.title.y = element_blank())
 
-ggsave(here::here("figures/phasing/sex_consensus.png"))
+ggsave(here::here("figures/sex_imputation/sex_consensus.png"))
 ```
 
 ---
 
-```{r}
+```{r, eval = FALSE}
 sex_impute %>% 
   filter(x_vs_auto > 0.8) %>% 
   filter(sex == "M") %>% 
@@ -233,15 +233,17 @@ sex_impute %>%
 ```{r}
 sex_impute %>% 
   filter(0.55 > x_vs_auto) %>% 
-  filter(sex == "F") 
+  filter(sex == "F") %>% 
+  arrange(desc(y_vs_auto), x_vs_auto) %>% 
+  select(population, avg_coverage, contains("sex"), contains("_vs_"), everything())
 ```
 
 ```{r}
 sex_impute %<>% 
   mutate(imputed_sex = 
            case_when(
-             international_id %in% c("SIMDEUF000938065319", "UMCUSAM000000020087", "UMCUSAM000000033784", "UMCUSAM000000196770", "UMCUSAM000000198523", "UMCUSAM000000202633", "UMCUSAM000000204540", "UMCUSAM000000204542", "UMCUSAU000000194531", "UMCUSAU000000194532", "UMCUSAU000000194533", "UMCUSAU000000194535", "UMCUSAU000000194704") ~ "F",
-             international_id %in% c("UMCUSAU000000205014") ~ "M",
+             international_id %in% c("SIMDEUF000938065319", "UMCUSAM000000020087", "UMCUSAM000000033784", "UMCUSAM000000196770", "UMCUSAM000000198523", "UMCUSAM000000202633", "UMCUSAM000000204540", "UMCUSAM000000204542", "UMCUSAU000000194531", "UMCUSAU000000194532", "UMCUSAU000000194533", "UMCUSAU000000194535") ~ "F",
+             international_id %in% c("UMCUSAF000000199748", "UMCUSAF000000199739", "UMCUSAU000000194492", "UMCUSAF000000087104", "UMCUSAU000000205014") ~ "M",
              sex %in% c("M", "F") ~ sex,
              TRUE ~ sex_cov
            ))
@@ -255,7 +257,7 @@ sex_impute %>%
 
 ### Output guide for PLINK 
 
-```{r}
+```{r, eval=FALSE}
 sex_impute %>% 
   mutate(fid = international_id) %>% 
   select(international_id, fid, imputed_sex) %>% 
