@@ -38,7 +38,7 @@ Evaluation of computing resources used for each step of genotype calling can be 
     * Variants restricted to biallelic SNPs using `GATK SelectVariants`
     * Site-level ~~and genotype-level~~ filtering annotated using `GATK VariantFiltration`. Then failing sites removed ~~and failing genotypes set to missing~~ using `GATK SelectVariants`
         + Based on results in `notebooks/filter_eval.Rmd`, data processed without genotype-level filtration starting July 23, 2020
-5. Summary stats for each chromosome generated using `Picard CollectVariantCallingMetrics` then evaluated in `source_functions/post_process.Rmd`, VCF format checked using `GATK ValidateVariants`. `CollectVariantCallingMetrics` results:
+5. Summary stats for each chromosome generated using `Picard CollectVariantCallingMetrics` in `source_functions/post_process.snakefile` then evaluated in `source_functions/post_process.Rmd`, VCF format checked using `GATK ValidateVariants`. `CollectVariantCallingMetrics` results:
     * **data/derived_data/joint_genotyping/bovine_demo.variant_metrics.summary_chr.csv** contains a summary by chromosome
     * **data/derived_data/joint_genotyping/bovine_demo.variant_metrics.detail_wg.csv** contains a summary by sample averaged/summed across all chromosomes
     * **data/derived_data/joint_genotyping/bovine_demo.variant_metrics.detail_chr.csv** contains a summary by sample and by chromosome

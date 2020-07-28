@@ -22,11 +22,6 @@ library(magrittr)
 
 # Notes & questions
 
-* ~~Filter down to only sites with complete data?~~ Remove sites with >= 10% missingness
-* What genetic map? 
-    + 1 Mb/cM?
-    + Yassine: "infer the map using the Li & Stephens (2003) LD based method"
-    + Jared: "Use published 50K map"
 * Sample sex determination?
     + ~~PLINK sex check~~
     + `bcftools guess_ploidy`: need coordinates of PAR 
