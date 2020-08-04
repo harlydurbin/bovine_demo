@@ -31,8 +31,12 @@ library(tidylog)
 ```{r}
 tibble::tribble(
   ~ Name, ~ Description,
-  "all", "All 2,362 samples",
-  "20cattle", "Bos taurus, B.indicus, composite, and ancient samples only. Up to 20 (ranked by coverage) samples per population label"
+  "all", "All species. All available samples.",
+  "20all", "All species. Up to 20 (ranked by coverage) samples per population label.",
+  "20cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 20 (ranked by coverage) samples per population label.",
+  "allyak", "B. grunniens and B. mutus. All available samples.",
+  "allgayalgaur", "B. frontalis and B. gaurus. All available samples.",
+  "allbanteng", "B. javanicus. All available samples."
 )
 ```
 
@@ -53,6 +57,23 @@ sample_metadata <- read_csv(here::here("data/derived_data/metadata/bovine_demo.s
 
 ## Dataset creation
 
+```{r}
+sample_metadata %>% 
+  group_by(species) %>% 
+  tally(sort = TRUE)
+```
+
+### `20all`
+
+```{r}
+sample_metadata %>% 
+  group_by(population) %>% 
+  top_n(20, avg_coverage) %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid) %>% 
+  write_tsv(here::here("data/derived_data/faststructure/thin_variants/keeplist.20all.txt"), col_names = FALSE)
+```
+
 ### `20cattle`
 
 ```{r}
@@ -63,5 +84,36 @@ sample_metadata %>%
   mutate(fid = international_id) %>% 
   select(international_id, fid) %>% 
   write_tsv(here::here("data/derived_data/faststructure/thin_variants/keeplist.20cattle.txt"), col_names = FALSE)
+```
+
+### `allyak`
+
+```{r}
+sample_metadata %>% 
+  filter(species %in% c("bos grunniens", "bos mutus")) %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid) %>% 
+  write_tsv(here::here("data/derived_data/faststructure/thin_variants/keeplist.allyak.txt"), col_names = FALSE)
+
+```
+
+### `allgaurgayal`
+
+```{r}
+sample_metadata %>% 
+  filter(species %in% c("bos gaurus", "bos frontalis")) %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid) %>% 
+  write_tsv(here::here("data/derived_data/faststructure/thin_variants/keeplist.allgaurgayal.txt"), col_names = FALSE)
+```
+
+### `allbanteng`
+
+```{r}
+sample_metadata %>% 
+  filter(species %in% c("bos javanicus")) %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid) %>% 
+  write_tsv(here::here("data/derived_data/faststructure/thin_variants/keeplist.allbanteng.txt"), col_names = FALSE)
 ```
 

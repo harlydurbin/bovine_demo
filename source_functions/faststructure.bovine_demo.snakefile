@@ -11,7 +11,7 @@ for x in expand("log/slurm_out/faststructure/{rules}", rules = config['rules']):
 
 os.makedirs("log/psrecord/faststructure", exist_ok = True)
 
-rule all:
+rule faststructure_all:
 	input:
 		expand("data/derived_data/faststructure/structure/{dataset}.{thin_p}/structure.{dataset}.{thin_p}.ML.txt", thin_p = config['thin_p'], dataset = config['dataset'])
 
@@ -29,14 +29,14 @@ rule thin_variants:
 		plink_module = config['plink_module'],
 		nt = config['plink_nt'],
 		in_prefix = "data/derived_data/joint_genotyping/plink_qc/qc.{chr}",
-		out_prefix = "data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{thin_p}",
+		out_prefix = "data/derived_data/faststructure/thin_variants/thin_variants.{chr}.full.{thin_p}",
 		thin_p = thin_chooser
 	resources:
 		load = 1
 	output:
-		thinned_bed = temp("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{thin_p}.bed"),
-		thinned_bim = temp("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{thin_p}.bim"),
-		thinned_fam = temp("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{thin_p}.fam")
+		thinned_bed = temp("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.full.{thin_p}.bed"),
+		thinned_bim = temp("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.full.{thin_p}.bim"),
+		thinned_fam = temp("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.full.{thin_p}.fam")
 	shell:
 		"""
 		module load {params.plink_module}
@@ -47,21 +47,21 @@ rule thin_variants:
 # Output is all samples, variant density thinned to specified thinning parameter, merged to whole-genome
 rule merge_thinned:
 	input:
-		thinned_bed = expand("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{{thin_p}}.bed", chr = config['chr']),
-		thinned_bim = expand("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{{thin_p}}.bim", chr = config['chr']),
-		thinned_fam = expand("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{{thin_p}}.fam", chr = config['chr'])
+		thinned_bed = expand("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.full.{{thin_p}}.bed", chr = config['chr']),
+		thinned_bim = expand("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.full.{{thin_p}}.bim", chr = config['chr']),
+		thinned_fam = expand("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.full.{{thin_p}}.fam", chr = config['chr'])
 	resources:
 		load = 1
 	params:
 		plink_module = config['plink_module'],
 		nt = config['plink_nt'],
-		prefixes = lambda wildcards: expand("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.all.{thin_p}\n", thin_p = wildcards.thin_p, chr = config['chr']),
-		out_prefix = "data/derived_data/faststructure/thin_variants/merge_thinned.all.{thin_p}"
+		prefixes = lambda wildcards: expand("data/derived_data/faststructure/thin_variants/thin_variants.{chr}.full.{thin_p}\n", thin_p = wildcards.thin_p, chr = config['chr']),
+		out_prefix = "data/derived_data/faststructure/thin_variants/merge_thinned.full.{thin_p}"
 	output:
-		merge_list = "data/derived_data/faststructure/thin_variants/merge_list.all.{thin_p}.list",
-		merged_bed = "data/derived_data/faststructure/thin_variants/merge_thinned.all.{thin_p}.bed",
-		merged_bim = "data/derived_data/faststructure/thin_variants/merge_thinned.all.{thin_p}.bim",
-		merged_fam = "data/derived_data/faststructure/thin_variants/merge_thinned.all.{thin_p}.fam"
+		merge_list = "data/derived_data/faststructure/thin_variants/merge_list.full.{thin_p}.list",
+		merged_bed = "data/derived_data/faststructure/thin_variants/merge_thinned.full.{thin_p}.bed",
+		merged_bim = "data/derived_data/faststructure/thin_variants/merge_thinned.full.{thin_p}.bim",
+		merged_fam = "data/derived_data/faststructure/thin_variants/merge_thinned.full.{thin_p}.fam"
 	shell:
 		"""
 		module load {params.plink_module}
@@ -72,16 +72,16 @@ rule merge_thinned:
 # Output is all samples, variant density thinned to specified thinning parameter, merged to whole-genome, only samples in specified downsample_dataset
 rule downsample_indiv:
 	input:
-		merged_bed = "data/derived_data/faststructure/thin_variants/merge_thinned.all.{thin_p}.bed",
-		merged_bim = "data/derived_data/faststructure/thin_variants/merge_thinned.all.{thin_p}.bim",
-		merged_fam = "data/derived_data/faststructure/thin_variants/merge_thinned.all.{thin_p}.fam",
+		merged_bed = "data/derived_data/faststructure/thin_variants/merge_thinned.full.{thin_p}.bed",
+		merged_bim = "data/derived_data/faststructure/thin_variants/merge_thinned.full.{thin_p}.bim",
+		merged_fam = "data/derived_data/faststructure/thin_variants/merge_thinned.full.{thin_p}.fam",
 		keep_list = "data/derived_data/faststructure/thin_variants/keeplist.{downsample_dataset}.txt"
 	resources:
 		load = 1
 	params:
 		plink_module = config['plink_module'],
 		nt = config['plink_nt'],
-		in_prefix = "data/derived_data/faststructure/thin_variants/merge_thinned.all.{thin_p}",
+		in_prefix = "data/derived_data/faststructure/thin_variants/merge_thinned.full.{thin_p}",
 		out_prefix = "data/derived_data/faststructure/thin_variants/merge_thinned.{downsample_dataset}.{thin_p}"
 	output:
 		downsample_bed = "data/derived_data/faststructure/thin_variants/merge_thinned.{downsample_dataset}.{thin_p}.bed",

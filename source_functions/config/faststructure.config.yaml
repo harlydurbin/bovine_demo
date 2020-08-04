@@ -4,9 +4,9 @@ chr: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14',
 
 k: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20']
 
-downsample_dataset: ['20cattle']
+downsample_dataset: ['20all', '20cattle', 'allyak', 'allgayalgaur', 'allbanteng']
 
-dataset: ['all', '20cattle']
+dataset: ['full', '20all', '20cattle', 'allyak', 'allgayalgaur', 'allbanteng']
 
 plink_module: "plink/plink-1.90b"
 
