@@ -18,7 +18,7 @@ for x in expand("log/slurm_out/plink_qc/{rules}", rules = config['plink_qc_rules
 for x in expand("log/psrecord/joint_genotyping/{rules}", rules = config['plink_qc_rules']):
     os.makedirs(x, exist_ok = True)
 
-rule all:
+rule plink_qc_all:
 	input:
 		expand("data/derived_data/joint_genotyping/plink_qc/plink_qc.{autosome}.bed", autosome = list(range(1,30))), "data/derived_data/joint_genotyping/plink_qc/plink_qc.Y.bed", "data/derived_data/joint_genotyping/plink_qc/plink_qc.X.bed"
 

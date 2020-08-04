@@ -1,5 +1,5 @@
 ---
-title: "Phasing"
+title: "Sex imputation"
 author: "Harly Durbin"
 output:
   html_document:
