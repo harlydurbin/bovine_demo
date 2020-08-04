@@ -20,9 +20,20 @@ library(tidylog)
 
 # Notes & questions
 
-* In order to [install via conda](https://bioconda.github.io/recipes/faststructure/README.html), need a Python 2.7 environment, which means you can't run Snakemake
+* In order to [install via conda](https://bioconda.github.io/recipes/plink_qc/README.html), need a Python 2.7 environment, which means you can't run Snakemake
 
 ---
+
+```{r}
+sample_metadata %>% 
+  filter(international_id == "CPC98_Bprimigenius_EnglandDerbyshire_5936") %>% 
+  mutate(fid = international_id,
+         newid = "ancient_derbyshire",
+         newfid = "ancient_derbysire") %>% 
+  select(international_id, fid, newid, newfid) %>% 
+  write_tsv(here::here("data/derived_data/plink_qc/update_ids.txt"), col_names = FALSE)
+```
+
 
 ## Dataset key
 
@@ -30,13 +41,13 @@ library(tidylog)
 
 ```{r}
 tibble::tribble(
-  ~ Name, ~ Description,
-  "all", "All species. All available samples.",
-  "20all", "All species. Up to 20 (ranked by coverage) samples per population label.",
-  "20cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 20 (ranked by coverage) samples per population label.",
-  "allyak", "B. grunniens and B. mutus. All available samples.",
-  "allgayalgaur", "B. frontalis and B. gaurus. All available samples.",
-  "allbanteng", "B. javanicus. All available samples."
+  ~ Name, ~ Description, ~ `k ran`,
+  "all", "All species. All available samples.", "1-20",
+  "20all", "All species. Up to 20 (ranked by coverage) samples per population label.", "1-20",
+  "20cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 20 (ranked by coverage) samples per population label.", "1-20",
+  "allyak", "B. grunniens and B. mutus. All available samples.", "1-10",
+  "allgayalgaur", "B. frontalis and B. gaurus. All available samples.", "1-10",
+  "allbanteng", "B. javanicus. All available samples.", "1-8"
 )
 ```
 
@@ -69,9 +80,10 @@ sample_metadata %>%
 sample_metadata %>% 
   group_by(population) %>% 
   top_n(20, avg_coverage) %>% 
+  ungroup() %>% 
   mutate(fid = international_id) %>% 
   select(international_id, fid) %>% 
-  write_tsv(here::here("data/derived_data/faststructure/thin_variants/keeplist.20all.txt"), col_names = FALSE)
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.20all.txt"), col_names = FALSE)
 ```
 
 ### `20cattle`
@@ -81,9 +93,10 @@ sample_metadata %>%
   filter(species %in% c("bos primigenius", "bos taurus", "composite", "bos indicus")) %>% 
   group_by(population) %>% 
   top_n(20, avg_coverage) %>% 
+  ungroup() %>% 
   mutate(fid = international_id) %>% 
   select(international_id, fid) %>% 
-  write_tsv(here::here("data/derived_data/faststructure/thin_variants/keeplist.20cattle.txt"), col_names = FALSE)
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.20cattle.txt"), col_names = FALSE)
 ```
 
 ### `allyak`
@@ -93,7 +106,7 @@ sample_metadata %>%
   filter(species %in% c("bos grunniens", "bos mutus")) %>% 
   mutate(fid = international_id) %>% 
   select(international_id, fid) %>% 
-  write_tsv(here::here("data/derived_data/faststructure/thin_variants/keeplist.allyak.txt"), col_names = FALSE)
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.allyak.txt"), col_names = FALSE)
 
 ```
 
@@ -104,7 +117,7 @@ sample_metadata %>%
   filter(species %in% c("bos gaurus", "bos frontalis")) %>% 
   mutate(fid = international_id) %>% 
   select(international_id, fid) %>% 
-  write_tsv(here::here("data/derived_data/faststructure/thin_variants/keeplist.allgaurgayal.txt"), col_names = FALSE)
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.allgaurgayal.txt"), col_names = FALSE)
 ```
 
 ### `allbanteng`
@@ -114,6 +127,6 @@ sample_metadata %>%
   filter(species %in% c("bos javanicus")) %>% 
   mutate(fid = international_id) %>% 
   select(international_id, fid) %>% 
-  write_tsv(here::here("data/derived_data/faststructure/thin_variants/keeplist.allbanteng.txt"), col_names = FALSE)
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.allbanteng.txt"), col_names = FALSE)
 ```
 

@@ -147,30 +147,6 @@
         "o": "log/slurm_out/sex_imputation/{rule}/{wildcards}.%j.out",
         "p" : "General,Lewis,BioCompute,htc4,hpc5"
     },
-    "qc_autosomes":
-    {
-        "mem" : 24G,
-        "c" : 12,
-        "t": "2:00:00",
-        "o": "log/slurm_out/plink_qc/{rule}/{wildcards}.%j.out",
-        "p" : "General,Lewis,BioCompute,htc4,hpc5"
-    },
-    "qc_x":
-    {
-        "mem" : 24G,
-        "c" : 12,
-        "t": "2:00:00",
-        "o": "log/slurm_out/plink_qc/{rule}/{wildcards}.%j.out",
-        "p" : "General,Lewis,BioCompute,htc4,hpc5"
-    },
-    "qc_y":
-    {
-        "mem" : 24G,
-        "c" : 12,
-        "t": "2:00:00",
-        "o": "log/slurm_out/plink_qc/{rule}/{wildcards}.%j.out",
-        "p" : "General,Lewis,BioCompute,htc4,hpc5"
-    },
     "shapeit_sex_check":
     {
         "mem" : 24G,

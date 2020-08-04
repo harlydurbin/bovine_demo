@@ -88,14 +88,6 @@ plink_nt: 12
 
 pab: 133300518
 
-#### plink_qc ####
-
-plink_qc_rules: ["qc_autosomes", "qc_x", "qc_y"]
-
-imputed_sexes: "data/derived_data/joint_genotyping/sex_imputation/imputed_sexes.txt"
-
-geno_filter: 0.10
-
 #### phasing ####
 
 phasing_rules: ["shapeit_sex_check", "phase_autosomes", "phase_x", "phase_y"]

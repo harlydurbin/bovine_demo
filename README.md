@@ -51,17 +51,19 @@ See `source_functions/phasing.snakefile` and `notebooks/phasing.Rmd`
 1. In order to phase X chromosome, missing sexes imputed and incorrectly assigned sexes fixed in `source_functions/sex_imputation.snakefile` and `notebooks/sex_imputation.Rmd`
     * Ended up using the ratio of average coverage on the X chromosome/average coverage on all autosomes to determine cutoffs. Of all other tested metrics, I think this the only one that should be similar across all species in the dataset + agnostic to effective population size
 2. Genetic map inferred using several published cattle recombination maps *TODO*
-3. Pre-phasing QC
+3. Pre-phasing QC in `source_functions/plink_qc.snakefile`
     * For all chromosomes, sites with > 10% missingness removed
     * For all chromosomes, listed sex updated to imputed sex
     * Pseudo-autosomal region removed from X chromosome
     * Heterozygous genotypes set to missing on Y chromosome
+    * Derbyshire auroch ID is too long and throws errors in downstream analyses, rename it from "CPC98_Bprimigenius_EnglandDerbyshire_5936" to "ancient_derbyshire"
 4. Phase autosomes and sex chromosomes separately using `SHAPEIT` *TODO*
 
 ## Exploratory analyses
 
 * `fastStructure`
-    * Using output of pre-phasing QC in `source_functions/phasing.snakefile`, variants removed from each chromosome with an X% probability of being retained, downsample individuals
+    * Using output of initial QC performed in `source_functions/plink_qc.snakefile`, variants removed from each chromosome with an X% probability of being retained, downsample individuals based on dataset of interest
     * See `source_functions/faststructure.bovine_demo.snakefile` for analysis and `notebooks/faststructure.Rmd` for thinning/downsampling dataset designations & results
 * `EIGENSOFT smartpca`
+    * QC and datasets used identical to `fastStructure` above
 * [`SMC++`](https://github.com/popgenmethods/smcpp)

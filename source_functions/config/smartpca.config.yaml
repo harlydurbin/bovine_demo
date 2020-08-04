@@ -10,8 +10,4 @@ chr: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14',
 
 thin_p: ['superthin']
 
-thin_p_dict: {"superthin":".001", "onepercent":"0.01"}
-
 dataset: ['full', '20all', '20cattle', 'allyak', 'allgaurgayal', 'allbanteng']
-
-downsample_dataset: ['20all', '20cattle', 'allyak', 'allgayalgaur', 'allbanteng']

@@ -1,0 +1,21 @@
+plink_qc_rules: ['qc_autosomes', 'qc_x', 'qc_y', 'thin_variants', 'merge_thinned', 'downsample_indiv']
+
+imputed_sexes: "data/derived_data/joint_genotyping/sex_imputation/imputed_sexes.txt"
+
+plink_module: "plink/plink-1.90b"
+
+plink_nt: 12
+
+rename_file: "data/derived_data/plink_qc/update_ids.txt"
+
+geno_filter: 0.10
+
+pab: 133300518
+
+chr: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', 'X', 'Y']
+
+thin_p: ['superthin']
+
+thin_p_dict: {"superthin":".001", "onepercent":"0.01"}
+
+downsample_dataset: ['20all', '20cattle', 'allyak', 'allgaurgayal', 'allbanteng']
