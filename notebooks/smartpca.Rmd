@@ -1,0 +1,121 @@
+---
+title: "PCA"
+author: "Harly Durbin"
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(readr)
+library(magrittr)
+library(purrr)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+
+```
+
+# Notes & questions
+
+# Setup
+
+```{r}
+sample_metadata <- 
+  read_csv(here::here("data/derived_data/metadata/bovine_demo.sample_metadata.csv")) %>% 
+  mutate(international_id = if_else(international_id == "CPC98_Bprimigenius_EnglandDerbyshire_5936", "ancient_derbyshire", international_id))
+```
+
+
+```{r}
+x <-
+  read_lines(here::here("data/derived_data/smartpca/20all.superthin/smartpca.20all.superthin.evec"), n_max = 1) %>% 
+  str_remove("#eigvals:") %>% 
+  str_squish() %>% 
+  str_split(pattern = "[[:space:]]") %>% 
+  flatten_chr() %>% 
+  map_dbl(~ as.numeric(.x))
+  
+```
+
+```{r}
+read_table2(here::here("data/derived_data/smartpca/20all.superthin/smartpca.20all.superthin.evec"), skip = 1, col_names = FALSE) %>% 
+  select(-X12) %>% 
+  set_names(c("international_id", map_chr(1:10, ~ str_c("PC", .x)))) %>% 
+  mutate(international_id = str_remove(international_id, ":[[:graph:]]+")) %>% 
+  left_join(sample_metadata %>% 
+              select(international_id, population, region, continent, species))
+```
+
+```{r}
+
+
+plot_pca <-
+  
+  function(dataset_thinning, title, pc1, pc2) {
+    col1 <- rlang::sym(str_c("PC", as.character(pc1)))
+    col2 <- rlang::sym(str_c("PC", as.character(pc2)))
+    
+    path <-
+      glue::glue(
+        "data/derived_data/smartpca/{dataset_thinning}/smartpca.{dataset_thinning}.evec"
+      )
+    
+    val <-
+      read_lines(here::here(path), n_max = 1) %>%
+      str_remove("#eigvals:") %>%
+      str_squish() %>%
+      str_split(pattern = "[[:space:]]") %>%
+      flatten_chr() %>%
+      map_dbl( ~ as.numeric(.x))
+    
+    vec <-
+      read_table2(here::here(path), skip = 1, col_names = FALSE) %>%
+      select(-X12) %>%
+      set_names(c("international_id", map_chr(1:10, ~ str_c("PC", .x)))) %>%
+      mutate(international_id = str_remove(international_id, ":[[:graph:]]+")) %>% 
+      left_join(sample_metadata %>% 
+              select(international_id, population, region, continent, species))
+    
+    vec %>%
+      mutate(
+        species = stringr::str_to_sentence(species),
+        region = stringr::str_to_sentence(region),
+        continent = stringr::str_to_sentence(continent)
+      ) %>%
+      ggplot(aes(
+        x = !!col1,
+        y = !!col2,
+        shape = continent,
+        color = species
+      )) +
+      geom_point(alpha = 0.6, size = 3) +
+      bakeoff::scale_color_bakeoff() +
+      guides(colour = guide_legend(override.aes = list(alpha = 1))) +
+      # ggsci::scale_color_futurama(alpha = 0.7) +
+      theme_classic() +
+      labs(
+        x = str_c("PC ", pc1, ": ", scales::percent(as.numeric(val[pc1, 4]))),
+        y = str_c("PC ", pc2, ": ", scales::percent(as.numeric(val[pc2, 4]))),
+        shape = "Region",
+        color = "Species",
+        title = glue::glue("{dataset_thinning}: PC {pc1} vs. PC {pc2}")
+      )
+    
+    # ggsave(here::here(
+    #   glue::glue(
+    #     "figures/pca/{where}plink_pca.{which}.PC{pc1}_PC{pc2}.png"
+    #   )
+    # ))
+  }
+
+```
+
+```{r}
+plot_pca()
+```
+
+
+# Commentary

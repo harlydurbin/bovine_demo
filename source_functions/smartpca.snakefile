@@ -17,6 +17,22 @@ rule smartpca_all:
 	input:
 		expand("data/derived_data/smartpca/{dataset}.{thin_p}/smartpca.{dataset}.{thin_p}.evec", thin_p = config['thin_p'], dataset = config['dataset'])
 
+rule recode_input:
+	input:
+		bed = "data/derived_data/plink_qc/thin_variants/merge_thinned.{dataset}.{thin_p}.bed",
+		bim = "data/derived_data/plink_qc/thin_variants/merge_thinned.{dataset}.{thin_p}.bim",
+		fam = "data/derived_data/plink_qc/thin_variants/merge_thinned.{dataset}.{thin_p}.fam"
+	output:
+		bed = "data/derived_data/smartpca/{dataset}.{thin_p}/smartpca.{dataset}.{thin_p}.bed",
+		pedsnp = "data/derived_data/smartpca/{dataset}.{thin_p}/smartpca.{dataset}.{thin_p}.pedsnp",
+		pedind = "data/derived_data/smartpca/{dataset}.{thin_p}/smartpca.{dataset}.{thin_p}.pedind"
+	shell:
+		"""
+		sed 's/-9/pheno/g' {input.fam} > {output.pedind}
+		cp {input.bed} {output.bed}
+		cp {input.bim} {output.pedsnp}
+		"""
+
 rule create_par:
 	input:
 		bed = "data/derived_data/smartpca/{dataset}.{thin_p}/smartpca.{dataset}.{thin_p}.bed",

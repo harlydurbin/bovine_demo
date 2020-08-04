@@ -10,6 +10,8 @@ for x in expand("log/slurm_out/faststructure/{rules}", rules = config['rules']):
     os.makedirs(x, exist_ok = True)
 
 os.makedirs("log/psrecord/faststructure", exist_ok = True)
+for x in expand("log/psrecord/faststructure/{rules}", rules = config['rules']):
+    os.makedirs(x, exist_ok = True)
 
 rule faststructure_all:
 	input:

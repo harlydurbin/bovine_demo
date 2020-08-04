@@ -35,3 +35,4 @@ scratch.Rmd
 *.DS_Store
 *.xlsx
 *.sexcheck
+*.evec

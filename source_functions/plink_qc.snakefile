@@ -28,7 +28,7 @@ rule qc_autosomes:
 		imputed_sexes = config['imputed_sexes']
 	params:
 		plink_module = config['plink_module'],
-		prefix = "data/derived_data/plink_qc/initial_qc/plink_qc.{autosome}",
+		prefix = "data/derived_data/plink_qc/initial_qc/initial_qc.{autosome}",
 		nt = config['plink_nt'],
 		geno_filter = config['geno_filter'],
 		autosome = "{autosome}"
