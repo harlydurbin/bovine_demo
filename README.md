@@ -61,9 +61,10 @@ See `source_functions/phasing.snakefile` and `notebooks/phasing.Rmd`
 
 ## Exploratory analyses
 
-* `fastStructure`
-    * Using output of initial QC performed in `source_functions/plink_qc.snakefile`, variants removed from each chromosome with an X% probability of being retained, downsample individuals based on dataset of interest
-    * See `source_functions/faststructure.bovine_demo.snakefile` for analysis and `notebooks/faststructure.Rmd` for thinning/downsampling dataset designations & results
-* `EIGENSOFT smartpca`
-    * QC and datasets used identical to `fastStructure` above
+* Downsampling & variant thinning performed in `source_functions/plink_qc.snakefile`
+    * Initial QC same as pre-phasing QC above
+    * Variants removed from each chromosome with an X% probability of being retained
+    * Individuals downsampled based on dataset of interest
+* `fastStructure` ran `source_functions/faststructure.bovine_demo.snakefile`, see `notebooks/faststructure.Rmd` for thinning/downsampling dataset designations & results
+* `EIGENSOFT smartpca` ran in `source_functions/smartpca.snakefile`, see `notebooks/smartpca.Rmd` for thinning/downsampling dataset designations & results
 * [`SMC++`](https://github.com/popgenmethods/smcpp)
