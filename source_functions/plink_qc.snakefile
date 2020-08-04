@@ -20,7 +20,7 @@ for x in expand("log/psrecord/joint_genotyping/{rules}", rules = config['plink_q
 
 rule plink_qc_all:
 	input:
-		expand("data/derived_data/joint_genotyping/plink_qc/plink_qc.{autosome}.bed", autosome = list(range(1,30))), "data/derived_data/joint_genotyping/plink_qc/plink_qc.Y.bed", "data/derived_data/joint_genotyping/plink_qc/plink_qc.X.bed"
+		expand("data/derived_data/plink_qc/initial_qc/initial_qc.{autosome}.bed", autosome = list(range(1,30))), "data/derived_data/plink_qc/initial_qc/initial_qc.Y.bed", "data/derived_data/plink_qc/initial_qc/initial_qc.X.bed"
 
 rule qc_autosomes:
 	input:
@@ -28,14 +28,14 @@ rule qc_autosomes:
 		imputed_sexes = config['imputed_sexes']
 	params:
 		plink_module = config['plink_module'],
-		prefix = "data/derived_data/joint_genotyping/plink_qc/plink_qc.{autosome}",
+		prefix = "data/derived_data/plink_qc/initial_qc/plink_qc.{autosome}",
 		nt = config['plink_nt'],
 		geno_filter = config['geno_filter'],
 		autosome = "{autosome}"
 	output:
-		bed = "data/derived_data/joint_genotyping/plink_qc/plink_qc.{autosome}.bed",
-		bim = "data/derived_data/joint_genotyping/plink_qc/plink_qc.{autosome}.bim",
-		fam = "data/derived_data/joint_genotyping/plink_qc/plink_qc.{autosome}.fam"
+		bed = "data/derived_data/plink_qc/initial_qc/plink_qc.{autosome}.bed",
+		bim = "data/derived_data/plink_qc/initial_qc/initial_qc.{autosome}.bim",
+		fam = "data/derived_data/plink_qc/initial_qc/initial_qc.{autosome}.fam"
 	shell:
 		"""
 		module load {params.plink_module}
@@ -49,13 +49,13 @@ rule qc_x:
 	params:
 		plink_module = config['plink_module'],
 		pab = config['pab'],
-		prefix = "data/derived_data/joint_genotyping/plink_qc/plink_qc.X",
+		prefix = "data/derived_data/plink_qc/initial_qc/initial_qc.X",
 		nt = config['plink_nt'],
 		geno_filter = config['geno_filter']
 	output:
-		bed = "data/derived_data/joint_genotyping/plink_qc/plink_qc.X.bed",
-		bim = "data/derived_data/joint_genotyping/plink_qc/plink_qc.X.bim",
-		fam = "data/derived_data/joint_genotyping/plink_qc/plink_qc.X.fam"
+		bed = "data/derived_data/plink_qc/initial_qc/initial_qc.X.bed",
+		bim = "data/derived_data/plink_qc/initial_qc/initial_qc.X.bim",
+		fam = "data/derived_data/plink_qc/initial_qc/initial_qc.X.fam"
 	shell:
 		"""
 		module load {params.plink_module}
@@ -70,12 +70,12 @@ rule qc_y:
 	params:
 		plink_module = config['plink_module'],
 		nt = config['plink_nt'],
-		prefix = "data/derived_data/joint_genotyping/plink_qc/plink_qc.Y",
+		prefix = "data/derived_data/plink_qc/initial_qc/initial_qc.Y",
 		geno_filter = config['geno_filter']
 	output:
-		bed = "data/derived_data/joint_genotyping/plink_qc/plink_qc.Y.bed",
-		bim = "data/derived_data/joint_genotyping/plink_qc/plink_qc.Y.bim",
-		fam = "data/derived_data/joint_genotyping/plink_qc/plink_qc.Y.fam"
+		bed = "data/derived_data/plink_qc/initial_qc/initial_qc.Y.bed",
+		bim = "data/derived_data/plink_qc/initial_qc/initial_qc.Y.bim",
+		fam = "data/derived_data/plink_qc/initial_qc/initial_qc.Y.fam"
 	shell:
 		"""
 		module load {params.plink_module}
