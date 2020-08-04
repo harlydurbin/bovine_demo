@@ -37,6 +37,8 @@ x <-
   str_split(pattern = "[[:space:]]") %>% 
   flatten_chr() %>% 
   map_dbl(~ as.numeric(.x))
+
+x[1]/sum(x)
   
 ```
 
@@ -54,9 +56,16 @@ read_table2(here::here("data/derived_data/smartpca/20all.superthin/smartpca.20al
 
 plot_pca <-
   
-  function(dataset_thinning, title, pc1, pc2) {
+  function(dataset_thinning,
+           pc1,
+           pc2,
+           color_var,
+           shape_var = NULL) {
     col1 <- rlang::sym(str_c("PC", as.character(pc1)))
     col2 <- rlang::sym(str_c("PC", as.character(pc2)))
+    
+    shape_var <- rlang::enquo(shape_var)
+    
     
     path <-
       glue::glue(
@@ -75,46 +84,65 @@ plot_pca <-
       read_table2(here::here(path), skip = 1, col_names = FALSE) %>%
       select(-X12) %>%
       set_names(c("international_id", map_chr(1:10, ~ str_c("PC", .x)))) %>%
-      mutate(international_id = str_remove(international_id, ":[[:graph:]]+")) %>% 
-      left_join(sample_metadata %>% 
-              select(international_id, population, region, continent, species))
-    
-    vec %>%
+      mutate(international_id = str_remove(international_id, ":[[:graph:]]+")) %>%
+      left_join(
+        sample_metadata %>%
+          select(international_id, population, region, continent, species)
+      ) %>%
       mutate(
         species = stringr::str_to_sentence(species),
         region = stringr::str_to_sentence(region),
-        continent = stringr::str_to_sentence(continent)
-      ) %>%
-      ggplot(aes(
-        x = !!col1,
-        y = !!col2,
-        shape = continent,
-        color = species
-      )) +
-      geom_point(alpha = 0.6, size = 3) +
+        continent = stringr::str_to_sentence(continent),
+        population = stringr::str_to_sentence(population)
+      )
+    
+    plot <-
+      if (is.null(shape_var)) {
+        vec %>%
+          ggplot(aes(
+            x = !!col1,
+            y = !!col2
+          )) +
+          geom_point(aes(color = !!rlang::enquo(color_var)),
+                     alpha = 0.6)
+      } else{
+        vec %>%
+          ggplot(aes(
+            x = !!col1,
+            y = !!col2
+          )) +
+          geom_point(aes(color = !!rlang::enquo(color_var), 
+                         shape = !!shape_var),
+                     alpha = 0.6)
+      }
+    
+    plot <-
+      plot +
       bakeoff::scale_color_bakeoff() +
       guides(colour = guide_legend(override.aes = list(alpha = 1))) +
-      # ggsci::scale_color_futurama(alpha = 0.7) +
       theme_classic() +
       labs(
-        x = str_c("PC ", pc1, ": ", scales::percent(as.numeric(val[pc1, 4]))),
-        y = str_c("PC ", pc2, ": ", scales::percent(as.numeric(val[pc2, 4]))),
-        shape = "Region",
-        color = "Species",
+        x = str_c("PC ", pc1, ": ", scales::percent(val[pc1] / sum(val))),
+        y = str_c("PC ", pc2, ": ", scales::percent(val[pc2] / sum(val))),
+        color = stringr::str_to_sentence(rlang::quo_name(rlang::enquo(color_var))),
         title = glue::glue("{dataset_thinning}: PC {pc1} vs. PC {pc2}")
       )
     
-    # ggsave(here::here(
-    #   glue::glue(
-    #     "figures/pca/{where}plink_pca.{which}.PC{pc1}_PC{pc2}.png"
-    #   )
-    # ))
+    plot <-
+      if (is.null(shape_var)) {
+        plot
+      } else{
+        plot +
+          labs(shape = stringr::str_to_sentence(rlang::quo_name(shape_var)))
+      }
+    
+    return(plot)
   }
 
 ```
 
 ```{r}
-plot_pca()
+plot_pca(dataset_thinning = "20cattle.superthin", pc1 = 1, pc2 = 2, color_var = region, shape_var = species)
 ```
 
 
