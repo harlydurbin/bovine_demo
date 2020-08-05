@@ -66,6 +66,8 @@ plot_pca <-
     
     shape_var <- rlang::enquo(shape_var)
     
+    color_var <- rlang::enquo(color_var)
+    
     
     path <-
       glue::glue(
@@ -103,7 +105,7 @@ plot_pca <-
             x = !!col1,
             y = !!col2
           )) +
-          geom_point(aes(color = !!rlang::enquo(color_var)),
+          geom_point(aes(color = !!color_var),
                      alpha = 0.6)
       } else{
         vec %>%
@@ -111,7 +113,7 @@ plot_pca <-
             x = !!col1,
             y = !!col2
           )) +
-          geom_point(aes(color = !!rlang::enquo(color_var), 
+          geom_point(aes(color = !!color_var, 
                          shape = !!shape_var),
                      alpha = 0.6)
       }

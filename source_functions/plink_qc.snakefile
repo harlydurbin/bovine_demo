@@ -1,4 +1,4 @@
-# snakemake -s source_functions/plink_qc.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/plink_qc.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200804.plink_qc.log
+# snakemake -s source_functions/plink_qc.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/plink_qc.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200805.plink_qc.log
 
 import os
 
@@ -138,7 +138,7 @@ rule merge_thinned:
 		plink --merge-list {output.merge_list} --double-id --cow --threads {params.nt} --make-bed --out {params.out_prefix}
 		"""
 
-# Output is all samples, variant density thinned to specified thinning parameter, merged to whole-genome, only samples in specified downsample_dataset
+# Output is only samples in specified downsample_dataset, variant density thinned to specified thinning parameter, merged to whole-genome
 rule downsample_indiv:
 	input:
 		merged_bed = "data/derived_data/plink_qc/thin_variants/merge_thinned.full.{thin_p}.bed",

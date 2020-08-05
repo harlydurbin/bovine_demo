@@ -25,18 +25,15 @@ rule structure:
 	# Snakemake looks for envs/ relative to the snakefile
 	conda:
 		"envs/faststructure.yaml"
-	resources:
-		load = 10
 	params:
 		in_prefix = "data/derived_data/plink_qc/thin_variants/merge_thinned.{dataset}.{thin_p}",
 		out_prefix = "data/derived_data/faststructure/structure/{dataset}.{thin_p}/structure.{dataset}.{thin_p}",
-		k = "{k}",
-		psrecord = "log/psrecord/faststructure/structure/structure.{dataset}.{thin_p}.{k}.log"
+		k = "{k}"
 	output:
 		structure_files = expand("data/derived_data/faststructure/structure/{{dataset}}.{{thin_p}}/structure.{{dataset}}.{{thin_p}}.{{k}}.{extension}", extension = ["meanP", "meanQ", "varP", "varQ"])
 	shell:
 		"""
-		psrecord "structure.py -K {params.k} --input={params.in_prefix} --output={params.out_prefix} --prior=simple --cv=0 --full" --log {params.psrecord} --include-children --interval 5
+		structure.py -K {params.k} --input={params.in_prefix} --output={params.out_prefix} --prior=simple --cv=0 --full
 		"""
 
 rule structure_ml:

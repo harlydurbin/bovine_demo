@@ -35,5 +35,5 @@ scratch.Rmd
 *.DS_Store
 *.xlsx
 *.sexcheck
-*.evec
 data/derived_data/faststructure/*
+data/derived_data/smartpca/*
