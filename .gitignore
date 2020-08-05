@@ -36,3 +36,4 @@ scratch.Rmd
 *.xlsx
 *.sexcheck
 *.evec
+data/derived_data/faststructure/*

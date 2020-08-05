@@ -91,9 +91,9 @@ plot_pca <-
       ) %>%
       mutate(
         species = stringr::str_to_sentence(species),
-        region = stringr::str_to_sentence(region),
-        continent = stringr::str_to_sentence(continent),
-        population = stringr::str_to_sentence(population)
+        region = stringr::str_to_title(region),
+        continent = stringr::str_to_title(continent),
+        population = stringr::str_to_title(population)
       )
     
     plot <-
@@ -142,7 +142,7 @@ plot_pca <-
 ```
 
 ```{r}
-plot_pca(dataset_thinning = "20cattle.superthin", pc1 = 1, pc2 = 2, color_var = region, shape_var = species)
+plot_pca(dataset_thinning = "full.superthin", pc1 = 1, pc2 = 2, color_var = region, shape_var = species)
 ```
 
 

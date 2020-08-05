@@ -12,10 +12,11 @@ usage_summary <-
         col_names = c("time", "cpu_percent", "real_mb", "virtual_mb")
       ), .id = "file") %>%
       mutate(rule = keyword) %>%
-      summarise(max_time_minutes = max(time, na.rm = TRUE),
+      filter(virtual_mb > 0) %>% 
+      summarise(max_time_hours = max(time, na.rm = TRUE),
                 max_cpu_percent = max(cpu_percent, na.rm = TRUE),
                 max_mb = max(real_mb, na.rm = TRUE)) %>%
-      mutate(max_time_minutes = max_time_minutes / 60,
+      mutate(max_time_hours = (max_time_hours / 60)/60,
              max_gb = max_mb * 0.001)
     
   }
@@ -35,7 +36,8 @@ usage_facets <-
         skip = 1,
         col_names = c("time", "cpu_percent", "real_mb", "virtual_mb")
       ), .id = "file") %>%
-      mutate(rule = keyword) 
+      mutate(rule = keyword) %>% 
+      filter(virtual_mb > 0)
     
     # logs <- 
     #   if(!is.null(sample_num)){

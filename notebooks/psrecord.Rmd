@@ -191,3 +191,15 @@ usage_facets(process = "joint_genotyping", keyword = "guess_ploidy")
 ```
 
 # `phasing`
+
+# `faststructure`
+
+```{r,eval=FALSE}
+usage_summary(process = "faststructure", keyword = "structure") 
+```
+
+```{r, eval=FALSE}
+usage_facets(process = "faststructure", keyword = "structure")
+```
+
+# smartpca

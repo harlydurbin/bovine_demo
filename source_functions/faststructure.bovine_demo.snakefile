@@ -1,4 +1,4 @@
-# snakemake -s source_functions/faststructure.bovine_demo.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --use-conda --resources load=100 --config --cluster-config source_functions/cluster/faststructure.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type} --qos {cluster.qos}" -p &> log/snakemake_log/faststructure/200804.faststructure.log
+# snakemake -s source_functions/faststructure.bovine_demo.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --use-conda --resources load=100 --config --cluster-config source_functions/cluster/faststructure.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type} --qos {cluster.qos}" -p &> log/snakemake_log/faststructure/200805.faststructure.log
 
 include: "plink_qc.snakefile"
 
@@ -29,11 +29,11 @@ rule structure:
 		load = 10
 	params:
 		in_prefix = "data/derived_data/plink_qc/thin_variants/merge_thinned.{dataset}.{thin_p}",
-		out_prefix = "data/derived_data/faststructure/structure/{dataset}.{thin_p}/structure.{dataset}.{thin_p}.k{k}",
+		out_prefix = "data/derived_data/faststructure/structure/{dataset}.{thin_p}/structure.{dataset}.{thin_p}",
 		k = "{k}",
-		psrecord = "log/psrecord/faststructure/structure/structure.{dataset}.{thin_p}.k{k}.log"
+		psrecord = "log/psrecord/faststructure/structure/structure.{dataset}.{thin_p}.{k}.log"
 	output:
-		structure_files = expand("data/derived_data/faststructure/structure/{{dataset}}.{{thin_p}}/structure.{{dataset}}.{{thin_p}}.k{{k}}.{extension}", extension = ["meanP", "meanQ", "varP", "varQ"])
+		structure_files = expand("data/derived_data/faststructure/structure/{{dataset}}.{{thin_p}}/structure.{{dataset}}.{{thin_p}}.{{k}}.{extension}", extension = ["meanP", "meanQ", "varP", "varQ"])
 	shell:
 		"""
 		psrecord "structure.py -K {params.k} --input={params.in_prefix} --output={params.out_prefix} --prior=simple --cv=0 --full" --log {params.psrecord} --include-children --interval 5
@@ -41,7 +41,7 @@ rule structure:
 
 rule structure_ml:
 	input:
-		structure_files = lambda wildcards: expand("data/derived_data/faststructure/structure/{dataset}.{thin_p}/structure.{dataset}.{thin_p}.k{k}.{extension}", dataset = wildcards.dataset, thin_p = wildcards.thin_p, k = config['k'][wildcards.dataset], extension = ["meanP", "meanQ", "varP", "varQ"])
+		structure_files = lambda wildcards: expand("data/derived_data/faststructure/structure/{dataset}.{thin_p}/structure.{dataset}.{thin_p}.{k}.{extension}", dataset = wildcards.dataset, thin_p = wildcards.thin_p, k = config['k'][wildcards.dataset], extension = ["meanP", "meanQ", "varP", "varQ"])
 	resources:
 		load = 1
 	conda:
