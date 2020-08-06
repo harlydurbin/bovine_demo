@@ -8,6 +8,8 @@ plink_nt: 12
 
 rename_file: "data/derived_data/plink_qc/update_ids.txt"
 
+pheno_file: "data/derived_data/plink_qc/update_pheno.txt"
+
 geno_filter: 0.10
 
 pab: 133300518
@@ -18,4 +20,4 @@ thin_p: ['superthin']
 
 thin_p_dict: {"superthin":".001", "onepercent":"0.01"}
 
-downsample_dataset: ['20all', '20cattle', 'allyak', 'allgaurgayal', 'allbanteng']
+downsample_dataset: ['20all', '20cattle', '5cattle', 'allyak', 'allgaurgayal', 'allbanteng']
