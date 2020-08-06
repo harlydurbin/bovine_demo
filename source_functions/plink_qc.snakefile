@@ -118,8 +118,7 @@ rule merge_thinned:
 	input:
 		thinned_bed = expand("data/derived_data/plink_qc/thin_variants/full.{{thin_p}}/thin_variants.{chr}.full.{{thin_p}}.bed", chr = config['chr']),
 		thinned_bim = expand("data/derived_data/plink_qc/thin_variants/full.{{thin_p}}/thin_variants.{chr}.full.{{thin_p}}.bim", chr = config['chr']),
-		thinned_fam = expand("data/derived_data/plink_qc/thin_variants/full.{{thin_p}}/thin_variants.{chr}.full.{{thin_p}}.fam", chr = config['chr']),
-		pheno_file = config['pheno_file']
+		thinned_fam = expand("data/derived_data/plink_qc/thin_variants/full.{{thin_p}}/thin_variants.{chr}.full.{{thin_p}}.fam", chr = config['chr'])
 	resources:
 		load = 1
 	params:
@@ -136,7 +135,7 @@ rule merge_thinned:
 		"""
 		module load {params.plink_module}
 		echo -e '{params.prefixes}' | sed 's/^ *//g' > {output.merge_list}
-		plink --merge-list {output.merge_list} --update-pheno {input.pheno_file} --double-id --cow --threads {params.nt} --make-bed --out {params.out_prefix}
+		plink --merge-list {output.merge_list} --double-id --cow --threads {params.nt} --make-bed --out {params.out_prefix}
 		"""
 
 # Output is only samples in specified downsample_dataset, variant density thinned to specified thinning parameter, merged to whole-genome

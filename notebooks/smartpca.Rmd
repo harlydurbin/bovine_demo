@@ -31,22 +31,27 @@ sample_metadata <-
   mutate(international_id = if_else(international_id == "CPC98_Bprimigenius_EnglandDerbyshire_5936", "ancient_derbyshire", international_id))
 ```
 
+```{r}
+read_table2(here::here("data/derived_data/plink_qc/thin_variants/full.superthin/merge_thinned.full.superthin.fam"), col_names = FALSE) %>% 
+  select(-X6) %>% 
+  mutate(pop = if_else(X1 %in% c("A2494_Yenisei_River", "ancient_derbyshire"), "ancient", "modern"))
+```
+
 
 # Results
 
 ## `full`
 
 ```{r}
-plot_pca(dataset_thinning = "full.superthin", pc1 = 1, pc2 = 2, color_var = region, shape_var = species)
+plot_pca(dataset_thinning = "projectfull.superthin", pc1 = 1, pc2 = 2, color_var = species, shape_var = continent)
 ```
 
 
 ## `20cattle`
 
-> Aurochs projected
 
 ```{r}
-plot_pca(dataset_thinning = "project20cattle.superthin", pc1 = 1, pc2 = 2, color_var = continent, shape_var = species)
+plot_pca(dataset_thinning = "project20cattle.superthin", pc1 = 2, pc2 = 3, color_var = continent, shape_var = species)
 ```
 
 ```{r}
@@ -54,26 +59,30 @@ read_vec(dataset_thinning = "project20cattle.superthin") %>%
   View()
 ```
 
-> Aurochs not projected
-
-```{r}
-plot_pca(dataset_thinning = "20cattle.superthin", pc1 = 1, pc2 = 2, color_var = region, shape_var = species)
-```
-
 ## `20all`
-
-> Aurochs projected
 
 ```{r}
 plot_pca(dataset_thinning = "project20all.superthin", pc1 = 1, pc2 = 2, color_var = species)
 ```
 
-
-> Aurochs not projected
+## `allbanteng`
 
 ```{r}
-plot_pca(dataset_thinning = "20all.superthin", pc1 = 1, pc2 = 2, color_var = region, shape_var = species)
+plot_pca(dataset_thinning = "allbanteng.superthin", pc1 = 1, pc2 = 2, color_var = population)
 ```
 
+## `allgaurgayal`
+
+```{r}
+plot_pca(dataset_thinning = "allgaurgayal.superthin", pc1 = 1, pc2 = 2, color_var = population)
+```
+
+## `allyak`
+
+* Probably 3 mislabeled "yak jinchuan"
+
+```{r}
+plot_pca(dataset_thinning = "allyak.superthin", pc1 = 3, pc2 = 4, color_var = population)
+```
 
 # Commentary

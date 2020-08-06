@@ -46,6 +46,7 @@ tibble::tribble(
   "20all", "All species. Up to 20 (ranked by coverage) samples per population label.", "1-20",
   "20cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 20 (ranked by coverage) samples per population label.", "1-20",
   "5cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 5 (ranked by coverage) samples per population label.", "1-20",
+  "5taurine", "Bos taurus, B. primigenius. Up to 5 (ranked by coverage) samples per population label.", "1-20",
   "allyak", "B. grunniens and B. mutus. All available samples.", "1-10",
   "allgayalgaur", "B. frontalis and B. gaurus. All available samples.", "1-10",
   "allbanteng", "B. javanicus. All available samples.", "1-8"
@@ -113,6 +114,17 @@ sample_metadata %>%
   mutate(fid = international_id) %>% 
   select(international_id, fid) %>% 
   write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.5cattle.txt"), col_names = FALSE)
+```
+
+```{r}
+sample_metadata %>% 
+  filter(species %in% c("bos primigenius", "bos taurus")) %>% 
+  group_by(population) %>% 
+  top_n(5, avg_coverage) %>% 
+  ungroup() %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid) %>% 
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.5taurine.txt"), col_names = FALSE)
 ```
 
 ### `allyak`

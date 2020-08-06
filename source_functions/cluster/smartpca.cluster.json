@@ -11,6 +11,10 @@
         "mail-type" : "NONE",
         "qos": "normal"
     },
+    "pop_labels":
+    {
+        "t": "1:00:00"
+    },
     "recode_input":
     {
         "t": "1:00:00"
