@@ -38,81 +38,228 @@ sample_metadata <-
   mutate(international_id = if_else(international_id == "CPC98_Bprimigenius_EnglandDerbyshire_5936", "ancient_derbyshire", international_id))
 ```
 
-```{r}
-read_table2(here::here("data/derived_data/plink_qc/thin_variants/full.superthin/merge_thinned.full.superthin.fam"), col_names = FALSE) %>% 
-  select(-X6) %>% 
-  mutate(pop = if_else(X1 %in% c("A2494_Yenisei_River", "ancient_derbyshire"), "ancient", "modern"))
+# `full`
+
+```{r, fig.width = 7, fig.height=5}
+plot_pca(dataset_thinning = "projectfull.onepercent", pc1 = 1, pc2 = 2, color_var = species, shape_var = continent, title_string = "All species, all samples, 1% SNPs")
 ```
 
-
-# Results
-
-## `full`
-
-```{r}
-plot_pca(dataset_thinning = "projectfull.onepercent", pc1 = 1, pc2 = 2, color_var = species, shape_var = continent)
+```{r, fig.width = 7, fig.height=5}
+ggscree(dataset_thinning = "projectfull.onepercent", title_string = "All species, all samples, 1% SNPs")
 ```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
+purrr::map2(
+  .x = seq(1,9, by = 2),
+  .y = seq(2,10, by = 2),
+  ~ plot_pca(
+    dataset_thinning = "projectfull.onepercent",
+    pc1 = .x, pc2 = .y,
+    color_var = species,
+    shape_var = continent,
+    title_string = "All species, all samples, 1% SNPs") %>% 
+    ggplot2::ggsave(
+      filename = here::here(glue::glue("figures/smartpca/projectfull.onepercent.PC{.x}_PC{.y}.png")),
+      width = 7,
+      height = 5
+    ))
+```
+
 
 # `20all`
 
-```{r}
-plot_pca(dataset_thinning = "project20all.onepercent", pc1 = 1, pc2 = 2, color_var = continent, shape_var = species)
+```{r, fig.width = 7, fig.height=5}
+plot_pca(dataset_thinning = "project20all.onepercent", pc1 = 1, pc2 = 2, color_var = species, shape_var = continent, title_string = "All species, 20 samples per population, 1% SNPs")
 ```
 
-## `20cattle`
-
-```{r}
-plot_pca(dataset_thinning = "project20cattle.onepercent", pc1 = 2, pc2 = 3, color_var = continent, shape_var = species)
+```{r, fig.width = 7, fig.height=5}
+ggscree(dataset_thinning = "project201ll.onepercent", title_string = "All species, 20 samples per population, 1% SNPs")
 ```
 
-```{r}
-read_vec(dataset_thinning = "project20cattle.onepercent") %>% 
-  View()
+```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
+purrr::map2(
+  .x = seq(1,9, by = 2),
+  .y = seq(2,10, by = 2),
+  ~ plot_pca(
+    dataset_thinning = "project20all.onepercent",
+    pc1 = .x, pc2 = .y,
+    color_var = species,
+    shape_var = continent,
+    title_string = "All species, 20 samples per population, 1% SNPs") %>% 
+    ggplot2::ggsave(
+      filename = here::here(glue::glue("figures/smartpca/project20all.onepercent.PC{.x}_PC{.y}.png")),
+      width = 7,
+      height = 5
+    ))
 ```
 
-## `5cattle`
+# `20cattle`
 
-```{r}
-plot_pca(dataset_thinning = "project5cattle.onepercent", pc1 = 1, pc2 = 2, color_var = continent, shape_var = species)
+```{r, fig.width = 7, fig.height=5}
+plot_pca(dataset_thinning = "project20cattle.onepercent", pc1 = 1, pc2 = 2, color_var = species, shape_var = continent, title_string = "Cattle & ancient, 20 samples per population, 1% SNPs")
 ```
 
-## `5taurine`
-
-* Sichuan indigenous probably not a taurine cow
-
-```{r}
-plot_pca(dataset_thinning = "project5taurine.onepercent", pc1 = 1, pc2 = 2, color_var = region)
+```{r, fig.width = 7, fig.height=5}
+ggscree(dataset_thinning = "project20cattle.onepercent", title_string = "Cattle & ancient, 20 samples per population, 1% SNPs")
 ```
 
-```{r}
-read_vec(dataset_thinning = "project5taurine.onepercent") %>% 
-  View()
+```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
+purrr::map2(
+  .x = seq(1,9, by = 2),
+  .y = seq(2,10, by = 2),
+  ~ plot_pca(
+    dataset_thinning = "project20cattle.onepercent",
+    pc1 = .x, pc2 = .y,
+    color_var = species,
+    shape_var = continent,
+    title_string = "Cattle & ancient, 20 samples per population, 1% SNPs") %>% 
+    ggplot2::ggsave(
+      filename = here::here(glue::glue("figures/smartpca/project20cattle.onepercent.PC{.x}_PC{.y}.png")),
+      width = 7,
+      height = 5
+    ))
 ```
 
-## `20all`
+# `5cattle`
 
-```{r}
-plot_pca(dataset_thinning = "project20all.onepercent", pc1 = 1, pc2 = 2, color_var = species)
+* Some Asian taurines mislabeled as composites?
+
+```{r, fig.width = 7, fig.height=5}
+plot_pca(dataset_thinning = "project5cattle.onepercent", pc1 = 1, pc2 = 2, color_var = species, shape_var = continent, title_string = "Cattle & ancient, 5 samples per population, 1% SNPs")
 ```
 
-## `allbanteng`
-
-```{r}
-plot_pca(dataset_thinning = "allbanteng.onepercent", pc1 = 1, pc2 = 2, color_var = population)
+```{r, fig.width = 7, fig.height=5}
+ggscree(dataset_thinning = "project5cattle.onepercent", title_string = "Cattle & ancient, 5 samples per population, 1% SNPs")
 ```
 
-## `allgaurgayal`
-
-```{r}
-plot_pca(dataset_thinning = "allgaurgayal.onepercent", pc1 = 1, pc2 = 2, color_var = population)
+```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
+purrr::map2(
+  .x = seq(1,9, by = 2),
+  .y = seq(2,10, by = 2),
+  ~ plot_pca(
+    dataset_thinning = "project5cattle.onepercent",
+    pc1 = .x, pc2 = .y,
+    color_var = species,
+    shape_var = continent,
+    title_string = "Cattle & ancient, 5 samples per population, 1% SNPs") %>% 
+    ggplot2::ggsave(
+      filename = here::here(glue::glue("figures/smartpca/project5cattle.onepercent.PC{.x}_PC{.y}.png")),
+      width = 7,
+      height = 5
+    ))
 ```
 
-## `allyak`
+# `5taurine`
+
+* Sichuan indigenous probably not a taurine cow or is admixed
+
+```{r, fig.width = 7, fig.height=5}
+plot_pca(dataset_thinning = "project5taurine.onepercent", pc1 = 1, pc2 = 2, color_var = region, shape_var = continent, title_string = "Taurine cattle & ancient, 5 samples per population, 1% SNPs")
+```
+
+```{r, fig.width = 7, fig.height=5}
+ggscree(dataset_thinning = "project5taurine.onepercent", title_string = "Taurine cattle & ancient, 5 samples per population, 1% SNPs")
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
+purrr::map2(
+  .x = seq(1,9, by = 2),
+  .y = seq(2,10, by = 2),
+  ~ plot_pca(
+    dataset_thinning = "project5taurine.onepercent",
+    pc1 = .x, pc2 = .y,
+    color_var = region,
+    shape_var = continent,
+    title_string = "Taurine cattle & ancient, 5 samples per population, 1% SNPs") %>% 
+    ggplot2::ggsave(
+      filename = here::here(glue::glue("figures/smartpca/project5taurine.onepercent.PC{.x}_PC{.y}.png")),
+      width = 7,
+      height = 5
+    ))
+```
+
+# `allbanteng`
+
+```{r, fig.width = 7, fig.height=5}
+plot_pca(dataset_thinning = "allbanteng.onepercent", pc1 = 1, pc2 = 2, color_var = international_id, title_string = "All banteng, 1% SNPs")
+```
+
+```{r, fig.width = 7, fig.height=5}
+ggscree(dataset_thinning = "allbanteng.onepercent", title_string = "All banteng, 1% SNPs")
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
+purrr::map2(
+  .x = seq(1,9, by = 2),
+  .y = seq(2,10, by = 2),
+  ~ plot_pca(
+    dataset_thinning = "allbanteng.onepercent",
+    pc1 = .x, pc2 = .y,
+    color_var = international_id,
+    title_string = "All banteng, 1% SNPs") %>% 
+    ggplot2::ggsave(
+      filename = here::here(glue::glue("figures/smartpca/allbanteng.onepercent.PC{.x}_PC{.y}.png")),
+      width = 7,
+      height = 5
+    ))
+```
+
+# `allgaurgayal`
+
+```{r, fig.width = 7, fig.height=5}
+plot_pca(dataset_thinning = "allgaurgayal.onepercent", pc1 = 1, pc2 = 2, color_var = population, title_string = "All gaur & gayal, 1% SNPs")
+```
+
+```{r, fig.width = 7, fig.height=5}
+ggscree(dataset_thinning = "allgaurgayal.onepercent", title_string = "All gaur & gayal, 1% SNPs")
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
+purrr::map2(
+  .x = seq(1,9, by = 2),
+  .y = seq(2,10, by = 2),
+  ~ plot_pca(
+    dataset_thinning = "allgaurgayal.onepercent",
+    pc1 = .x, pc2 = .y,
+    color_var = population,
+    title_string = "All gaur & gayal, 1% SNPs") %>% 
+    ggplot2::ggsave(
+      filename = here::here(glue::glue("figures/smartpca/allgaurgayal.onepercent.PC{.x}_PC{.y}.png")),
+      width = 7,
+      height = 5
+    ))
+```
+
+# `allyak`
 
 * Probably 3 mislabeled "yak jinchuan"
 
-```{r}
-plot_pca(dataset_thinning = "allyak.onepercent", pc1 = 3, pc2 = 4, color_var = population)
+```{r, fig.width = 7, fig.height=5}
+plot_pca(dataset_thinning = "allyak.onepercent", pc1 = 1, pc2 = 2, color_var = population, title_string = "All domestic & wild yak, 1% SNPs")
+```
+
+```{r, fig.width = 7, fig.height=5}
+ggscree(dataset_thinning = "allyak.onepercent", title_string = "All domestic & wild yak, 1% SNPs")
+```
+
+```{r, fig.width = 7, fig.height=5}
+plot_pca(dataset_thinning = "allyak.onepercent", pc1 = 4, pc2 = 5, color_var = population, title_string = "All domestic & wild yak, 1% SNPs")
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
+purrr::map2(
+  .x = seq(1,9, by = 2),
+  .y = seq(2,10, by = 2),
+  ~ plot_pca(
+    dataset_thinning = "allyak.onepercent",
+    pc1 = .x, pc2 = .y,
+    color_var = population,
+    title_string = "All domestic & wild yak, 1% SNPs") %>% 
+    ggplot2::ggsave(
+      filename = here::here(glue::glue("figures/smartpca/allyak.onepercent.PC{.x}_PC{.y}.png")),
+      width = 7,
+      height = 5
+    ))
 ```
 
 # Commentary

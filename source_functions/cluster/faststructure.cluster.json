@@ -11,27 +11,6 @@
         "mail-type" : "NONE",
         "qos": "normal"
     },
-    "thin_variants":
-    {
-        "mem" : 24G,
-        "t": "2:00:00",
-        "p" : "General,Lewis,BioCompute,htc4,hpc5",
-        "o": "log/slurm_out/plink_qc/{rule}/{wildcards}.%j.out"
-    },
-    "merge_thinned":
-    {
-        "mem" : 24G,
-        "t": "2:00:00",
-        "p" : "General,Lewis,BioCompute,htc4,hpc5",
-        "o": "log/slurm_out/plink_qc/{rule}/{wildcards}.%j.out"
-    },
-    "downsample_indiv":
-    {
-        "mem" : 24G,
-        "t": "2:00:00",
-        "p" : "General,Lewis,BioCompute,htc4,hpc5",
-        "o": "log/slurm_out/plink_qc/{rule}/{wildcards}.%j.out"
-    },
     "structure":
     {
         "t": "48:00:00",

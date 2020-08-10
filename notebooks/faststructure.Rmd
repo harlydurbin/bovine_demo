@@ -17,13 +17,12 @@ library(rlang)
 library(purrr)
 library(ggplot2)
 library(tidylog)
+
+source(here::here("source_functions/structure_functions.R"))
 ```
 
 # Notes & questions
 
-* In order to [install via conda](https://bioconda.github.io/recipes/plink_qc/README.html), need a Python 2.7 environment, which means you can't run Snakemake
-
----
 
 ## Dataset key
 
@@ -71,10 +70,23 @@ read_fs(dataset_thinning = "allyak.superthin", k = 4) %>%
 
 ```
 
-# `20cattle`
+# `allbanteng`
+
+Model complexity that maximizes marginal likelihood = 1
+Model components used to explain structure in data = 2
 
 ```{r}
-read_fs(dataset_thinning = "20cattle.superthin", k = 2) %>%
+read_fs(dataset_thinning = "allbanteng.superthin", k = 2) %>%
+  gg_fs(wrap_var = "population")
+```
+
+# `allgaurgayal`
+
+Model complexity that maximizes marginal likelihood = 5
+Model components used to explain structure in data = 1
+
+```{r}
+read_fs(dataset_thinning = "allgaurgayal.superthin", k = 2) %>%
   gg_fs(wrap_var = "population")
 ```
 

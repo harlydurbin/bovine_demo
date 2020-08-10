@@ -9,7 +9,35 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Dataset creation
+# Dataset key
+
+* Which samples
+
+```{r}
+tibble::tribble(
+  ~ Name, ~ Description, ~ `k ran`,
+  "full", "All species. All available samples.", "1-20",
+  "20all", "All species. Up to 20 (ranked by coverage) samples per population label.", "1-20",
+  "20cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 20 (ranked by coverage) samples per population label.", "1-20",
+  "5cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 5 (ranked by coverage) samples per population label.", "1-20",
+  "5taurine", "Bos taurus, B. primigenius. Up to 5 (ranked by coverage) samples per population label.", "1-20",
+  "allyak", "B. grunniens and B. mutus. All available samples.", "1-10",
+  "allgayalgaur", "B. frontalis and B. gaurus. All available samples.", "1-10",
+  "allbanteng", "B. javanicus. All available samples.", "1-8"
+)
+```
+
+* Thinning parameter
+
+```{r}
+tibble::tribble(
+  ~ Name, ~ Description,
+  "superthin", "Randomly retain 0.001% of SNPs from each chromosome",
+  "onepercent", "Randomly retain 0.01% of SNPs from each chromosome"
+)
+```
+
+# Dataset creation
 
 ```{r}
 sample_metadata %>% 
@@ -17,7 +45,7 @@ sample_metadata %>%
   tally(sort = TRUE)
 ```
 
-### `20all`
+## `20all`
 
 ```{r}
 sample_metadata %>% 
@@ -29,7 +57,7 @@ sample_metadata %>%
   write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.20all.txt"), col_names = FALSE)
 ```
 
-### `20cattle`
+## `20cattle`
 
 ```{r}
 sample_metadata %>% 
@@ -42,7 +70,7 @@ sample_metadata %>%
   write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.20cattle.txt"), col_names = FALSE)
 ```
 
-### `5cattle`
+## `5cattle`
 
 ```{r}
 sample_metadata %>% 
@@ -55,6 +83,8 @@ sample_metadata %>%
   write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.5cattle.txt"), col_names = FALSE)
 ```
 
+## `5taurine`
+
 ```{r}
 sample_metadata %>% 
   filter(species %in% c("bos primigenius", "bos taurus")) %>% 
@@ -66,7 +96,7 @@ sample_metadata %>%
   write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.5taurine.txt"), col_names = FALSE)
 ```
 
-### `allyak`
+## `allyak`
 
 ```{r}
 sample_metadata %>% 
@@ -77,7 +107,7 @@ sample_metadata %>%
 
 ```
 
-### `allgaurgayal`
+## `allgaurgayal`
 
 ```{r}
 sample_metadata %>% 
@@ -87,7 +117,7 @@ sample_metadata %>%
   write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.allgaurgayal.txt"), col_names = FALSE)
 ```
 
-### `allbanteng`
+## `allbanteng`
 
 ```{r}
 sample_metadata %>% 
