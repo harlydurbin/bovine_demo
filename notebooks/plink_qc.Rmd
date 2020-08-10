@@ -1,0 +1,99 @@
+---
+title: "plink qc"
+author: "Harly Durbin"
+date: "8/9/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Dataset creation
+
+```{r}
+sample_metadata %>% 
+  group_by(species) %>% 
+  tally(sort = TRUE)
+```
+
+### `20all`
+
+```{r}
+sample_metadata %>% 
+  group_by(population) %>% 
+  top_n(20, avg_coverage) %>% 
+  ungroup() %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid) %>% 
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.20all.txt"), col_names = FALSE)
+```
+
+### `20cattle`
+
+```{r}
+sample_metadata %>% 
+  filter(species %in% c("bos primigenius", "bos taurus", "composite", "bos indicus")) %>% 
+  group_by(population) %>% 
+  top_n(20, avg_coverage) %>% 
+  ungroup() %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid) %>% 
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.20cattle.txt"), col_names = FALSE)
+```
+
+### `5cattle`
+
+```{r}
+sample_metadata %>% 
+  filter(species %in% c("bos primigenius", "bos taurus", "composite", "bos indicus")) %>% 
+  group_by(population) %>% 
+  top_n(5, avg_coverage) %>% 
+  ungroup() %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid) %>% 
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.5cattle.txt"), col_names = FALSE)
+```
+
+```{r}
+sample_metadata %>% 
+  filter(species %in% c("bos primigenius", "bos taurus")) %>% 
+  group_by(population) %>% 
+  top_n(5, avg_coverage) %>% 
+  ungroup() %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid) %>% 
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.5taurine.txt"), col_names = FALSE)
+```
+
+### `allyak`
+
+```{r}
+sample_metadata %>% 
+  filter(species %in% c("bos grunniens", "bos mutus")) %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid) %>% 
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.allyak.txt"), col_names = FALSE)
+
+```
+
+### `allgaurgayal`
+
+```{r}
+sample_metadata %>% 
+  filter(species %in% c("bos gaurus", "bos frontalis")) %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid) %>% 
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.allgaurgayal.txt"), col_names = FALSE)
+```
+
+### `allbanteng`
+
+```{r}
+sample_metadata %>% 
+  filter(species %in% c("bos javanicus")) %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid) %>% 
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.allbanteng.txt"), col_names = FALSE)
+```
+

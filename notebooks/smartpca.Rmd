@@ -22,6 +22,13 @@ source(here::here("source_functions/plot_pca.R"))
 # Notes & questions
 
 * [Eigensoft population lists vs. projection](https://compvar-workshop.readthedocs.io/en/latest/contents/02_pca/pca.html#population-lists-vs-projection)
+* Need to specify shapes manually
+
+---
+
+Possible metadata edits:
+* Weird Jinchuan yaks
+* Sichuan idigenous is admixed
 
 # Setup
 
@@ -43,38 +50,61 @@ read_table2(here::here("data/derived_data/plink_qc/thin_variants/full.superthin/
 ## `full`
 
 ```{r}
-plot_pca(dataset_thinning = "projectfull.superthin", pc1 = 1, pc2 = 2, color_var = species, shape_var = continent)
+plot_pca(dataset_thinning = "projectfull.onepercent", pc1 = 1, pc2 = 2, color_var = species, shape_var = continent)
 ```
 
+# `20all`
+
+```{r}
+plot_pca(dataset_thinning = "project20all.onepercent", pc1 = 1, pc2 = 2, color_var = continent, shape_var = species)
+```
 
 ## `20cattle`
 
-
 ```{r}
-plot_pca(dataset_thinning = "project20cattle.superthin", pc1 = 2, pc2 = 3, color_var = continent, shape_var = species)
+plot_pca(dataset_thinning = "project20cattle.onepercent", pc1 = 2, pc2 = 3, color_var = continent, shape_var = species)
 ```
 
 ```{r}
-read_vec(dataset_thinning = "project20cattle.superthin") %>% 
+read_vec(dataset_thinning = "project20cattle.onepercent") %>% 
+  View()
+```
+
+## `5cattle`
+
+```{r}
+plot_pca(dataset_thinning = "project5cattle.onepercent", pc1 = 1, pc2 = 2, color_var = continent, shape_var = species)
+```
+
+## `5taurine`
+
+* Sichuan indigenous probably not a taurine cow
+
+```{r}
+plot_pca(dataset_thinning = "project5taurine.onepercent", pc1 = 1, pc2 = 2, color_var = region)
+```
+
+```{r}
+read_vec(dataset_thinning = "project5taurine.onepercent") %>% 
   View()
 ```
 
 ## `20all`
 
 ```{r}
-plot_pca(dataset_thinning = "project20all.superthin", pc1 = 1, pc2 = 2, color_var = species)
+plot_pca(dataset_thinning = "project20all.onepercent", pc1 = 1, pc2 = 2, color_var = species)
 ```
 
 ## `allbanteng`
 
 ```{r}
-plot_pca(dataset_thinning = "allbanteng.superthin", pc1 = 1, pc2 = 2, color_var = population)
+plot_pca(dataset_thinning = "allbanteng.onepercent", pc1 = 1, pc2 = 2, color_var = population)
 ```
 
 ## `allgaurgayal`
 
 ```{r}
-plot_pca(dataset_thinning = "allgaurgayal.superthin", pc1 = 1, pc2 = 2, color_var = population)
+plot_pca(dataset_thinning = "allgaurgayal.onepercent", pc1 = 1, pc2 = 2, color_var = population)
 ```
 
 ## `allyak`
@@ -82,7 +112,7 @@ plot_pca(dataset_thinning = "allgaurgayal.superthin", pc1 = 1, pc2 = 2, color_va
 * Probably 3 mislabeled "yak jinchuan"
 
 ```{r}
-plot_pca(dataset_thinning = "allyak.superthin", pc1 = 3, pc2 = 4, color_var = population)
+plot_pca(dataset_thinning = "allyak.onepercent", pc1 = 3, pc2 = 4, color_var = population)
 ```
 
 # Commentary

@@ -13,8 +13,9 @@ library(readr)
 library(dplyr)
 library(stringr)
 library(magrittr)
+library(rlang)
 library(purrr)
-library(tidyr)
+library(ggplot2)
 library(tidylog)
 ```
 
@@ -23,17 +24,6 @@ library(tidylog)
 * In order to [install via conda](https://bioconda.github.io/recipes/plink_qc/README.html), need a Python 2.7 environment, which means you can't run Snakemake
 
 ---
-
-```{r}
-sample_metadata %>% 
-  filter(international_id == "CPC98_Bprimigenius_EnglandDerbyshire_5936") %>% 
-  mutate(fid = international_id,
-         newid = "ancient_derbyshire",
-         newfid = "ancient_derbysire") %>% 
-  select(international_id, fid, newid, newfid) %>% 
-  write_tsv(here::here("data/derived_data/plink_qc/update_ids.txt"), col_names = FALSE)
-```
-
 
 ## Dataset key
 
@@ -58,7 +48,8 @@ tibble::tribble(
 ```{r}
 tibble::tribble(
   ~ Name, ~ Description,
-  "superthin", "Randomly retain 0.001% of SNPs from each chromosome"
+  "superthin", "Randomly retain 0.001% of SNPs from each chromosome",
+  "onepercent", "Randomly retain 0.01% of SNPs from each chromosome"
 )
 ```
 
@@ -70,91 +61,22 @@ sample_metadata <-
   mutate(international_id = if_else(international_id == "CPC98_Bprimigenius_EnglandDerbyshire_5936", "ancient_derbyshire", international_id))
 ```
 
-## Dataset creation
+
+# `allyak`
 
 ```{r}
-sample_metadata %>% 
-  group_by(species) %>% 
-  tally(sort = TRUE)
-```
 
-### `20all`
-
-```{r}
-sample_metadata %>% 
-  group_by(population) %>% 
-  top_n(20, avg_coverage) %>% 
-  ungroup() %>% 
-  mutate(fid = international_id) %>% 
-  select(international_id, fid) %>% 
-  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.20all.txt"), col_names = FALSE)
-```
-
-### `20cattle`
-
-```{r}
-sample_metadata %>% 
-  filter(species %in% c("bos primigenius", "bos taurus", "composite", "bos indicus")) %>% 
-  group_by(population) %>% 
-  top_n(20, avg_coverage) %>% 
-  ungroup() %>% 
-  mutate(fid = international_id) %>% 
-  select(international_id, fid) %>% 
-  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.20cattle.txt"), col_names = FALSE)
-```
-
-### `5cattle`
-
-```{r}
-sample_metadata %>% 
-  filter(species %in% c("bos primigenius", "bos taurus", "composite", "bos indicus")) %>% 
-  group_by(population) %>% 
-  top_n(5, avg_coverage) %>% 
-  ungroup() %>% 
-  mutate(fid = international_id) %>% 
-  select(international_id, fid) %>% 
-  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.5cattle.txt"), col_names = FALSE)
-```
-
-```{r}
-sample_metadata %>% 
-  filter(species %in% c("bos primigenius", "bos taurus")) %>% 
-  group_by(population) %>% 
-  top_n(5, avg_coverage) %>% 
-  ungroup() %>% 
-  mutate(fid = international_id) %>% 
-  select(international_id, fid) %>% 
-  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.5taurine.txt"), col_names = FALSE)
-```
-
-### `allyak`
-
-```{r}
-sample_metadata %>% 
-  filter(species %in% c("bos grunniens", "bos mutus")) %>% 
-  mutate(fid = international_id) %>% 
-  select(international_id, fid) %>% 
-  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.allyak.txt"), col_names = FALSE)
+read_fs(dataset_thinning = "allyak.superthin", k = 4) %>%
+  gg_fs(wrap_var = "population")
 
 ```
 
-### `allgaurgayal`
+# `20cattle`
 
 ```{r}
-sample_metadata %>% 
-  filter(species %in% c("bos gaurus", "bos frontalis")) %>% 
-  mutate(fid = international_id) %>% 
-  select(international_id, fid) %>% 
-  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.allgaurgayal.txt"), col_names = FALSE)
+read_fs(dataset_thinning = "20cattle.superthin", k = 2) %>%
+  gg_fs(wrap_var = "population")
 ```
 
-### `allbanteng`
 
-```{r}
-sample_metadata %>% 
-  filter(species %in% c("bos javanicus")) %>% 
-  mutate(fid = international_id) %>% 
-  select(international_id, fid) %>% 
-  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.allbanteng.txt"), col_names = FALSE)
-```
-
+# Commentary
