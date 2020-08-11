@@ -27,8 +27,9 @@ source(here::here("source_functions/plot_pca.R"))
 ---
 
 Possible metadata edits:
+
 * Weird Jinchuan yaks
-* Sichuan idigenous is admixed
+* Sichuan indigenous is admixed
 
 # Setup
 
@@ -73,7 +74,7 @@ plot_pca(dataset_thinning = "project20all.onepercent", pc1 = 1, pc2 = 2, color_v
 ```
 
 ```{r, fig.width = 7, fig.height=5}
-ggscree(dataset_thinning = "project201ll.onepercent", title_string = "All species, 20 samples per population, 1% SNPs")
+ggscree(dataset_thinning = "project20all.onepercent", title_string = "All species, 20 samples per population, 1% SNPs")
 ```
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
@@ -122,7 +123,7 @@ purrr::map2(
 
 # `5cattle`
 
-* Some Asian taurines mislabeled as composites?
+* Some Asian taurines mislabeled as composites and vice versa?
 
 ```{r, fig.width = 7, fig.height=5}
 plot_pca(dataset_thinning = "project5cattle.onepercent", pc1 = 1, pc2 = 2, color_var = species, shape_var = continent, title_string = "Cattle & ancient, 5 samples per population, 1% SNPs")
@@ -131,6 +132,58 @@ plot_pca(dataset_thinning = "project5cattle.onepercent", pc1 = 1, pc2 = 2, color
 ```{r, fig.width = 7, fig.height=5}
 ggscree(dataset_thinning = "project5cattle.onepercent", title_string = "Cattle & ancient, 5 samples per population, 1% SNPs")
 ```
+
+```{r}
+sample_metadata %>% 
+  filter(region == "asian steppe") %>% 
+  distinct(population) 
+```
+
+
+```{r, fig.width = 7, fig.height=5}
+read_vec("project5cattle.onepercent") %>%
+  mutate(
+    color_var =
+      case_when(
+        population %in% c("yakutian", "mongolian", "chaidamu yellow", "kazakh", "tibetan") ~ stringr::str_to_title(population),
+        international_id == "A2494_Yenisei_River" ~ "Ancient (Siberian)",
+        international_id == "ancient_derbyshire" ~ "Ancient (Derbyshire)",
+        TRUE ~ "All others"),
+    alpha_var = if_else(color_var == "All others", 0.2, 0.6),
+    species = stringr::str_to_sentence(species)
+  ) %>%
+  arrange(desc(color_var)) %>% 
+  mutate(color_var = forcats::fct_inorder(color_var)) %>% 
+  ggplot(aes(x = PC1,
+             y = PC2,
+             color = color_var,
+             shape = species,
+             alpha = alpha_var)) +
+  geom_point(size = 3) +
+  scale_alpha_identity() +
+  scale_color_manual(
+    values = c(
+      "Ancient (Siberian)" = "#126180",
+      "Ancient (Derbyshire)" = "#629d62",
+      "Yakutian" = "#84d6d3",
+      "Mongolian" = "#ee5863",
+      "Chaidamu Yellow" = "#fedb11",
+      "Kazakh" = "#ff743d",
+      "Tibetan" = "#5f1f29",
+      "All others" = "lightgrey"
+      )
+  ) +
+  guides(colour = guide_legend(override.aes = list(alpha = 1))) +
+  theme_classic() +
+  labs(shape = "Species",
+       color = "Population",
+       title = "Cattle & ancient, 5 samples per population, 1% SNPs",
+       x = "PC 1: 51.1%",
+       y = "PC 2: 14.2%")
+
+ggsave(here::here("figures/smartpca/project5cattle_asiansteppe.onepercent.PC1_PC2.png"), width = 7, height = 5)
+```
+
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
 purrr::map2(
@@ -242,10 +295,6 @@ plot_pca(dataset_thinning = "allyak.onepercent", pc1 = 1, pc2 = 2, color_var = p
 ggscree(dataset_thinning = "allyak.onepercent", title_string = "All domestic & wild yak, 1% SNPs")
 ```
 
-```{r, fig.width = 7, fig.height=5}
-plot_pca(dataset_thinning = "allyak.onepercent", pc1 = 4, pc2 = 5, color_var = population, title_string = "All domestic & wild yak, 1% SNPs")
-```
-
 ```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
 purrr::map2(
   .x = seq(1,9, by = 2),
@@ -263,3 +312,7 @@ purrr::map2(
 ```
 
 # Commentary
+
+* Siberian ancient clusters with Asian steppe cattle
+* In cattle datasets, PC1 is taurine vs. indicine and PC2 appears to be Indian indicine vs. East Asian indicine (though quite a lot of variation within East Asian indicine and composite)
+* No idea what the deal with weird 3 Jinchuan yaks. They don't look especially different in fastSTRUCTURE results
