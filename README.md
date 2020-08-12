@@ -65,6 +65,8 @@ See `source_functions/phasing.snakefile` and `notebooks/phasing.Rmd`
     * Initial QC same as pre-phasing QC above
     * Variants removed from each chromosome with an X% probability of being retained
     * Individuals downsampled based on dataset of interest
-* `fastStructure` ran `source_functions/faststructure.bovine_demo.snakefile`, see `notebooks/faststructure.Rmd` for thinning/downsampling dataset designations & results
+* `fastStructure` ran in `source_functions/faststructure.bovine_demo.snakefile`, see `notebooks/faststructure.Rmd` for thinning/downsampling dataset designations & results
 * `EIGENSOFT smartpca` ran in `source_functions/smartpca.snakefile`, see `notebooks/smartpca.Rmd` for thinning/downsampling dataset designations & results
+    * For all datasets including ancient samples: eigenvectors calculated without them --> ancients samples projected onto PC space
 * [`SMC++`](https://github.com/popgenmethods/smcpp)
+* `TreeMix`
