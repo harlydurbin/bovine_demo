@@ -25,7 +25,6 @@ source(here::here("source_functions/structure_functions.R"))
 
 # Notes & questions
 
-
 ## Dataset key
 
 * Which samples
@@ -189,6 +188,13 @@ Model components used to explain structure in data = 3
 ```{r}
 
 read_structure(dataset_thinning = "allyak.onepercent", k = 2) %>% 
+  ggstructure(wrap_var = "population")
+
+```
+
+```{r}
+
+read_structure(dataset_thinning = "allyak.onepercent", k = 3) %>% 
   ggstructure(wrap_var = "population")
 
 ```

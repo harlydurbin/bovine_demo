@@ -2,7 +2,7 @@
 
 #snakemake -s source_functions/treemix.snakefile --rerun-incomplete --latency-wait 120 --jobs 10 &> snakemake_logs/treemix/191206.treemix.log
 
-configfile: "source_functions/config/191204.treemix.json"
+configfile: "source_functions/config/treemix.json"
 
 m_list = list(range(config['min_m'], config['max_m']))
 
@@ -10,43 +10,45 @@ rule target:
 	input:
 		targ = lambda wildcards: expand("data/derived_data/treemix/output/{dataset}/treemix.{dataset}.{m}.vertices.gz", dataset = config['dataset'], m = m_list)
 
-rule keep:
+rule define_cluster:
 	input:
-		keepfile = "data/plink/{dataset}.keep.txt"
+		fam = "data/derived_data/plink_qc/thin_variants/{dataset}.{thin_p}/merge_thinned.{dataset}.{thin_p}.fam",
+		script = "source_functions/define_cluster.R"
 	params:
-		prefix = "data/plink/{dataset}"
+		r_module = config['r_module']
 	output:
-		bed = "data/plink/{dataset}.bed",
-		bim = "data/plink/{dataset}.bim",
-		fam = "data/plink/{dataset}.fam"
+		within = "data/derived_data/treemix/define_cluster.{dataset}.{thin_p}.txt"
 	shell:
-		"plink --bfile data/plink/full --keep {input.keepfile} --make-bed --out {params.prefix}"
+		"""
+		module load {params.r_module}
+		Rscript --vanilla {input.script} {input.fam} {output.within}
+		"""
 
-rule clst:
+
+
+rule write_cluster:
 	input:
-		bed = "data/plink/{dataset}.bed",
-		bim = "data/plink/{dataset}.bim",
-		fam = "data/plink/{dataset}.fam"
+		bed = "data/derived_data/plink_qc/thin_variants/{dataset}.{thin_p}/merge_thinned.{dataset}.{thin_p}.bed",
+		bim = "data/derived_data/plink_qc/thin_variants/{dataset}.{thin_p}/merge_thinned.{dataset}.{thin_p}.bim",
+		fam = "data/derived_data/plink_qc/thin_variants/{dataset}.{thin_p}/merge_thinned.{dataset}.{thin_p}.fam"
 	params:
-		prefix = "data/plink/{dataset}"
+		prefix = "data/derived_data/plink_qc/thin_variants/{dataset}.{thin_p}/merge_thinned.{dataset}.{thin_p}"
 	output:
-		clst = "data/plink/{dataset}.clst"
-	shell: "plink --bfile {params.prefix} --write-cluster --family --out {params.prefix}"
+		clst = "data/derived_data/plink_qc/thin_variants/{dataset}.{thin_p}/merge_thinned.{dataset}.{thin_p}.clst"
+	shell: "plink --bfile {params.prefix} --within --write-cluster --out {params.prefix}"
 
 rule freq:
 	input:
-		bed = "data/plink/{dataset}.bed",
-		bim = "data/plink/{dataset}.bim",
-		fam = "data/plink/{dataset}.fam",
-		clst = "data/plink/{dataset}.clst"
+		bed = "data/derived_data/plink_qc/thin_variants/{dataset}.{thin_p}/merge_thinned.{dataset}.{thin_p}.bed",
+		bim = "data/derived_data/plink_qc/thin_variants/{dataset}.{thin_p}/merge_thinned.{dataset}.{thin_p}.bim",
+		fam = "data/derived_data/plink_qc/thin_variants/{dataset}.{thin_p}/merge_thinned.{dataset}.{thin_p}.fam"
+		clst = "data/derived_data/plink_qc/thin_variants/{dataset}.{thin_p}/merge_thinned.{dataset}.{thin_p}.clst"
 	params:
-		prefix_in = "data/plink/{dataset}",
-		prefix_out = "data/derived_data/treemix/plink2tm/{dataset}"
+		in_prefix = "data/derived_data/plink_qc/thin_variants/{dataset}.{thin_p}/merge_thinned.{dataset}.{thin_p}",
+		out_prefix = "data/derived_data/treemix/plink2tm/plink2tm.{dataset}.{thin_p}"
 	output:
-		strat = "data/derived_data/treemix/plink2tm/{dataset}.frq.strat"
-	shell: "plink --bfile {params.prefix_in} --freq --within {input.clst} --out {params.prefix_out}"
-
-#plink --bfile data/plink/treemix_pops --freq --within data/plink/treemix_pops.clst --out data/derived_data/treemix/plink2tm/treemix_pops
+		strat = "data/derived_data/treemix/plink2tm/plink2tm.{dataset}.{thin_p}.frq.strat"
+	shell: "plink --bfile {params.in_prefix} --freq --within {input.clst} --out {params.out_prefix}"
 
 rule gz:
 	input:

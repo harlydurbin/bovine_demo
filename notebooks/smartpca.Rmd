@@ -247,7 +247,7 @@ read_vec("project5cattle.onepercent") %>%
              split = FALSE,
              horizontal = FALSE)
 
-#ggsave(here::here("figures/smartpca/project5cattle_asiansteppe.onepercent.PC1_PC2.png"), width = 7, height = 5)
+ggsave(here::here("figures/smartpca/project5cattle_asiansteppe_cutout.onepercent.PC1_PC2.png"), width = 7, height = 5)
 ```
 
 
