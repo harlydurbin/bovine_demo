@@ -131,6 +131,33 @@ purrr::map2(
     ))
 ```
 
+## `5regionall`
+
+```{r, fig.width = 7, fig.height=5}
+plot_pca(dataset_thinning = "project5regionall.onepercent", pc1 = 1, pc2 = 2, color_var = species, shape_var = continent, title_string = "All species, 5 samples per region per population, 1% SNPs")
+```
+
+```{r, fig.width = 7, fig.height=5}
+ggscree(dataset_thinning = "project5regionall.onepercent", title_string = "All species, 20 samples per population, 1% SNPs")
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
+purrr::map2(
+  .x = seq(1,9, by = 2),
+  .y = seq(2,10, by = 2),
+  ~ plot_pca(
+    dataset_thinning = "project5regionall.onepercent",
+    pc1 = .x, pc2 = .y,
+    color_var = species,
+    shape_var = continent,
+    title_string = "All species, 5 samples per region per population, 1% SNPs") %>% 
+    ggplot2::ggsave(
+      filename = here::here(glue::glue("figures/smartpca/project5regionall.onepercent.PC{.x}_PC{.y}.png")),
+      width = 7,
+      height = 5
+    ))
+```
+
 # Cattle datasets {.tabset}
 
 ## `20cattle`
@@ -172,14 +199,7 @@ plot_pca(dataset_thinning = "project5cattle.onepercent", pc1 = 1, pc2 = 2, color
 ggscree(dataset_thinning = "project5cattle.onepercent", title_string = "Cattle & ancient, 5 samples per population, 1% SNPs")
 ```
 
-```{r}
-sample_metadata %>% 
-  filter(region == "asian steppe") %>% 
-  distinct(population) 
-```
-
-
-```{r, fig.width = 7, fig.height=5}
+```{r, fig.width = 7, fig.height=8}
 read_vec("project5cattle.onepercent") %>%
   mutate(
     color_var =
@@ -188,18 +208,20 @@ read_vec("project5cattle.onepercent") %>%
         international_id == "A2494_Yenisei_River" ~ "Ancient (Siberian)",
         international_id == "ancient_derbyshire" ~ "Ancient (Derbyshire)",
         TRUE ~ "All others"),
+    color_var = forcats::fct_relevel(as.factor(color_var), "Ancient (Siberian)", "Ancient (Derbyshire)", "Yakutian", "Mongolian", "Chaidamu Yellow", "Kazakh", "Tibetan", "All others"),
     alpha_var = if_else(color_var == "All others", 0.2, 0.6),
+    size_var = if_else(population == "ancient", 4, 3),
     species = stringr::str_to_sentence(species)
   ) %>%
-  arrange(desc(color_var)) %>% 
-  mutate(color_var = forcats::fct_inorder(color_var)) %>% 
   ggplot(aes(x = PC1,
              y = PC2,
              color = color_var,
              shape = species,
-             alpha = alpha_var)) +
-  geom_point(size = 3) +
+             alpha = alpha_var,
+             size = size_var)) +
+  geom_point() +
   scale_alpha_identity() +
+  scale_size_identity() +
   scale_color_manual(
     values = c(
       "Ancient (Siberian)" = "#126180",
@@ -218,9 +240,14 @@ read_vec("project5cattle.onepercent") %>%
        color = "Population",
        title = "Cattle & ancient, 5 samples per population, 1% SNPs",
        x = "PC 1: 51.1%",
-       y = "PC 2: 14.2%")
+       y = "PC 2: 14.2%") +
+  ggforce::facet_zoom(xlim = c(-.045, -0.01),
+             ylim = c(-.015, .025),
+             zoom.size = 0.5,
+             split = FALSE,
+             horizontal = FALSE)
 
-ggsave(here::here("figures/smartpca/project5cattle_asiansteppe.onepercent.PC1_PC2.png"), width = 7, height = 5)
+#ggsave(here::here("figures/smartpca/project5cattle_asiansteppe.onepercent.PC1_PC2.png"), width = 7, height = 5)
 ```
 
 

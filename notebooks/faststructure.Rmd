@@ -3,12 +3,14 @@ title: "fastStructure"
 author: "Harly Durbin"
 output:
   html_document:
+    toc: true
+    toc_depth: 2
     df_print: paged
     code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, fig.width = 10, fig.height = 7)
 library(readr)
 library(dplyr)
 library(stringr)
@@ -33,13 +35,16 @@ tibble::tribble(
   ~ Name, ~ Description, ~ `k ran`,
   "full", "All species. All available samples.", "1-20",
   "20all", "All species. Up to 20 (ranked by coverage) samples per population label.", "1-20",
+  "5regionall", "All species. Up to 5 (ranked by coverage) samples per species per region", "1-20",
   "20cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 20 (ranked by coverage) samples per population label.", "1-20",
   "5cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 5 (ranked by coverage) samples per population label.", "1-20",
   "5taurine", "Bos taurus, B. primigenius. Up to 5 (ranked by coverage) samples per population label.", "1-20",
   "allyak", "B. grunniens and B. mutus. All available samples.", "1-10",
   "allgayalgaur", "B. frontalis and B. gaurus. All available samples.", "1-10",
   "allbanteng", "B. javanicus. All available samples.", "1-8"
-)
+) %>% 
+  kableExtra::kable("html") %>% 
+  kableExtra::kable_styling(full_width = F)
 ```
 
 * Thinning parameter
@@ -49,7 +54,9 @@ tibble::tribble(
   ~ Name, ~ Description,
   "superthin", "Randomly retain 0.001% of SNPs from each chromosome",
   "onepercent", "Randomly retain 0.01% of SNPs from each chromosome"
-)
+) %>% 
+  kableExtra::kable("html") %>% 
+  kableExtra::kable_styling(full_width = F)
 ```
 
 # Setup
@@ -60,34 +67,140 @@ sample_metadata <-
   mutate(international_id = if_else(international_id == "CPC98_Bprimigenius_EnglandDerbyshire_5936", "ancient_derbyshire", international_id))
 ```
 
+# Full datasets
 
-# `allyak`
+## `full.onepercent` {.tabset}
+
+## `20all.onepercent` {.tabset}
+
+### K = 5
 
 ```{r}
 
-read_fs(dataset_thinning = "allyak.superthin", k = 4) %>%
-  gg_fs(wrap_var = "population")
+read_structure(dataset_thinning = "20all.onepercent", k = 5) %>%
+  mutate(
+    color_var =
+      case_when(
+        # Banteng, gaur, gayal
+        variable == "X1" ~ "#fedb11",
+        # Yaks
+        variable == "X2" ~ "#c6b7d5",
+        # European taurine
+        variable == "X3" ~ "#126180",
+        # Indian indicine
+        variable == "X4" ~ "#ff7436",
+        # auroch
+        variable == "X5" ~ "#84d6d3"
+      )
+  ) %>%
+  ggstructure(wrap_var = "species", custom_color = TRUE) +
+  labs(title = "All samples, 20 samples per population, 1% SNPs: k = 5")
 
 ```
 
-# `allbanteng`
+### K = 6
 
-Model complexity that maximizes marginal likelihood = 1
-Model components used to explain structure in data = 2
+```{r, eval = FALSE}
 
-```{r}
-read_fs(dataset_thinning = "allbanteng.superthin", k = 2) %>%
-  gg_fs(wrap_var = "population")
+read_structure(dataset_thinning = "20all.onepercent", k = 6) %>% 
+  ggstructure(wrap_var = "species", custom_color = FALSE) +
+  labs(title = "All samples, 20 samples per population, 1% SNPs: k = 6")
+
 ```
 
-# `allgaurgayal`
+# Cattle datasets 
 
-Model complexity that maximizes marginal likelihood = 5
+## `5cattle.onepercent` {.tabset}
+
+Model complexity that maximizes marginal likelihood = 2
+Model components used to explain structure in data = 3
+
+### K = 2
+
+```{r}
+
+read_structure(dataset_thinning = "5cattle.onepercent", k = 2) %>% 
+  mutate(color_var =
+           case_when(
+             # European taurine
+             variable == "X2" ~ "#126180",
+             # Indian indicine
+             variable == "X1" ~ "#ff7436"
+           )) %>% 
+  ggstructure(wrap_var = "region", custom_color = TRUE) +
+  labs(title = "Cattle & ancient, 5 samples per population, 1% SNPs: k = 2")
+
+```
+
+### K = 3
+
+* Components appear to be taurines (green) and indicines (blue)
+    + Other component associated with Siberian auroch
+
+```{r}
+
+read_structure(dataset_thinning = "5cattle.onepercent", k = 3) %>%
+  mutate(color_var =
+           case_when(
+             # European taurine
+             variable == "X2" ~ "#126180",
+             # Indian indicine
+             variable == "X3" ~ "#ff7436",
+             # auroch
+             variable == "X1" ~ "#84d6d3")) %>%
+  ggstructure(wrap_var = "region", custom_color = TRUE) +
+  labs(title = "Cattle & ancient, 5 samples per population, 1% SNPs: k = 3")
+
+```
+
+### K = 4
+
+* First three components appear to be taurines (pink), Indian indicines (green), and East Asian indicines (blue)
+    + Barely visible, but the 4th component separates out Derbyshire auroch (likely related to technical error)
+
+```{r}
+
+read_structure(dataset_thinning = "5cattle.onepercent", k = 4) %>%
+  mutate(
+    color_var =
+      case_when(
+        # European taurine
+        variable == "X1" ~ "#126180",
+        # Indian indicine
+        variable == "X2" ~ "#ff7436",
+        # Asian indicine
+        variable == "X3" ~ "#629d62",
+        # auroch
+        variable == "X4" ~ "#84d6d3"
+      )
+  ) %>%
+  ggstructure(wrap_var = "region", custom_color = TRUE) +
+  labs(title = "Cattle & ancient, 5 samples per population, 1% SNPs: k = 4")
+
+```
+
+# Outgroup datasets
+
+## `allyak.onepercent`
+
+Model complexity that maximizes marginal likelihood = 2
+Model components used to explain structure in data = 3
+
+```{r}
+
+read_structure(dataset_thinning = "allyak.onepercent", k = 2) %>% 
+  ggstructure(wrap_var = "population")
+
+```
+
+## `allgaurgayal.onepercent`
+
+Model complexity that maximizes marginal likelihood = 2
 Model components used to explain structure in data = 1
 
 ```{r}
-read_fs(dataset_thinning = "allgaurgayal.superthin", k = 2) %>%
-  gg_fs(wrap_var = "population")
+read_structure(dataset_thinning = "allgaurgayal.onepercent", k = 2) %>%
+  ggstructure(wrap_var = "population")
 ```
 
 
