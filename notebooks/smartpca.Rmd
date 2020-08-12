@@ -3,6 +3,8 @@ title: "PCA"
 author: "Harly Durbin"
 output:
   html_document:
+    toc: true
+    toc_depth: 2
     df_print: paged
     code_folding: hide
 ---
@@ -22,7 +24,7 @@ source(here::here("source_functions/plot_pca.R"))
 # Notes & questions
 
 * [Eigensoft population lists vs. projection](https://compvar-workshop.readthedocs.io/en/latest/contents/02_pca/pca.html#population-lists-vs-projection)
-* Need to specify shapes manually
+* Maybe need to specify shapes manually
 
 ---
 
@@ -30,6 +32,39 @@ Possible metadata edits:
 
 * Weird Jinchuan yaks
 * Sichuan indigenous is admixed
+
+## Dataset key
+
+* Which samples
+
+```{r}
+tibble::tribble(
+  ~ Name, ~ Description,
+  "full", "All species. All available samples.",
+  "20all", "All species. Up to 20 (ranked by coverage) samples per population label.",
+  "20cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 20 (ranked by coverage) samples per population label.",
+  "5cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 5 (ranked by coverage) samples per population label.",
+  "5taurine", "Bos taurus, B. primigenius. Up to 5 (ranked by coverage) samples per population label.",
+  "allyak", "B. grunniens and B. mutus. All available samples.",
+  "allgayalgaur", "B. frontalis and B. gaurus. All available samples.",
+  "allbanteng", "B. javanicus. All available samples."
+) %>% 
+  kableExtra::kable("html") %>% 
+  kableExtra::kable_styling(full_width = F)
+```
+
+* Thinning parameter
+
+```{r}
+tibble::tribble(
+  ~ Name, ~ Description,
+  "superthin", "Randomly retain 0.001% of SNPs from each chromosome",
+  "onepercent", "Randomly retain 0.01% of SNPs from each chromosome"
+) %>%
+  kableExtra::kable("html") %>% 
+  kableExtra::kable_styling(full_width = F)
+```
+
 
 # Setup
 
@@ -39,7 +74,9 @@ sample_metadata <-
   mutate(international_id = if_else(international_id == "CPC98_Bprimigenius_EnglandDerbyshire_5936", "ancient_derbyshire", international_id))
 ```
 
-# `full`
+# Full datasets {.tabset}
+
+## `full`
 
 ```{r, fig.width = 7, fig.height=5}
 plot_pca(dataset_thinning = "projectfull.onepercent", pc1 = 1, pc2 = 2, color_var = species, shape_var = continent, title_string = "All species, all samples, 1% SNPs")
@@ -67,7 +104,7 @@ purrr::map2(
 ```
 
 
-# `20all`
+## `20all`
 
 ```{r, fig.width = 7, fig.height=5}
 plot_pca(dataset_thinning = "project20all.onepercent", pc1 = 1, pc2 = 2, color_var = species, shape_var = continent, title_string = "All species, 20 samples per population, 1% SNPs")
@@ -94,7 +131,9 @@ purrr::map2(
     ))
 ```
 
-# `20cattle`
+# Cattle datasets {.tabset}
+
+## `20cattle`
 
 ```{r, fig.width = 7, fig.height=5}
 plot_pca(dataset_thinning = "project20cattle.onepercent", pc1 = 1, pc2 = 2, color_var = species, shape_var = continent, title_string = "Cattle & ancient, 20 samples per population, 1% SNPs")
@@ -121,7 +160,7 @@ purrr::map2(
     ))
 ```
 
-# `5cattle`
+## `5cattle`
 
 * Some Asian taurines mislabeled as composites and vice versa?
 
@@ -202,7 +241,7 @@ purrr::map2(
     ))
 ```
 
-# `5taurine`
+## `5taurine`
 
 * Sichuan indigenous probably not a taurine cow or is admixed
 
@@ -231,7 +270,9 @@ purrr::map2(
     ))
 ```
 
-# `allbanteng`
+# Outgroup datasets {.tabset}
+
+## `allbanteng`
 
 ```{r, fig.width = 7, fig.height=5}
 plot_pca(dataset_thinning = "allbanteng.onepercent", pc1 = 1, pc2 = 2, color_var = international_id, title_string = "All banteng, 1% SNPs")
@@ -257,7 +298,7 @@ purrr::map2(
     ))
 ```
 
-# `allgaurgayal`
+## `allgaurgayal`
 
 ```{r, fig.width = 7, fig.height=5}
 plot_pca(dataset_thinning = "allgaurgayal.onepercent", pc1 = 1, pc2 = 2, color_var = population, title_string = "All gaur & gayal, 1% SNPs")
@@ -283,7 +324,7 @@ purrr::map2(
     ))
 ```
 
-# `allyak`
+## `allyak`
 
 * Probably 3 mislabeled "yak jinchuan"
 
@@ -313,6 +354,6 @@ purrr::map2(
 
 # Commentary
 
-* Siberian ancient clusters with Asian steppe cattle
+* Previously, the Siberian auroch defined PC2 and the Derbyshire auroch clustered closely with European cattle. Now that we have many more Asian cattle represented, the two aurochs are much closer together and are clustered within breeds found on the Asian steppe.
 * In cattle datasets, PC1 is taurine vs. indicine and PC2 appears to be Indian indicine vs. East Asian indicine (though quite a lot of variation within East Asian indicine and composite)
 * No idea what the deal with weird 3 Jinchuan yaks. They don't look especially different in fastSTRUCTURE results
