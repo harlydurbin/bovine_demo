@@ -13,3 +13,11 @@ thin_p: ['onepercent']
 dataset: ['allyak', 'allgaurgayal', 'allbanteng', 'projectfull', 'project20all', 'project5regionall', 'project20cattle', 'project5cattle', 'project5taurine']
 
 dataset_key: {'allyak':['allyak'], 'allgaurgayal':['allgaurgayal'], 'allbanteng':['allbanteng'], 'projectfull':['full'], 'project20all':['20all'], 'project5regionall':['5regionall'], 'project20cattle':['20cattle'], 'project5cattle':['5cattle'], 'project5taurine':['5taurine']}
+
+root: "AmericanBison"
+
+min_m: 1
+
+max_m: 11
+
+ld_snps: 1000

@@ -57,10 +57,15 @@ rule gz:
 		strat_gz = "data/derived_data/treemix/plink2tm/{dataset}.frq.strat.gz"
 	shell: "pigz {input.strat}"
 
+
+# https://anaconda.org/bioconda/treemix
 rule plink2tm:
 	input:
 		strat_gz = "data/derived_data/treemix/plink2tm/{dataset}.frq.strat.gz",
 		script = "source_functions/plink2treemix.py"
+	# Use Python2.7 environment
+	conda:
+		"envs/faststructure.yaml"
 	output:
 		treemix_gz = "data/derived_data/treemix/plink2tm/plink2tm.{dataset}.frq.gz"
 	shell: "python2.7 source_functions/plink2treemix.py {input.strat_gz} {output.treemix_gz}"
