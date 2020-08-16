@@ -37,3 +37,4 @@ scratch.Rmd
 *.sexcheck
 data/derived_data/faststructure/*
 data/derived_data/smartpca/*
+figures/bakeoff_reference.png

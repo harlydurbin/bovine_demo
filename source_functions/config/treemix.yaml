@@ -1,4 +1,4 @@
-rules: ['pop_labels', 'recode_input', 'create_par', 'smartpca']
+rules: ['define_cluster', 'write_cluster', 'freq', 'plink2tm', 'treemix_base', 'treemix']
 
 plink_module: "plink/plink-1.90b"
 
@@ -6,13 +6,11 @@ plink_nt: 12
 
 r_module: "r/r-3.4.2"
 
-chr: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', 'X', 'Y']
+python_module: "python/python-2.7.13"
 
 thin_p: ['onepercent']
 
-dataset: ['allyak', 'allgaurgayal', 'allbanteng', 'projectfull', 'project20all', 'project5regionall', 'project20cattle', 'project5cattle', 'project5taurine']
-
-dataset_key: {'allyak':['allyak'], 'allgaurgayal':['allgaurgayal'], 'allbanteng':['allbanteng'], 'projectfull':['full'], 'project20all':['20all'], 'project5regionall':['5regionall'], 'project20cattle':['20cattle'], 'project5cattle':['5cattle'], 'project5taurine':['5taurine']}
+dataset: ['full']
 
 root: "AmericanBison"
 

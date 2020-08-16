@@ -1,0 +1,56 @@
+{
+    "__default__":
+    {
+        "p" : "BioCompute,htc4,hpc5",
+        "account" : "animalsci",
+        "mem" : 36G,
+        "c": 12,
+        "t": "12:00:00",
+        "o": "log/slurm_out/treemix/{rule}/{wildcards}.%j.out",
+        "mail-user" : "hjdurbin@mail.missouri.edu",
+        "mail-type" : "NONE",
+        "qos": "normal"
+    },
+    "define_cluster":
+    {
+        "t": "1:00:00",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5",
+        "c": 1,
+        "mem" : 1G
+    },
+    "write_cluster":
+    {
+        "t": "1:00:00",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5",
+        "c": 1,
+        "mem" : 1G
+    },
+    "freq":
+    {
+        "t": "1:00:00",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5",
+        "c": 1,
+        "mem" : 12G
+    },
+    "plink2tm":
+    {
+        "t": "1:00:00",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5",
+        "c": 1,
+        "mem" : 12G
+    },
+    "treemix_base":
+    {
+        "t": "48:00:00",
+        "p" : "BioCompute,htc4,hpc5",
+        "c": 1,
+        "mail-type" : "END,FAIL"
+    },
+    "treemix":
+    {
+        "t": "48:00:00",
+        "p" : "BioCompute,htc4,hpc5",
+        "c": 1,
+        "mail-type" : "END,FAIL"
+    }
+}

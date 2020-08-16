@@ -68,9 +68,34 @@ sample_metadata <-
 
 # Full datasets
 
-## `full.onepercent` {.tabset}
-
 ## `20all.onepercent` {.tabset}
+
+* Model complexity that maximizes marginal likelihood = 4
+* Model components used to explain structure in data = 6
+
+### K = 4
+
+```{r}
+
+read_structure(dataset_thinning = "20all.onepercent", k = 4) %>%
+  mutate(
+    color_var =
+      case_when(
+        # Banteng, gaur, gayal
+        variable == "X1" ~ "#fedb11",
+        # Yaks
+        variable == "X4" ~ "#c6b7d5",
+        # European taurine
+        variable == "X2" ~ "#126180",
+        # Indian indicine
+        variable == "X3" ~ "#ff7436"
+      )
+  ) %>%
+  ggstructure(wrap_var = "species", custom_color = TRUE) +
+  labs(title = "All samples, 20 samples per population, 1% SNPs: K = 4")
+
+ggsave(here::here("figures/faststructure/20all.onepercent.K4.png"), width = 10, height = 7)
+```
 
 ### K = 5
 
@@ -93,26 +118,196 @@ read_structure(dataset_thinning = "20all.onepercent", k = 5) %>%
       )
   ) %>%
   ggstructure(wrap_var = "species", custom_color = TRUE) +
-  labs(title = "All samples, 20 samples per population, 1% SNPs: k = 5")
+  labs(title = "All samples, 20 samples per population, 1% SNPs: K = 5")
 
+ggsave(here::here("figures/faststructure/20all.onepercent.K5.png"), width = 10, height = 7)
 ```
 
 ### K = 6
 
-```{r, eval = FALSE}
+* The sixth component is probably a technical artifact, as it's less than zero (1e-06, which is why it isn't visible) for only one individual
 
+```{r, echo=TRUE}
 read_structure(dataset_thinning = "20all.onepercent", k = 6) %>% 
-  ggstructure(wrap_var = "species", custom_color = FALSE) +
+  filter(variable == "X2") %>% 
+  filter(value != 0)
+```
+
+* Interestingly, the Siberian auroch and non-European (particularly African & Asian steppe) taurines create their own component here
+
+```{r}
+read_structure(dataset_thinning = "20all.onepercent", k = 6) %>%
+  mutate(
+    color_var =
+      case_when(
+        # European taurines
+        variable == "X1" ~ "#126180",
+        # Other taurines
+        variable == "X3" ~ "#e74a2f",
+        # Banteng, gaur, gayal
+        variable == "X4" ~ "#fedb11",
+        # Yaks
+        variable == "X5" ~ "#c6b7d5",
+        # Indian indicine
+        variable == "X6" ~ "#ff7436",
+      )
+  ) %>%
+  ggstructure(wrap_var = "species", custom_color = TRUE) +
   labs(title = "All samples, 20 samples per population, 1% SNPs: k = 6")
 
+
+
+ggsave(here::here("figures/faststructure/20all.onepercent.K6.png"), width = 10, height = 7)
 ```
 
 # Cattle datasets 
 
+## `20cattle.onepercent` {.tabset}
+
+* Model complexity that maximizes marginal likelihood = 3
+* Model components used to explain structure in data = 6
+
+### K = 2
+
+```{r}
+
+read_structure(dataset_thinning = "20cattle.onepercent", k = 2) %>% 
+  mutate(color_var =
+           case_when(
+             # taurine
+             variable == "X1" ~ "#126180",
+             # indicine
+             variable == "X2" ~ "#ff7436"
+           )) %>% 
+  ggstructure(wrap_var = "region", custom_color = TRUE) +
+  labs(title = "Cattle & ancient, 20 samples per population, 1% SNPs: k = 2")
+
+ggsave(here::here("figures/faststructure/20cattle.onepercent.K2.png"), width = 10, height = 7)
+```
+
+### K = 3
+
+```{r}
+
+read_structure(dataset_thinning = "20cattle.onepercent", k = 3) %>%
+  mutate(
+    color_var =
+      case_when(
+        # European taurine
+        variable == "X3" ~ "#126180",
+        # Indian indicine
+        variable == "X2" ~ "#ff7436",
+        # Asian indicine
+        variable == "X1" ~ "#629d62",
+      )
+  ) %>%
+  ggstructure(wrap_var = "region", custom_color = TRUE) +
+  labs(title = "Cattle & ancient, 20 samples per population, 1% SNPs: k = 3")
+
+ggsave(here::here("figures/faststructure/20cattle.onepercent.K3.png"), width = 10, height = 7)
+
+```
+
+### K = 4
+
+```{r}
+
+read_structure(dataset_thinning = "20cattle.onepercent", k = 4) %>%
+  mutate(
+    color_var =
+      case_when(
+        # Asian taurines
+        variable == "X1" ~ "#e74a2f",
+        # African taurines
+        variable == "X2" ~ "#fdaba3",
+        # European taurine
+        variable == "X3" ~ "#126180",
+        # Indian indicine
+        variable == "X4" ~ "#ff7436"
+      )
+  ) %>%
+  ggstructure(wrap_var = "region", custom_color = TRUE) +
+  labs(title = "Cattle & ancient, 5 samples per population, 1% SNPs: k = 4")
+
+ggsave(here::here("figures/faststructure/20cattle.onepercent.K4.png"), width = 10, height = 7)
+```
+
+### K = 5
+
+* Last component probably associated with technical error: only two (very different) individuals with > 0 % assignment
+
+```{r, echo=TRUE}
+read_structure(dataset_thinning = "20cattle.onepercent", k = 5) %>%
+  arrange(variable, desc(value)) %>% 
+  filter(variable == "X4") %>% 
+  filter(value > 0) 
+```
+
+
+```{r}
+
+read_structure(dataset_thinning = "20cattle.onepercent", k = 5) %>%
+  mutate(
+    color_var =
+      case_when(
+        # European taurine
+        variable == "X1" ~ "#126180",
+        # Indian indicine
+        variable == "X2" ~ "#ff7436",
+        # Asian indicine
+        variable == "X3" ~ "#629d62",
+        variable == "X4" ~ "#84d6d3",
+        # African taurines
+        variable == "X5" ~ "#fdaba3"
+      )
+  ) %>%
+  ggstructure(wrap_var = "region", custom_color = TRUE) +
+  labs(title = "Cattle & ancient, 5 samples per population, 1% SNPs: k = 5")
+
+ggsave(here::here("figures/faststructure/20cattle.onepercent.K5.png"), width = 10, height = 7)
+```
+
+### K = 6
+
+* Again, last component probably associated with technical error: only one (very different) individual with > 0 % assignment
+
+```{r, echo=TRUE}
+read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
+  arrange(variable, desc(value)) %>% 
+  filter(variable == "X2") %>% 
+  filter(value > 0) 
+```
+
+
+```{r}
+
+read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
+  mutate(
+    color_var =
+      case_when(
+        # Indian indicine
+        variable == "X1" ~ "#ff7436",
+        # European taurine
+        variable == "X3" ~ "#126180",
+        # African taurines
+        variable == "X4" ~ "#fdaba3",
+        # Asian taurines
+        variable == "X5" ~ "#e74a2f",        
+        # Asian indicine
+        variable == "X6" ~ "#629d62",
+      )
+  ) %>%
+  ggstructure(wrap_var = "region", custom_color = TRUE) +
+  labs(title = "Cattle & ancient, 5 samples per population, 1% SNPs: k = 6")
+
+ggsave(here::here("figures/faststructure/20cattle.onepercent.K6.png"), width = 10, height = 7)
+```
+
+
 ## `5cattle.onepercent` {.tabset}
 
-Model complexity that maximizes marginal likelihood = 2
-Model components used to explain structure in data = 3
+* Model complexity that maximizes marginal likelihood = 2
+* Model components used to explain structure in data = 3
 
 ### K = 2
 
@@ -129,6 +324,7 @@ read_structure(dataset_thinning = "5cattle.onepercent", k = 2) %>%
   ggstructure(wrap_var = "region", custom_color = TRUE) +
   labs(title = "Cattle & ancient, 5 samples per population, 1% SNPs: k = 2")
 
+ggsave(here::here("figures/faststructure/5cattle.onepercent.K2.png"), width = 10, height = 7)
 ```
 
 ### K = 3
@@ -150,6 +346,7 @@ read_structure(dataset_thinning = "5cattle.onepercent", k = 3) %>%
   ggstructure(wrap_var = "region", custom_color = TRUE) +
   labs(title = "Cattle & ancient, 5 samples per population, 1% SNPs: k = 3")
 
+ggsave(here::here("figures/faststructure/5cattle.onepercent.K3.png"), width = 10, height = 7)
 ```
 
 ### K = 4
@@ -176,37 +373,73 @@ read_structure(dataset_thinning = "5cattle.onepercent", k = 4) %>%
   ggstructure(wrap_var = "region", custom_color = TRUE) +
   labs(title = "Cattle & ancient, 5 samples per population, 1% SNPs: k = 4")
 
+ggsave(here::here("figures/faststructure/5cattle.onepercent.K4.png"), width = 10, height = 7)
 ```
 
 # Outgroup datasets
 
 ## `allyak.onepercent`
 
-Model complexity that maximizes marginal likelihood = 2
-Model components used to explain structure in data = 3
+* Model complexity that maximizes marginal likelihood = 2
+* Model components used to explain structure in data = 3
 
 ```{r}
 
 read_structure(dataset_thinning = "allyak.onepercent", k = 2) %>% 
-  ggstructure(wrap_var = "population")
+  mutate(
+    color_var =
+      case_when(
+        # Weird Jinchuan component
+        variable == "X1" ~ "#5f1f29",
+        # most yaks
+        variable == "X2" ~ "#c6b7d5"
+      )
+  ) %>%
+  ggstructure(wrap_var = "population", custom_color = TRUE) +
+  labs(title = "All yaks, 1% SNPs: k = 2")
 
+ggsave(here::here("figures/faststructure/allyak.onepercent.K2.png"), width = 10, height = 7)
 ```
 
 ```{r}
 
 read_structure(dataset_thinning = "allyak.onepercent", k = 3) %>% 
-  ggstructure(wrap_var = "population")
+  mutate(
+    color_var =
+      case_when(
+        # Weird Jinchuan component
+        variable == "X1" ~ "#5f1f29",
+        # most yaks
+        variable == "X2" ~ "#c6b7d5",
+        variable == "X3" ~ "#e74a2f"       
+      )
+  ) %>%
+  ggstructure(wrap_var = "population", custom_color = TRUE) +
+  labs(title = "All yaks, 1% SNPs: k = 3")
 
+ggsave(here::here("figures/faststructure/allyak.onepercent.K3.png"), width = 10, height = 7)
 ```
 
 ## `allgaurgayal.onepercent`
 
-Model complexity that maximizes marginal likelihood = 2
-Model components used to explain structure in data = 1
+* Model complexity that maximizes marginal likelihood = 2
+* Model components used to explain structure in data = 1
 
 ```{r}
 read_structure(dataset_thinning = "allgaurgayal.onepercent", k = 2) %>%
-  ggstructure(wrap_var = "population")
+  mutate(
+    color_var =
+      case_when(
+        # Banteng, gaur, gayal
+        variable == "X1" ~ "#fedb11",
+        # Yaks
+        variable == "X2" ~ "#5da19a"
+      )
+  ) %>%
+  ggstructure(wrap_var = "population", custom_color = TRUE) +
+  labs(title = "All gaur and gayal, 1% SNPs: k = 2")
+
+ggsave(here::here("figures/faststructure/allgaurgayal.onepercent.K2.png"), width = 10, height = 7)
 ```
 
 
