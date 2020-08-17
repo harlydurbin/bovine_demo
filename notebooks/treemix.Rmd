@@ -20,12 +20,13 @@ library(purrr)
 library(ggplot2)
 library(tidylog)
 
-source(here::here("source_functions/plotting_funcs.R"))
+source(here::here("source_functions/popcorn_treemix.R"))
 ```
 
 # Notes & questions
 
 * ["Because we only use a single individual per taxon, we need to use the flag -noss. Otherwise, treemix will apply a correction for small sample size which is too conservative."](https://speciationgenomics.github.io/Treemix/)
+*[ipyrad-analysis toolkit: treemix](https://ipyrad.readthedocs.io/en/latest/API-analysis/cookbook-treemix.html)
 
 # Setup
 
@@ -35,46 +36,37 @@ sample_metadata <-
   mutate(international_id = if_else(international_id == "CPC98_Bprimigenius_EnglandDerbyshire_5936", "ancient_derbyshire", international_id))
 ```
 
-```{r, fig.width=8, fig.height=12}
-save_treemix <- function(x, dataset, thin_p, fig_width = 10, fig_height = 12){
-  png(here::here(glue::glue("figures/treemix/{dataset}.{thin_p}.{x}.png")), width = fig_width, height = fig_height, units = "in", res = 500)
-  plot_tree(here::here(glue::glue("data/derived_data/treemix/output/{dataset}.{thin_p}/treemix.{dataset}.{thin_p}.{x}")))
-  dev.off()
-}
-
-```
-
 ```{r}
-save_treemix_resids <-
-  function(x,
-           dataset,
-           thin_p,
-           fig_width = 10,
-           fig_height = 10) {
-    png(
-      here::here(
-        glue::glue("figures/treemix/resids.{dataset}.{thin_p}.{x}.png")
-      ),
-      width = fig_width,
-      height = fig_height,
-      units = "in",
-      res = 500
-    )
-    plot_resid(stem = here::here(
-      glue::glue(
-        "data/derived_data/treemix/output/{dataset}.{thin_p}/treemix.{dataset}.{thin_p}.{x}"
-      )
-    ),
-    pop_order =  here::here(
-      glue::glue(
-        "data/derived_data/treemix/output/{dataset}.{thin_p}/poporder.{dataset}.{thin_p}.txt"
-      )
-    ))
-    dev.off()
-    
-  }
-
+theme_hj_treemix <- function(gg) {
+  gg <-
+    gg +
+    ggplot2::theme_classic() +
+    ggplot2::theme(
+      axis.text = ggplot2::element_text(size = 22),
+      axis.title.x = ggplot2::element_text(size = 26,
+                                           margin = margin(
+                                             t = 15,
+                                             r = 0,
+                                             b = 0,
+                                             l = 0
+                                           )),
+      axis.line.y = ggplot2::element_blank(),
+      axis.ticks.y = ggplot2::element_blank(),
+      axis.text.y = ggplot2::element_blank(),
+      axis.title.y = ggplot2::element_blank(),
+      legend.position = c(0.2, 0.4),
+      legend.title = element_text(size = 24),
+      legend.text = element_text(size = 20)
+    ) +
+    guides(color = guide_legend(title = "Migration weight",
+                                override.aes = list(size = 10))) +
+    labs(x = "Drift parameter")
+  
+  return(gg)
+}
 ```
+
+
 
 # Modified full results {.tabset}
 
@@ -97,7 +89,7 @@ read_table2(here::here("data/derived_data/treemix/define_cluster.full.onepercent
   tally(sort = TRUE)
 ```
 
-```{r}
+```{r, eval = FALSE}
 read_table2(
   here::here(
     "data/derived_data/treemix/define_cluster.full.onepercent.txt"
@@ -148,15 +140,32 @@ read_table2(
 
 ## Base tree
 
-```{r, echo=FALSE,message=FALSE, warning=FALSE, eval=FALSE}
-save_treemix(x = "base", dataset = "full", thin_p = "onepercent")
+```{r, fig.width=10, fig.height=12}
+base <- read_treemix(here::here("data/derived_data/treemix/output/full.onepercent/treemix.full.onepercent.base"))
 ```
 
-![](../figures/treemix/full.onepercent.base.png)
 
-```{r, eval=FALSE}
-save_treemix_resids(x = "base", dataset = "full", thin_p = "onepercent")
+```{r, fig.width=18, fig.height=18}
+plot_treemix(base, text_size = 8) %>% 
+  theme_hj_treemix() +
+  expand_limits(x = 0.099) 
+
+ggsave(here::here("figures/treemix/full.onepercent.base.png"), width = 18, height = 18)
 ```
 
+## m = 1
+
+```{r, fig.width=10, fig.height=12}
+m1 <- read_treemix(here::here("data/derived_data/treemix/output/full.onepercent/treemix.full.onepercent.1"))
+```
+
+
+```{r, fig.width=18, fig.height=18}
+plot_treemix(m1, text_size = 8) %>% 
+  theme_hj_treemix() +
+  expand_limits(x = 0.099)
+
+ggsave(here::here("figures/treemix/full.onepercent.m1.png"), width = 18, height = 18)
+```
 
 # Commentary

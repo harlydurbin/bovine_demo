@@ -26,22 +26,6 @@ options(scipen = 999)
 source(here::here("source_functions/admix_ratio.R"))
 ```
 
-# Setup
-
-```
-threepop -i ../treemix/plink2tm/plink2tm.treemix_pops.frq.gz -k 500 &> threepop.treemix_pops.txt
-
-fourpop -i ../treemix/plink2tm/plink2tm.treemix_pops.frq.gz -k 500 &> fourpop.treemix_pops.txt
-
-```
-
-```
-threepop -i ../treemix/plink2tm/plink2tm.191204.frq.gz -k 500 &> threepop.191204.txt
-
-fourpop -i ../treemix/plink2tm/plink2tm.191204.frq.gz -k 500 &> fourpop.191204.txt
-
-```
-
 # Notes & commentary
 
 
@@ -50,8 +34,8 @@ fourpop -i ../treemix/plink2tm/plink2tm.191204.frq.gz -k 500 &> fourpop.191204.t
 ```{r}
 
 # Import f3 results
-f3_dominica <-
-  read_lines(here::here("data/derived_data/fstats/threepop.191204.txt"), skip = 1) %>%
+f3 <-
+  read_lines(here::here("data/derived_data/treemix/f3_f4/f3.full.onepercent.txt"), skip = 1) %>%
   purrr::discard(str_detect(., "WARNING|Estimating|total")) %>% 
   as_tibble() %>% 
   separate(value, into = c("pops", "f3", "f3_se", "z_score"), sep = " ") %>% 
@@ -63,18 +47,18 @@ f3_dominica <-
 
 ```{r, eval=FALSE}
 # write out f3 results
-f3_dominica %>% 
+f3 %>% 
   filter(admixed == "Dominica") %>% 
   arrange(z_score) %>% 
-  write_csv(here::here("data/derived_data/fstats/f3_dominica.csv"))
+  write_csv(here::here("data/derived_data/fstats/f3.csv"))
 ```
 
 ```{r}
 # Import f4 results
-f4_dominica <-
+f4 <-
   # Skip first line reporting how many pops and SNPs
   # Read file into vector with each line as a string
-  read_lines(here::here("data/derived_data/fstats/fourpop.treemix_pops.txt"), skip = 1) %>%
+  read_lines(here::here("data/derived_data/treemix/f3_f4/f3.full.onepercent.txt"), skip = 1) %>%
   # Discard non-data strings
   purrr::discard(str_detect(., "WARNING|Estimating|total")) %>% 
   # vector --> df
@@ -82,26 +66,22 @@ f4_dominica <-
   # Separate into multiple columns using whitespace as delimiter
   separate(value, into = c("pops", "f4", "f4_se", "z_score"), sep = " ") %>% 
   # Separate column with population tree into side 1 and side 2
-  # separate(pops, into = c("pop_a", "pop_b", "pop_c", "pop_d"), sep = ";|,") %>%
   separate(pops, into = c("combo_1", "combo_2"), sep = ";", remove = FALSE) %>% 
   mutate_at(vars(f4:z_score), ~as.numeric(.)) %>% 
   mutate(
-    # combo1 = glue("{pop_a},{pop_b}"),
-    # combo2 = glue("{pop_c},{pop_d}"),
     test = glue("{combo_1};{combo_2}"),
     f4_abs = abs(f4)
     ) %>% 
-  select(test, everything()) %>% 
-  filter(!str_detect(test, "Russian|Colombian|Bantu|Maya"))
+  select(test, everything())
   
   
 ```
 
 ```{r, eval=FALSE}
 # Export f4 results
-f4_dominica %>% 
+f4 %>% 
   arrange(desc(f4_abs)) %>% 
-  write_csv(here::here("data/derived_data/fstats/f4_dominica.csv"))
+  write_csv(here::here("data/derived_data/treemix/f3_f4/f4_results.full.onepercent.csv"))
 ```
 
 
@@ -110,7 +90,7 @@ f4_dominica %>%
 ## All tests with Dominica
 
 ```{r}
-f3_dominica %>% 
+f3 %>% 
   filter(admixed == "Dominica") %>% 
   arrange(abs(z_score)) %>% 
   DT::datatable(options = list(pageLength = 7), rownames = FALSE)
@@ -120,7 +100,7 @@ f3_dominica %>%
 
 ```{r, fig.width=8, fig.height=14}
 
-f3_dominica %>% 
+f3 %>% 
   filter(admixed == "Dominica") %>% 
   filter(f3 < 0) %>% 
   arrange(abs(z_score)) %>% 
@@ -149,7 +129,7 @@ f3_dominica %>%
 ## Are any tests with French admixture significant? 
 
 ```{r}
-f3_dominica %>% 
+f3 %>% 
   filter(admixed == "Dominica") %>% 
   filter(f3 < 0) %>% 
   arrange(abs(z_score)) %>% 
@@ -170,7 +150,7 @@ f3_dominica %>%
 ## All tests with Dominica
 
 ```{r}
-f4_dominica %>% 
+f4 %>% 
   arrange(f4_abs) %>% 
   DT::datatable(options = list(pageLength = 7), rownames = FALSE)
 ```
@@ -178,7 +158,7 @@ f4_dominica %>%
 * "If, however, the true relationship between these four populations at the site under investigation is ((A,C), (B,D)), then f4 (A,B;C,D) is equal to the length of the internal branch of the tree, and positive because the drift paths overlap in the same direction."
 
 ```{r}
-f4_dominica %>% 
+f4 %>% 
   # Positive values
   filter(f4 > 0) %>% 
   # Where Dominica is involved
@@ -191,7 +171,7 @@ f4_dominica %>%
 
 ```{r, fig.width=10, fig.height=16}
 
-f4_dominica %>% 
+f4 %>% 
   filter(str_detect(test, "Dominica")) %>% 
   arrange(abs(z_score)) %>% 
   slice(1:10) %>% 
@@ -224,7 +204,7 @@ f4_dominica %>%
 * c = contributing population 2 (Yoruba or Mandenka)
 
 ```{r, eval = FALSE}
-f4_dominica %>% 
+f4 %>% 
   admix_prop(
     o = "San",
     x = "Dominica",
@@ -246,7 +226,7 @@ ratios <-
   .x = c("Basque", "Basque", "Surui", "Karitiana"),
   .y = c("French", "Orcadian", "Karitiana", "Surui"),
   ~ admix_prop(
-    df = f4_dominica,
+    df = f4,
     o = "San",
     x = "Dominica",
     a = .x,
