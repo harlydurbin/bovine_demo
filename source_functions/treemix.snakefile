@@ -98,7 +98,7 @@ rule treemix_base:
 		edges_out = "data/derived_data/treemix/output/{dataset}.{thin_p}/treemix.{dataset}.{thin_p}.base.edges.gz"
 	shell:
 		"""
-		psrecord "treemix -i {input.treemix_gz} -k {params.ld_snps} -se -root {params.root} -o {params.prefix}" --log {params.psrecord} --include-children --interval 5
+		psrecord "treemix -i {input.treemix_gz} -k {params.ld_snps} -se -noss -root {params.root} -o {params.prefix}" --log {params.psrecord} --include-children --interval 5
 		"""
 
 rule treemix:
@@ -125,5 +125,5 @@ rule treemix:
 		edges_out = "data/derived_data/treemix/output/{dataset}.{thin_p}/treemix.{dataset}.{thin_p}.{m}.edges.gz"
 	shell:
 		"""
-		psrecord "treemix -i {input.treemix_gz} -k {params.ld_snps} -se -root {params.root} -m {params.m} -g {input.vertices_in} {input.edges_in} -o {params.prefix}" --log {params.psrecord} --include-children --interval 5
+		psrecord "treemix -i {input.treemix_gz} -k {params.ld_snps} -se -noss -root {params.root} -m {params.m} -g {input.vertices_in} {input.edges_in} -o {params.prefix}" --log {params.psrecord} --include-children --interval 5
 		"""

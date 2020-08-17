@@ -22,12 +22,18 @@ library(tidylog)
 
 source(here::here("source_functions/plotting_funcs.R"))
 ```
+
 # Notes & questions
 
 * ["Because we only use a single individual per taxon, we need to use the flag -noss. Otherwise, treemix will apply a correction for small sample size which is too conservative."](https://speciationgenomics.github.io/Treemix/)
 
 # Setup
 
+```{r}
+sample_metadata <- 
+  read_csv(here::here("data/derived_data/metadata/bovine_demo.sample_metadata.csv")) %>% 
+  mutate(international_id = if_else(international_id == "CPC98_Bprimigenius_EnglandDerbyshire_5936", "ancient_derbyshire", international_id))
+```
 
 ```{r, fig.width=8, fig.height=20}
 save_treemix <- function(x, dataset, thin_p){
@@ -59,19 +65,31 @@ save_treemix_resids <- function(dataset, x) {
 
 ```
 
+# Modified full results {.tabset}
+
+* Removed several individuals/populations
+    + Recent American/Australian composite breeds (Santa Gertrudis, Beefmaster, and Droughtmaster)
+    + "East African Zebu" with quality issues in fastSTRUCTURE and PCA
+* Consolidated several populations 
+    + All domestic yak breeds
+    + All gayal populations
+    + All Podolian Steppe breeds (Podolica, Maremmana, Boskarin, Sikias)
+    + Combined Lowline Angus with Angus
+    + Combined miniature Hereford with Hereford
+* Removed all remaining populations with fewer than 5 individuals **excluding** Asian steppe breeds (Chaidamu Yellow) and the consolidated Podolian Steppe population 
+
+The resulting dataset has 2,167 individuals:
+
+```{r}
+read_table2(here::here("data/derived_data/treemix/define_cluster.full.onepercent.txt"), col_names = c("id", "fid", "Population")) %>% 
+  group_by(Population) %>% 
+  tally(sort = TRUE)
+```
+
+## Base tree
+
 ```{r, fig.height=24}
  plot_tree(here::here("data/derived_data/treemix/output/full.onepercent/treemix.full.onepercent.base"))
 ```
 
-
-```{r}
-c("base", 1:19) 
-  c(14:19) %>% 
-  purrr::map(~save_treemix(.x, dataset = "treemix_pops"))
-```
-
-
-```{r, fig.width=8, fig.height=20}
-save_treemix("base", dataset = "full", thin_p = "onepercent")
-   
-```
+# Commentary
