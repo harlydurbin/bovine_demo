@@ -1,12 +1,12 @@
 ---
-title: "Joint genotyping"
+title: "Genotyping evaluation & post-processing"
 author: "Harly Durbin"
 output:
   html_document:
     toc: true
     toc_depth: 2
     df_print: paged
-    code_folding: show
+    code_folding: hide
 ---
 
 ```{r setup}
@@ -97,7 +97,11 @@ var_detail %>%
   write_csv(here::here("data/derived_data/joint_genotyping/bovine_demo.variant_metrics.summary_chr.detail_chr.csv"), na = "")
 ```
 
+Full reports can be found in `data/derived_data/joint_genotyping/bovine_demo.variant_metrics.xlsx`, `data/derived_data/joint_genotyping/bovine_demo.variant_metrics.summary_chr.csv`, `data/derived_data/joint_genotyping/bovine_demo.variant_metrics.summary_chr.detail_wg.csv`, and `data/derived_data/joint_genotyping/bovine_demo.variant_metrics.summary_chr.detail_chr.csv`.
+
 # Variant calling summary metrics
+
+## Total number of SNPs
 
 ```{r}
 var_sum %>% 
@@ -106,11 +110,39 @@ var_sum %>%
   
 ```
 
+## Ti/Tv
+
+```{r, rows.print = 11}
+var_detail_wg %>%
+  group_by(species) %>%
+  summarise(
+    `Avg. dbSNP Ti/Tv` = mean(dbsnp_titv),
+    `Avg. novel Ti/Tv` = mean(novel_titv), 
+    n = n()
+  ) %>%
+  bind_rows(
+    var_detail_wg %>%
+      summarise(
+        `Avg. dbSNP Ti/Tv` = mean(dbsnp_titv),
+        `Avg. novel Ti/Tv` = mean(novel_titv), 
+        n = n()
+      ) %>% 
+      mutate(species = "Overall")
+  ) %>% 
+  mutate(species = stringr::str_to_sentence(species)) %>% 
+  rename(Species = species)
+```
+
+
 # Variant calling detail metrics
+
+Ran on a chromosome-by-chromosome basis, summarized to WG here
 
 ```{r}
 var_detail_wg %>% 
-  arrange(desc(novel_titv))
+  arrange(desc(novel_titv)) %>% 
+  DT::datatable(rownames = FALSE, options = list(scrollX = TRUE))
 
 ```
 
+# Commentary

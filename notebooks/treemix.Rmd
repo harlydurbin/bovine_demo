@@ -35,9 +35,9 @@ sample_metadata <-
   mutate(international_id = if_else(international_id == "CPC98_Bprimigenius_EnglandDerbyshire_5936", "ancient_derbyshire", international_id))
 ```
 
-```{r, fig.width=8, fig.height=20}
-save_treemix <- function(x, dataset, thin_p){
-  png(here::here(glue::glue("figures/treemix/{dataset}.{thin_p}.{x}.png")), width = 8, height = 20, units = "in", res = 500)
+```{r, fig.width=8, fig.height=12}
+save_treemix <- function(x, dataset, thin_p, fig_width = 10, fig_height = 12){
+  png(here::here(glue::glue("figures/treemix/{dataset}.{thin_p}.{x}.png")), width = fig_width, height = fig_height, units = "in", res = 500)
   plot_tree(here::here(glue::glue("data/derived_data/treemix/output/{dataset}.{thin_p}/treemix.{dataset}.{thin_p}.{x}")))
   dev.off()
 }
@@ -45,23 +45,34 @@ save_treemix <- function(x, dataset, thin_p){
 ```
 
 ```{r}
-save_treemix_resids <- function(dataset, x) {
-  png(here::here(
-    glue::glue("figures/treemix/{dataset}/resids_{dataset}.{x}.png")
-  ))
-  plot_resid(stem = here::here(
-    glue::glue(
-      "data/derived_data/treemix/output/{dataset}/treemix.{dataset}.{x}"
+save_treemix_resids <-
+  function(x,
+           dataset,
+           thin_p,
+           fig_width = 10,
+           fig_height = 10) {
+    png(
+      here::here(
+        glue::glue("figures/treemix/resids.{dataset}.{thin_p}.{x}.png")
+      ),
+      width = fig_width,
+      height = fig_height,
+      units = "in",
+      res = 500
     )
-  ),
-  pop_order =  here::here(
-    glue::glue(
-      "data/derived_data/treemix/output/{dataset}/poporder.txt"
-    )
-  ))
-  dev.off()
-  
-}
+    plot_resid(stem = here::here(
+      glue::glue(
+        "data/derived_data/treemix/output/{dataset}.{thin_p}/treemix.{dataset}.{thin_p}.{x}"
+      )
+    ),
+    pop_order =  here::here(
+      glue::glue(
+        "data/derived_data/treemix/output/{dataset}.{thin_p}/poporder.{dataset}.{thin_p}.txt"
+      )
+    ))
+    dev.off()
+    
+  }
 
 ```
 
@@ -86,10 +97,66 @@ read_table2(here::here("data/derived_data/treemix/define_cluster.full.onepercent
   tally(sort = TRUE)
 ```
 
+```{r}
+read_table2(
+  here::here(
+    "data/derived_data/treemix/define_cluster.full.onepercent.txt"
+  ),
+  col_names = c("international_id", "fid", "tmpop")
+) %>%
+  left_join(sample_metadata %>%
+              select(international_id, species, continent, region, population)) %>%
+  mutate(
+    continent = str_to_title(continent),
+    continent = forcats::fct_relevel(as.factor(continent),
+                                     "europe",
+                                     "africa",
+                                     "asia",
+                                     "americas"),
+    region = case_when(
+      region == "india and pakistan" ~ "India & Pakistan",
+      region == "japan and korea" ~ "Japan & Korea",
+      TRUE ~ str_to_title(region)
+    ),
+    region = forcats::fct_relevel(
+      as.factor(region),
+      "British Isles",
+      "France",
+      "Continental Europe",
+      "Scandinavia",
+      "Iberia",
+      "Italy",
+      "Podolian Steppe",
+      "West Africa",
+      "East Africa",
+      "Middle East",
+      "India & Pakistan",
+      "Japan & Korea",
+      "Southeast Asia",
+      "Asian Steppe",
+      "Northeast China",
+      "East Central China",
+      "South Central China",
+      "Southeast China",
+      "Americas"
+    )
+  ) %>% 
+  arrange(region, tmpop) %>% 
+  distinct(tmpop) %>% 
+  write_tsv(here::here("data/derived_data/treemix/output/full.onepercent/poporder.full.onepercent.txt"), col_names = FALSE)
+```
+
 ## Base tree
 
-```{r, fig.height=24}
- plot_tree(here::here("data/derived_data/treemix/output/full.onepercent/treemix.full.onepercent.base"))
+```{r, echo=FALSE,message=FALSE, warning=FALSE, eval=FALSE}
+save_treemix(x = "base", dataset = "full", thin_p = "onepercent")
 ```
+
+![](../figures/treemix/full.onepercent.base.png)
+
+```{r, eval=FALSE}
+save_treemix_resids(x = "base", dataset = "full", thin_p = "onepercent")
+```
+
 
 # Commentary
