@@ -199,6 +199,25 @@ plot_pca(dataset_thinning = "project5cattle.onepercent", pc1 = 1, pc2 = 2, color
 ggscree(dataset_thinning = "project5cattle.onepercent", title_string = "Cattle & ancient, 5 samples per population, 1% SNPs")
 ```
 
+```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
+purrr::map2(
+  .x = seq(1,9, by = 2),
+  .y = seq(2,10, by = 2),
+  ~ plot_pca(
+    dataset_thinning = "project5cattle.onepercent",
+    pc1 = .x, pc2 = .y,
+    color_var = species,
+    shape_var = continent,
+    title_string = "Cattle & ancient, 5 samples per population, 1% SNPs") %>% 
+    ggplot2::ggsave(
+      filename = here::here(glue::glue("figures/smartpca/project5cattle.onepercent.PC{.x}_PC{.y}.png")),
+      width = 7,
+      height = 5
+    ))
+```
+
+### Both ancient samples cluster with taurine breeds native to the Asian steppe
+
 ```{r, fig.width = 7, fig.height=8}
 read_vec("project5cattle.onepercent") %>%
   mutate(
@@ -248,24 +267,6 @@ read_vec("project5cattle.onepercent") %>%
              horizontal = FALSE)
 
 ggsave(here::here("figures/smartpca/project5cattle_asiansteppe_cutout.onepercent.PC1_PC2.png"), width = 7, height = 5)
-```
-
-
-```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
-purrr::map2(
-  .x = seq(1,9, by = 2),
-  .y = seq(2,10, by = 2),
-  ~ plot_pca(
-    dataset_thinning = "project5cattle.onepercent",
-    pc1 = .x, pc2 = .y,
-    color_var = species,
-    shape_var = continent,
-    title_string = "Cattle & ancient, 5 samples per population, 1% SNPs") %>% 
-    ggplot2::ggsave(
-      filename = here::here(glue::glue("figures/smartpca/project5cattle.onepercent.PC{.x}_PC{.y}.png")),
-      width = 7,
-      height = 5
-    ))
 ```
 
 ## `5taurine`
@@ -383,4 +384,4 @@ purrr::map2(
 
 * Previously, the Siberian auroch defined PC2 and the Derbyshire auroch clustered closely with European cattle. Now that we have many more Asian cattle represented, the two aurochs are much closer together and are clustered within breeds found on the Asian steppe.
 * In cattle datasets, PC1 is taurine vs. indicine and PC2 appears to be Indian indicine vs. East Asian indicine (though quite a lot of variation within East Asian indicine and composite)
-* No idea what the deal with weird 3 Jinchuan yaks. They don't look especially different in fastSTRUCTURE results
+* No idea what the deal with weird 3 Jinchuan yaks, probably need to re-run without them

@@ -19,9 +19,59 @@ library(rlang)
 library(purrr)
 library(ggplot2)
 library(tidylog)
+
+source(here::here("source_functions/plotting_funcs.R"))
 ```
 # Notes & questions
 
 * ["Because we only use a single individual per taxon, we need to use the flag -noss. Otherwise, treemix will apply a correction for small sample size which is too conservative."](https://speciationgenomics.github.io/Treemix/)
 
 # Setup
+
+
+```{r, fig.width=8, fig.height=20}
+save_treemix <- function(x, dataset, thin_p){
+  png(here::here(glue::glue("figures/treemix/{dataset}.{thin_p}.{x}.png")), width = 8, height = 20, units = "in", res = 500)
+  plot_tree(here::here(glue::glue("data/derived_data/treemix/output/{dataset}.{thin_p}/treemix.{dataset}.{thin_p}.{x}")))
+  dev.off()
+}
+
+```
+
+```{r}
+save_treemix_resids <- function(dataset, x) {
+  png(here::here(
+    glue::glue("figures/treemix/{dataset}/resids_{dataset}.{x}.png")
+  ))
+  plot_resid(stem = here::here(
+    glue::glue(
+      "data/derived_data/treemix/output/{dataset}/treemix.{dataset}.{x}"
+    )
+  ),
+  pop_order =  here::here(
+    glue::glue(
+      "data/derived_data/treemix/output/{dataset}/poporder.txt"
+    )
+  ))
+  dev.off()
+  
+}
+
+```
+
+```{r, fig.height=24}
+ plot_tree(here::here("data/derived_data/treemix/output/full.onepercent/treemix.full.onepercent.base"))
+```
+
+
+```{r}
+c("base", 1:19) 
+  c(14:19) %>% 
+  purrr::map(~save_treemix(.x, dataset = "treemix_pops"))
+```
+
+
+```{r, fig.width=8, fig.height=20}
+save_treemix("base", dataset = "full", thin_p = "onepercent")
+   
+```

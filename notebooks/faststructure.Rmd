@@ -31,16 +31,15 @@ source(here::here("source_functions/structure_functions.R"))
 
 ```{r}
 tibble::tribble(
-  ~ Name, ~ Description, ~ `k ran`,
-  "full", "All species. All available samples.", "1-20",
-  "20all", "All species. Up to 20 (ranked by coverage) samples per population label.", "1-20",
-  "5regionall", "All species. Up to 5 (ranked by coverage) samples per species per region", "1-20",
-  "20cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 20 (ranked by coverage) samples per population label.", "1-20",
-  "5cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 5 (ranked by coverage) samples per population label.", "1-20",
-  "5taurine", "Bos taurus, B. primigenius. Up to 5 (ranked by coverage) samples per population label.", "1-20",
-  "allyak", "B. grunniens and B. mutus. All available samples.", "1-10",
-  "allgayalgaur", "B. frontalis and B. gaurus. All available samples.", "1-10",
-  "allbanteng", "B. javanicus. All available samples.", "1-8"
+  ~ Name, ~ Description, ~ n, ~ `k ran`,
+  "full", "All species. All available samples.", "2,291","1-20",
+  "20all", "All species. Up to 20 (ranked by coverage) samples per population label.", "886", "1-20",
+  "5regionall", "All species. Up to 5 (ranked by coverage) samples per species per region", "142", "1-20",
+  "20cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 20 (ranked by coverage) samples per population label.", "768", "1-20",
+  "5cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 5 (ranked by coverage) samples per population label.", "392", "1-20",
+  "allyak", "B. grunniens and B. mutus. All available samples.", "231", "1-10",
+  "allgayalgaur", "B. frontalis and B. gaurus. All available samples.", "24", "1-10",
+  "allbanteng", "B. javanicus. All available samples.", "8", "1-8"
 ) %>% 
   kableExtra::kable("html") %>% 
   kableExtra::kable_styling(full_width = F)
@@ -125,16 +124,6 @@ ggsave(here::here("figures/faststructure/20all.onepercent.K5.png"), width = 10, 
 
 ### K = 6
 
-* The sixth component is probably a technical artifact, as it's less than zero (1e-06, which is why it isn't visible) for only one individual
-
-```{r, echo=TRUE}
-read_structure(dataset_thinning = "20all.onepercent", k = 6) %>% 
-  filter(variable == "X2") %>% 
-  filter(value != 0)
-```
-
-* Interestingly, the Siberian auroch and non-European (particularly African & Asian steppe) taurines create their own component here
-
 ```{r}
 read_structure(dataset_thinning = "20all.onepercent", k = 6) %>%
   mutate(
@@ -143,7 +132,7 @@ read_structure(dataset_thinning = "20all.onepercent", k = 6) %>%
         # European taurines
         variable == "X1" ~ "#126180",
         # Other taurines
-        variable == "X3" ~ "#e74a2f",
+        variable == "X3" ~ "#5f1f29",
         # Banteng, gaur, gayal
         variable == "X4" ~ "#fedb11",
         # Yaks
@@ -159,6 +148,120 @@ read_structure(dataset_thinning = "20all.onepercent", k = 6) %>%
 
 ggsave(here::here("figures/faststructure/20all.onepercent.K6.png"), width = 10, height = 7)
 ```
+
+* The sixth component is probably a technical artifact, as it's less than zero (1e-06, which is why it isn't visible) for only one individual
+
+```{r, echo=TRUE}
+read_structure(dataset_thinning = "20all.onepercent", k = 6) %>% 
+  filter(variable == "X2") %>% 
+  filter(value != 0)
+```
+
+* Interestingly, the Siberian auroch and non-European (particularly African & Asian steppe) taurines create their own component here (in maroon above)
+
+```{r, echo=TRUE}
+read_structure(dataset_thinning = "20all.onepercent", k = 6) %>% 
+  filter(variable == "X3") %>% 
+  filter(value != 0) %>% 
+  arrange(desc(value), continent, region, population) %>% 
+  select(variable, value, everything())
+```
+
+## `5regionall` {.tabset}
+
+* Model complexity that maximizes marginal likelihood = 7
+* Model components used to explain structure in data = 5
+
+### K = 5
+
+```{r}
+read_structure(dataset_thinning = "5regionall.onepercent", k = 5) %>%
+  mutate(
+    color_var =
+      case_when(
+        # Indian indicine
+        variable == "X1" ~ "#ff7436",
+        # European taurine
+        variable == "X2" ~ "#126180",
+        # Gaur, gayal, bison
+        variable == "X3" ~ "#fedb11",
+        # Banteng
+        variable == "X4" ~ "#8daed7",
+        # Yaks
+        variable == "X5" ~ "#c6b7d5",
+      )
+  ) %>%
+  ggstructure(wrap_var = "species", custom_color = TRUE) +
+  labs(title = "All samples, 5 samples per species per region, 1% SNPs: K = 5")
+
+ggsave(
+  here::here("figures/faststructure/5regionall.onepercent.K5.png"),
+  width = 10,
+  height = 7
+)
+```
+
+### K = 6
+
+```{r}
+read_structure(dataset_thinning = "5regionall.onepercent", k = 6) %>%
+  mutate(
+    color_var =
+      case_when(
+        # Indian indicine
+        variable == "X1" ~ "#ff7436",
+        # Banteng, gaur, gayal
+        variable == "X2" ~ "#8daed7",
+        # Bison
+        variable == "X3" ~ "#fedb11",
+        # European taurine
+        variable == "X5" ~ "#126180",
+        # Yaks
+        variable == "X6" ~ "#c6b7d5"
+      )
+  ) %>%
+  ggstructure(wrap_var = "species", custom_color = TRUE) +
+  labs(title = "All samples, 5 samples per species per region, 1% SNPs: K = 6")
+
+ggsave(
+  here::here("figures/faststructure/5regionall.onepercent.K6.png"),
+  width = 10,
+  height = 7
+)
+```
+
+* Only 5 components actually used 
+
+### K = 7
+
+```{r}
+read_structure(dataset_thinning = "5regionall.onepercent", k = 7) %>%
+  mutate(
+    color_var =
+      case_when(
+        # Banteng, gaur, gayal
+        variable == "X1" ~ "#8daed7",
+        # Indian indicine
+        variable == "X2" ~ "#ff7436",
+        # Yaks
+        variable == "X3" ~ "#c6b7d5",
+        # Bison
+        variable == "X4" ~ "#fedb11",
+        # European taurine
+        variable == "X6" ~ "#126180",
+      )
+  ) %>%
+  ggstructure(wrap_var = "species", custom_color = TRUE) +
+  labs(title = "All samples, 5 samples per species per region, 1% SNPs: K = 7")
+
+ggsave(
+  here::here("figures/faststructure/5regionall.onepercent.K7.png"),
+  width = 10,
+  height = 7
+)
+```
+
+* Again, only 5 components actually used 
 
 # Cattle datasets 
 
@@ -208,6 +311,19 @@ ggsave(here::here("figures/faststructure/20cattle.onepercent.K3.png"), width = 1
 
 ```
 
+* New green component separates out East Asian indicines from Indian indicines
+
+```{r}
+read_structure(dataset_thinning = "20cattle.onepercent", k = 3) %>% 
+  filter(variable == "X1") %>%
+  filter(value != 0) %>% 
+  arrange(desc(value), continent, region, population) %>% 
+  select(variable, value, everything())
+
+
+```
+
+
 ### K = 4
 
 ```{r}
@@ -217,7 +333,7 @@ read_structure(dataset_thinning = "20cattle.onepercent", k = 4) %>%
     color_var =
       case_when(
         # Asian taurines
-        variable == "X1" ~ "#e74a2f",
+        variable == "X1" ~ "#5f1f29",
         # African taurines
         variable == "X2" ~ "#fdaba3",
         # European taurine
@@ -232,17 +348,9 @@ read_structure(dataset_thinning = "20cattle.onepercent", k = 4) %>%
 ggsave(here::here("figures/faststructure/20cattle.onepercent.K4.png"), width = 10, height = 7)
 ```
 
+* Pink component separates out African taurines AND maroon component separates out Asian taurines
+
 ### K = 5
-
-* Last component probably associated with technical error: only two (very different) individuals with > 0 % assignment
-
-```{r, echo=TRUE}
-read_structure(dataset_thinning = "20cattle.onepercent", k = 5) %>%
-  arrange(variable, desc(value)) %>% 
-  filter(variable == "X4") %>% 
-  filter(value > 0) 
-```
-
 
 ```{r}
 
@@ -267,17 +375,20 @@ read_structure(dataset_thinning = "20cattle.onepercent", k = 5) %>%
 ggsave(here::here("figures/faststructure/20cattle.onepercent.K5.png"), width = 10, height = 7)
 ```
 
-### K = 6
-
-* Again, last component probably associated with technical error: only one (very different) individual with > 0 % assignment
+* Last component probably associated with technical error: only two (very different) individuals with > 0 % assignment
 
 ```{r, echo=TRUE}
-read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
+read_structure(dataset_thinning = "20cattle.onepercent", k = 5) %>%
   arrange(variable, desc(value)) %>% 
-  filter(variable == "X2") %>% 
-  filter(value > 0) 
+  filter(variable == "X4") %>% 
+  filter(value > 0) %>% 
+  select(variable, value, everything())
 ```
 
+* East Asian indicine in green (I think this is pretty noisy though - some Brahmans, which derive from Indian incine breeds, get assigned completely to the East Asian indicine cluster)
+* Non-European taurines in pink
+
+### K = 6
 
 ```{r}
 
@@ -292,7 +403,7 @@ read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
         # African taurines
         variable == "X4" ~ "#fdaba3",
         # Asian taurines
-        variable == "X5" ~ "#e74a2f",        
+        variable == "X5" ~ "#5f1f29",        
         # Asian indicine
         variable == "X6" ~ "#629d62",
       )
@@ -303,6 +414,49 @@ read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
 ggsave(here::here("figures/faststructure/20cattle.onepercent.K6.png"), width = 10, height = 7)
 ```
 
+Overall, I K = 6 is pretty noisy. Several of the clusters don't make a ton of sense based on what we know a priori and/or completely separate out individuals within a breed
+
+* Again, African taurines form their own cluster (pink)
+
+```{r, echo=TRUE}
+read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
+  arrange(variable, desc(value)) %>% 
+  filter(variable == "X4") %>% 
+  filter(value > 0) %>% 
+  select(variable, value, everything())
+```
+
+* Some Asian taurines and indicines in green 
+
+```{r, echo=TRUE}
+read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
+  arrange(variable, desc(value)) %>% 
+  filter(variable == "X6") %>% 
+  filter(value > 0) %>% 
+  select(variable, value, everything())
+```
+
+* Maroon cluster possibly noise - pulls out a few Mishima (a Korean taurine breed) and a few other Asian taurines/indicines
+
+```{r, echo=TRUE}
+read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
+  arrange(variable, desc(value)) %>% 
+  filter(variable == "X5") %>% 
+  filter(value > 0) %>% 
+  select(variable, value, everything()) %>% 
+  left_join(sample_metadata %>% 
+              select(international_id, avg_coverage, owner))
+```
+
+* Last component almost certainly associated with technical error: only one individual with > 0 % assignment
+
+```{r, echo=TRUE}
+read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
+  arrange(variable, desc(value)) %>% 
+  filter(variable == "X2") %>% 
+  filter(value > 0) %>% 
+  select(variable, value, everything())
+```
 
 ## `5cattle.onepercent` {.tabset}
 
@@ -329,8 +483,8 @@ ggsave(here::here("figures/faststructure/5cattle.onepercent.K2.png"), width = 10
 
 ### K = 3
 
-* Components appear to be taurines (green) and indicines (blue)
-    + Other component associated with Siberian auroch
+* Components appear to be taurines (dark blue) and indicines (orage)
+    + Other component associated with Siberian auroch (light blue)
 
 ```{r}
 
@@ -351,8 +505,8 @@ ggsave(here::here("figures/faststructure/5cattle.onepercent.K3.png"), width = 10
 
 ### K = 4
 
-* First three components appear to be taurines (pink), Indian indicines (green), and East Asian indicines (blue)
-    + Barely visible, but the 4th component separates out Derbyshire auroch (likely related to technical error)
+* First three components appear to be taurines (dark blue), Indian indicines (orange), and East Asian indicines (green)
+    + Barely visible, but the 4th component separates out Derbyshire auroch (likely related to technical error; light blue)
 
 ```{r}
 
@@ -378,10 +532,12 @@ ggsave(here::here("figures/faststructure/5cattle.onepercent.K4.png"), width = 10
 
 # Outgroup datasets
 
-## `allyak.onepercent`
+## `allyak.onepercent` {.tabset}
 
 * Model complexity that maximizes marginal likelihood = 2
 * Model components used to explain structure in data = 3
+
+### K = 2
 
 ```{r}
 
@@ -400,6 +556,19 @@ read_structure(dataset_thinning = "allyak.onepercent", k = 2) %>%
 
 ggsave(here::here("figures/faststructure/allyak.onepercent.K2.png"), width = 10, height = 7)
 ```
+
+* Second cluster in Jinchuan yaks probably associated with technical error - all of them come from the same university
+
+```{r}
+read_structure(dataset_thinning = "allyak.onepercent", k = 2) %>% 
+  filter(variable == "X1") %>% 
+  filter(value > 0.05) %>% 
+  arrange(desc(value)) %>% 
+  left_join(sample_metadata %>% 
+              select(international_id, owner, avg_coverage))
+```
+
+### K = 3
 
 ```{r}
 
@@ -420,10 +589,23 @@ read_structure(dataset_thinning = "allyak.onepercent", k = 3) %>%
 ggsave(here::here("figures/faststructure/allyak.onepercent.K3.png"), width = 10, height = 7)
 ```
 
-## `allgaurgayal.onepercent`
+* Again, other 2 clusters likely technical error
+
+```{r}
+read_structure(dataset_thinning = "allyak.onepercent", k = 3) %>% 
+  filter(variable %in% c("X1", "X3")) %>% 
+  filter(value > 0.05) %>% 
+  arrange(desc(value)) %>% 
+  left_join(sample_metadata %>% 
+              select(international_id, owner, avg_coverage))
+```
+
+## `allgaurgayal.onepercent` {.tabset}
 
 * Model complexity that maximizes marginal likelihood = 2
 * Model components used to explain structure in data = 1
+
+### K = 2
 
 ```{r}
 read_structure(dataset_thinning = "allgaurgayal.onepercent", k = 2) %>%
@@ -444,3 +626,11 @@ ggsave(here::here("figures/faststructure/allgaurgayal.onepercent.K2.png"), width
 
 
 # Commentary
+
+* Within cattle datasets, I think using 5 samples per population rather than 20 gives results that are more interpretable/less variable & noisy
+* Within taurines
+    + Non-European (African, Asian) taurines make up their own cluster in `20all.onepercent` K = 6 and `20cattle.onepercent` K = 5
+* Within indicines
+  + East Asian indicines often form their own component
+* Something weird with Jinchuan yaks
+* No evidence for structure within banteng

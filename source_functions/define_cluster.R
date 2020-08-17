@@ -14,7 +14,7 @@ sample_metadata <-
 read_table2(here::here(fam), col_names = FALSE) %>%
   select(international_id = X1, X2) %>%
   left_join(sample_metadata %>%
-              select(international_id, population, species)) %>%
+              select(international_id, population, region, species)) %>%
   mutate(population = case_when(
     international_id == "ancient_derbyshire" ~ "AncientDerbyshire",
     international_id == "A2494_Yenisei_River" ~ "AncientSiberian",
@@ -24,9 +24,22 @@ read_table2(here::here(fam), col_names = FALSE) %>%
     species == "bos gaurus" ~ "Gaur",
     species == "bos javanicus" ~ "Banteng",
     population == "hereford miniature" ~ "Hereford",
-    population == "angus lowline" ~ "angus",
+    population == "angus lowline" ~ "Angus",
+    region == "podolian steppe" ~ "PodolianSteppe",
     TRUE ~ stringr::str_to_title(population)
   ),
   population = str_remove_all(population, " |[[:punct:]]")) %>%
-  select(-species) %>%
+  #select(-species) %>%
+  group_by(population, species) %>% 
+  mutate(
+    drop = 
+      case_when(
+        population %in% c("Tibetan", "Mongolian", "ChaidamuYellow", "PodolianSteppe") ~ FALSE,
+        population %in% c("Beefmaster", "EastAfricanZebu") ~ TRUE,
+        n() < 5 ~ TRUE,
+        TRUE ~ FALSE
+      )
+  ) %>% 
+  ungroup() %>% 
+  filter(drop == FALSE) %>%
   write_tsv(here::here(out), col_names = FALSE)
