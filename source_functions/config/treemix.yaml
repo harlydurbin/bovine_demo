@@ -1,4 +1,4 @@
-rules: ['define_cluster', 'write_cluster', 'freq', 'plink2tm', 'treemix_base', 'treemix']
+rules: ['define_cluster', 'write_cluster', 'freq', 'plink2tm', 'treemix_base', 'treemix', 'f3', 'f4']
 
 plink_module: "plink/plink-1.90b"
 
@@ -10,9 +10,9 @@ python_module: "python/python-2.7.13"
 
 thin_p: ['onepercent']
 
-dataset: ['full']
+dataset: ['full', 'allcattle']
 
-root: "AmericanBison"
+root: "Gayal"
 
 min_m: 1
 

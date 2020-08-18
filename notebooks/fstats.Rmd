@@ -48,8 +48,7 @@ f3 <-
 ```{r, eval=FALSE}
 # write out f3 results
 f3 %>% 
-  arrange(z_score) %>% 
-  write_csv(here::here("data/derived_data/fstats/f3.csv"))
+  arrange(z_score)
 ```
 
 ```{r}

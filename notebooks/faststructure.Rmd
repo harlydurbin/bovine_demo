@@ -405,7 +405,7 @@ read_structure(dataset_thinning = "20cattle.onepercent", k = 5) %>%
   select(variable, value, everything())
 ```
 
-* East Asian indicine in green (I think this is pretty noisy though - some Brahmans, which derive from Indian incine breeds, get assigned completely to the East Asian indicine cluster)
+* East Asian indicine in green (I think this is pretty noisy though - some Brahmans, which derive from Indian indicine breeds, get assigned completely to the East Asian indicine cluster)
 * Non-European taurines in pink
 
 ### K = 6

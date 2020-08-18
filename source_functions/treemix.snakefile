@@ -1,4 +1,4 @@
-# snakemake -s source_functions/treemix.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --use-conda --config --cluster-config source_functions/cluster/treemix.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type} --qos {cluster.qos}" -p &> log/snakemake_log/treemix/200817.treemix.log
+# snakemake -s source_functions/treemix.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --use-conda --config --cluster-config source_functions/cluster/treemix.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type} --qos {cluster.qos}" -p &> log/snakemake_log/treemix/200818.treemix.log
 
 configfile: "source_functions/config/treemix.yaml"
 
@@ -10,9 +10,9 @@ for x in expand("log/slurm_out/treemix/{rules}", rules = config['rules']):
 os.makedirs("log/psrecord/treemix", exist_ok = True)
 os.makedirs("log/psrecord/treemix/treemix", exist_ok = True)
 
-rule target:
+rule all:
 	input:
-		targ = lambda wildcards: expand("data/derived_data/treemix/output/{dataset}.{thin_p}/treemix.{dataset}.{thin_p}.{m}.vertices.gz", dataset = config['dataset'], thin_p = config['thin_p'], m = list(range(config['min_m'], config['max_m'])))
+		lambda wildcards: expand("data/derived_data/treemix/output/{dataset}.{thin_p}/treemix.{dataset}.{thin_p}.{m}.vertices.gz", dataset = config['dataset'], thin_p = config['thin_p'], m = list(range(config['min_m'], config['max_m']))), expand("data/derived_data/treemix/f3_f4/f3.{dataset}.{thin_p}.txt", dataset = config['dataset'], thin_p = config['thin_p']), expand("data/derived_data/treemix/f3_f4/f4.{dataset}.{thin_p}.txt", dataset = config['dataset'], thin_p = config['thin_p'])
 
 rule define_cluster:
 	input:
@@ -79,6 +79,30 @@ rule plink2tm:
 		"""
 		module load {params.python_module}
 		{input.script} {input.strat_gz} {output.treemix_gz}
+		"""
+
+rule f3:
+	input:
+		treemix_gz = "data/derived_data/treemix/plink2tm/plink2tm.{dataset}.{thin_p}.frq.gz"
+	params:
+		ld_snps = config['ld_snps'],
+	output:
+		f3_out = "data/derived_data/treemix/f3_f4/f3.{dataset}.{thin_p}.txt"
+	shell:
+		"""
+		threepop -i {input.treemix_gz} -k {params.ld_snps} > {output.f3_out}
+		"""
+
+rule f4:
+	input:
+		treemix_gz = "data/derived_data/treemix/plink2tm/plink2tm.{dataset}.{thin_p}.frq.gz"
+	params:
+		ld_snps = config['ld_snps'],
+	output:
+		f4_out = "data/derived_data/treemix/f3_f4/f4.{dataset}.{thin_p}.txt"
+	shell:
+		"""
+		fourpop -i {input.treemix_gz} -k {params.ld_snps} > {output.f4_out}
 		"""
 
 rule treemix_base:
