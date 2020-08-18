@@ -10,7 +10,7 @@ python_module: "python/python-2.7.13"
 
 thin_p: ['onepercent']
 
-dataset: ['full', 'allcattle']
+dataset: ['full', 'allcattle_rootgayal']
 
 root: "Gayal"
 

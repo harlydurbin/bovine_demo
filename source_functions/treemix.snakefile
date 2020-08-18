@@ -2,6 +2,8 @@
 
 configfile: "source_functions/config/treemix.yaml"
 
+include: "plink_qc.snakefile"
+
 # Make log directories if they don't exist
 os.makedirs("log/slurm_out/treemix", exist_ok = True)
 for x in expand("log/slurm_out/treemix/{rules}", rules = config['rules']):
@@ -10,7 +12,7 @@ for x in expand("log/slurm_out/treemix/{rules}", rules = config['rules']):
 os.makedirs("log/psrecord/treemix", exist_ok = True)
 os.makedirs("log/psrecord/treemix/treemix", exist_ok = True)
 
-rule all:
+rule treemix_all:
 	input:
 		lambda wildcards: expand("data/derived_data/treemix/output/{dataset}.{thin_p}/treemix.{dataset}.{thin_p}.{m}.vertices.gz", dataset = config['dataset'], thin_p = config['thin_p'], m = list(range(config['min_m'], config['max_m']))), expand("data/derived_data/treemix/f3_f4/f3.{dataset}.{thin_p}.txt", dataset = config['dataset'], thin_p = config['thin_p']), expand("data/derived_data/treemix/f3_f4/f4.{dataset}.{thin_p}.txt", dataset = config['dataset'], thin_p = config['thin_p'])
 

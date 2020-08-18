@@ -131,6 +131,33 @@ purrr::map2(
     ))
 ```
 
+## `20randomall`
+
+```{r, fig.width = 7, fig.height=5}
+plot_pca(dataset_thinning = "project20randomall_seed100.onepercent", pc1 = 1, pc2 = 2, color_var = species, shape_var = continent, title_string = "All species, 15 random samples per species, 1% SNPs")
+```
+
+```{r, fig.width = 7, fig.height=5}
+ggscree(dataset_thinning = "project20all.onepercent", title_string = "All species, 20 samples per population, 1% SNPs")
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
+purrr::map2(
+  .x = seq(1,9, by = 2),
+  .y = seq(2,10, by = 2),
+  ~ plot_pca(
+    dataset_thinning = "project20all.onepercent",
+    pc1 = .x, pc2 = .y,
+    color_var = species,
+    shape_var = continent,
+    title_string = "All species, 20 samples per population, 1% SNPs") %>% 
+    ggplot2::ggsave(
+      filename = here::here(glue::glue("figures/smartpca/project20all.onepercent.PC{.x}_PC{.y}.png")),
+      width = 7,
+      height = 5
+    ))
+```
+
 ## `5regionall`
 
 ```{r, fig.width = 7, fig.height=5}
@@ -271,10 +298,10 @@ ggsave(here::here("figures/smartpca/project5cattle_asiansteppe_cutout.onepercent
 
 ## `5taurine`
 
-* Sichuan indigenous probably not a taurine cow or is admixed
+* Namchi indicine or technical error?
 
 ```{r, fig.width = 7, fig.height=5}
-plot_pca(dataset_thinning = "project5taurine.onepercent", pc1 = 1, pc2 = 2, color_var = region, shape_var = continent, title_string = "Taurine cattle & ancient, 5 samples per population, 1% SNPs")
+plot_pca(dataset_thinning = "project5taurine.onepercent", pc1 = 1, pc2 = 2, color_var = region, shape_var = species, title_string = "Taurine cattle & ancient, 5 samples per population, 1% SNPs")
 ```
 
 ```{r, fig.width = 7, fig.height=5}

@@ -422,10 +422,10 @@ read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
         variable == "X3" ~ "#126180",
         # African taurines
         variable == "X4" ~ "#fdaba3",
-        # Asian taurines
+        # Mishima
         variable == "X5" ~ "#5f1f29",        
-        # Asian indicine
-        variable == "X6" ~ "#629d62",
+        # Asian taurine
+        variable == "X6" ~ "#5da19a",
       )
   ) %>%
   ggstructure(wrap_var = "region", custom_color = TRUE) +
@@ -434,7 +434,23 @@ read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
 ggsave(here::here("figures/faststructure/20cattle.onepercent.K6.png"), width = 10, height = 7)
 ```
 
-Overall, I K = 6 is pretty noisy. Several of the clusters don't make a ton of sense based on what we know a priori and/or completely separate out individuals within a breed
+* Some low-lying African taurine and Indian indicine shows up in several American Criollo breeds. This makes sense considering they derive from Spanish cattle which mixed with Brahman type cattle in America
+
+```{r}
+read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
+  arrange(variable, desc(value)) %>% 
+  filter(species == "Bos taurus" & continent == "Americas & Australia") %>% 
+  mutate(inferred_source = case_when(
+    variable == "X1" ~ "Indian indicine",
+    variable == "X3" ~ "European taurine",
+    variable == "X4" ~ "African taurine",
+    variable == "X5" ~ "Mishima",
+    variable == "X6" ~ "Asian taurine"
+  )) %>% 
+  select(inferred_source, value, population, everything()) %>% 
+  arrange(international_id, desc(value)) %>% 
+  filter(value != 0)
+```
 
 * Again, African taurines form their own cluster (pink)
 
@@ -446,7 +462,24 @@ read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
   select(variable, value, everything())
 ```
 
-* Some Asian taurines and indicines in green 
+* The two trypanotolerant breeds (N'dama and Muturu) assign completely to this cluster while other African taurine breeds assign to both African and European taurine clusters
+
+```{r, echo=TRUE}
+read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
+  filter(species == "Bos taurus" & continent == "Africa") %>% 
+  mutate(inferred_source = case_when(
+    variable == "X1" ~ "Indian indicine",
+    variable == "X3" ~ "European taurine",
+    variable == "X4" ~ "African taurine",
+    variable == "X5" ~ "Mishima",
+    variable == "X6" ~ "Asian taurine"
+  )) %>% 
+  select(inferred_source, value, population, everything()) %>% 
+  arrange(international_id, desc(value)) %>% 
+  filter(value != 0)
+```
+
+* Some Asian taurines and indicines in blue-green 
 
 ```{r, echo=TRUE}
 read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
@@ -456,7 +489,23 @@ read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
   select(variable, value, everything())
 ```
 
-* Maroon cluster possibly noise - pulls out a few Mishima (a Korean taurine breed) and a few other Asian taurines/indicines
+```{r, echo=TRUE}
+read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%
+  filter(species == "Bos indicus" & continent == "Africa") %>% 
+  mutate(inferred_source = case_when(
+    variable == "X1" ~ "Indian indicine",
+    variable == "X3" ~ "European taurine",
+    variable == "X4" ~ "African taurine",
+    variable == "X5" ~ "Mishima",
+    variable == "X6" ~ "Asian taurine"
+  )) %>% 
+  select(inferred_source, value, population, everything()) %>% 
+  arrange(international_id, desc(value)) %>% 
+  filter(value != 0)
+```
+
+* Maroon cluster pulls out a few Mishima (a Korean taurine breed) and a few other Asian taurines/indicines
+    + [Mishima is an inbred island breed](https://en.wikipedia.org/wiki/Mishima_cattle), possibly real signal 
 
 ```{r, echo=TRUE}
 read_structure(dataset_thinning = "20cattle.onepercent", k = 6) %>%

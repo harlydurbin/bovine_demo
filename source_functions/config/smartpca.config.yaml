@@ -12,6 +12,6 @@ chr: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14',
 
 thin_p: ['onepercent']
 
-dataset: ['allyak', 'allgaurgayal', 'allbanteng', 'projectfull', 'project20all', 'project5regionall', 'project20cattle', 'project5cattle', 'project5taurine']
+dataset: ['allyak', 'allgaurgayal', 'allbanteng', 'project20all', 'project20randomall_seed100', 'project5regionall', 'project20cattle', 'project5cattle', 'project5taurine']
 
-dataset_key: {'allyak':['allyak'], 'allgaurgayal':['allgaurgayal'], 'allbanteng':['allbanteng'], 'projectfull':['full'], 'project20all':['20all'], 'project5regionall':['5regionall'], 'project20cattle':['20cattle'], 'project5cattle':['5cattle'], 'project5taurine':['5taurine']}
+dataset_key: {'allyak':['allyak'], 'allgaurgayal':['allgaurgayal'], 'allbanteng':['allbanteng'], 'projectfull':['full'], 'project20all':['20all'], 'project20randomall_seed100':['20randomall_seed100'], 'project5regionall':['5regionall'], 'project20cattle':['20cattle'], 'project5cattle':['5cattle'], 'project5taurine':['5taurine']}

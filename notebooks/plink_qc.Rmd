@@ -74,6 +74,83 @@ sample_metadata %>%
   write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.20all.txt"), col_names = FALSE)
 ```
 
+## `20randomall`
+
+
+```{r}
+set.seed(100)
+```
+
+
+```{r}
+seed100 <- sample_metadata %>% 
+  filter(!population %in% c("beefmaster", "droughtmaster", "santa gertrudis", "east african zebu")) %>% 
+  # Remove problematic jinchuan yaks
+  filter(
+    !international_id %in% c(
+      "UMCUSAF000000202744",
+      "UMCUSAM000000202672",
+      "UMCUSAF000000202743",
+      "UMCUSAF000000202742"
+    )
+  ) %>% 
+  mutate(group = 
+           case_when(
+             # Bison
+             species == "bison bison" ~ 1,
+             # Gayal
+             species == "bos frontalis" ~ 2,
+             # Gaur
+             species == "bos gaurus" ~ 3,
+             # Banteng
+             species == "bos javanicus" ~ 4,
+             # Yaks
+             species %in% c("bos grunniens", "bos mutus") ~ 5,
+             # Ancient 
+             species == "bos primigenius" ~ 6,
+             # European taurines
+             continent == "europe" & species == "bos taurus" ~ 7,
+             # African taurines
+             continent == "africa" & species == "bos taurus" ~ 8,
+             # Asian taurines
+             continent == "asia" & species == "bos taurus" ~ 9,
+             # Indian indicines
+             region %in% c("india and pakistan", "australia", "americas") & species == "bos indicus" ~ 10,
+             # Asian indicines 
+             continent == "asia" & species == "bos indicus" ~ 11,
+             # African indicines
+             continent == "africa" & species == "bos indicus" ~ 12,
+             # Put African indicines in with rest of composites
+             TRUE ~ 13
+           )) %>% 
+  group_by(group) %>% 
+  nest() %>% 
+  ungroup() %>% 
+  mutate(nkeep = case_when(
+    # Bison, 
+    group == 1 ~ 9,
+    # Gaur
+    group == 3 ~ 2,
+    # Banteng
+    group == 4 ~ 8,
+    # ancient
+    group == 6 ~ 2,
+    # 15 each of gayal, yak, composite
+    group %in% c(2, 5, 13) ~ 15,
+    # 5 each of euro taurine, afr taurine, asian taurine = 15
+    group %in% c(7, 8, 9) ~ 5,
+    # 5 each of indian indicine, e. asian indicine, african indicine = 15
+    group %in% c(10, 11, 12) ~ 5
+  )) %>% 
+  mutate(samp = purrr::map2(data, nkeep, sample_n)) %>% 
+  select(samp) %>% 
+  unnest() %>% 
+  mutate(fid = international_id) %>% 
+  select(international_id, fid) %>% 
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.20randomall_seed100.txt"), col_names = FALSE)
+```
+
+
 ## `5regionall`
 
 ```{r}
@@ -95,14 +172,14 @@ sample_metadata %>%
   write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.5regionall.txt"), col_names = FALSE)
 ```
 
-## `allcattle`
+## `allcattle_rootgayal`
 
 ```{r}
 sample_metadata %>% 
-  filter(species %in% c("bos primigenius", "bos taurus", "composite", "bos indicus")) %>% 
+  filter(species %in% c("bos primigenius", "bos taurus", "composite", "bos indicus", "bos frontalis")) %>% 
   mutate(fid = international_id) %>% 
   select(international_id, fid) %>% 
-  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.allcattle.txt"), col_names = FALSE)
+  write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.allcattle_rootgayal.txt"), col_names = FALSE)
 
 ```
 
@@ -137,6 +214,7 @@ sample_metadata %>%
 
 ```{r}
 sample_metadata %>% 
+  filter(!population %in% "sichuan indigenous") %>% 
   filter(species %in% c("bos primigenius", "bos taurus")) %>% 
   group_by(population) %>% 
   top_n(5, avg_coverage) %>% 

@@ -20,4 +20,4 @@ thin_p: ['onepercent']
 
 thin_p_dict: {"superthin":".001", "onepercent":"0.01"}
 
-downsample_dataset: ['20all', '5regionall', 'allcattle', '20cattle', '5cattle', '5taurine', 'allyak', 'allgaurgayal', 'allbanteng']
+downsample_dataset: ['20all', '20randomall_seed100', '5regionall', 'allcattle', '20cattle', '5cattle', '5taurine', 'allyak', 'allgaurgayal', 'allbanteng', 'allcattle_rootgayal']
