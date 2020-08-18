@@ -168,4 +168,19 @@ plot_treemix(m1, text_size = 8) %>%
 ggsave(here::here("figures/treemix/full.onepercent.m1.png"), width = 18, height = 18)
 ```
 
+## m = 2
+
+```{r, fig.width=10, fig.height=12}
+m2 <- read_treemix(here::here("data/derived_data/treemix/output/full.onepercent/treemix.full.onepercent.2"))
+```
+
+
+```{r, fig.width=18, fig.height=18}
+plot_treemix(m2, text_size = 8) %>% 
+  theme_hj_treemix() +
+  expand_limits(x = 0.099)
+
+ggsave(here::here("figures/treemix/full.onepercent.m2.png"), width = 18, height = 18)
+```
+
 # Commentary

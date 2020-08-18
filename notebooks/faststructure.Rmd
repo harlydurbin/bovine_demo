@@ -67,6 +67,8 @@ sample_metadata <-
 
 # Full datasets
 
+* As expected, indicine/taurine ancestry in gayal and banteng ancestry in some East Asian indicine/composite + low levels of East Asian taurine <--> yak introgression
+
 ## `20all.onepercent` {.tabset}
 
 * Model complexity that maximizes marginal likelihood = 4
@@ -157,7 +159,7 @@ read_structure(dataset_thinning = "20all.onepercent", k = 6) %>%
   filter(value != 0)
 ```
 
-* Interestingly, the Siberian auroch and non-European (particularly African & Asian steppe) taurines create their own component here (in maroon above)
+* Maybe interestingly, the Siberian auroch and non-European (particularly African & Asian steppe) taurines create their own component here (in maroon above)
 
 ```{r, echo=TRUE}
 read_structure(dataset_thinning = "20all.onepercent", k = 6) %>% 
@@ -171,6 +173,7 @@ read_structure(dataset_thinning = "20all.onepercent", k = 6) %>%
 
 * Model complexity that maximizes marginal likelihood = 7
 * Model components used to explain structure in data = 5
+
 
 ### K = 5
 
@@ -265,10 +268,14 @@ ggsave(
 
 # Cattle datasets 
 
+* Find indicine ancestry in expected European breeds (Italian/Podolian breeds; Charolais) plus a few continental European individuals whose breeds have open herdbooks in the U.S
+* Chinese indicines separate out at `20cattle.onepercent` K = 3,4,6 + `5cattle.onepercent` K = 4
+
 ## `20cattle.onepercent` {.tabset}
 
 * Model complexity that maximizes marginal likelihood = 3
 * Model components used to explain structure in data = 6
+
 
 ### K = 2
 
@@ -287,6 +294,19 @@ read_structure(dataset_thinning = "20cattle.onepercent", k = 2) %>%
 
 ggsave(here::here("figures/faststructure/20cattle.onepercent.K2.png"), width = 10, height = 7)
 ```
+
+* Find indicine ancestry in expected European breeds (Italian/Podolian breeds; Charolais) plus a few continental European individuals whose breeds have open herdbooks in the U.S.
+
+```{r}
+read_structure(dataset_thinning = "20cattle.onepercent", k = 2) %>% 
+  filter(variable == "X2") %>% 
+  filter(continent == "Europe") %>% 
+  filter(value > 0.01) %>% 
+  arrange(desc(value)) %>% 
+  select(variable, value, everything())
+
+```
+
 
 ### K = 3
 

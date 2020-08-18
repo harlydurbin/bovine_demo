@@ -48,7 +48,6 @@ f3 <-
 ```{r, eval=FALSE}
 # write out f3 results
 f3 %>% 
-  filter(admixed == "Dominica") %>% 
   arrange(z_score) %>% 
   write_csv(here::here("data/derived_data/fstats/f3.csv"))
 ```
@@ -58,7 +57,7 @@ f3 %>%
 f4 <-
   # Skip first line reporting how many pops and SNPs
   # Read file into vector with each line as a string
-  read_lines(here::here("data/derived_data/treemix/f3_f4/f3.full.onepercent.txt"), skip = 1) %>%
+  read_lines(here::here("data/derived_data/treemix/f3_f4/f4.full.onepercent.txt"), skip = 1) %>%
   # Discard non-data strings
   purrr::discard(str_detect(., "WARNING|Estimating|total")) %>% 
   # vector --> df
@@ -80,7 +79,7 @@ f4 <-
 ```{r, eval=FALSE}
 # Export f4 results
 f4 %>% 
-  arrange(desc(f4_abs)) %>% 
+  arrange(z_score) %>% 
   write_csv(here::here("data/derived_data/treemix/f3_f4/f4_results.full.onepercent.csv"))
 ```
 
