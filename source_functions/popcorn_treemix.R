@@ -394,3 +394,30 @@ theme_treemix <- function(...) {
   
 }
 
+theme_hj_treemix <- function(gg) {
+  gg <-
+    gg +
+    ggplot2::theme_classic() +
+    ggplot2::theme(
+      axis.text = ggplot2::element_text(size = 22),
+      axis.title.x = ggplot2::element_text(size = 26,
+                                           margin = margin(
+                                             t = 15,
+                                             r = 0,
+                                             b = 0,
+                                             l = 0
+                                           )),
+      axis.line.y = ggplot2::element_blank(),
+      axis.ticks.y = ggplot2::element_blank(),
+      axis.text.y = ggplot2::element_blank(),
+      axis.title.y = ggplot2::element_blank(),
+      legend.position = c(0.2, 0.4),
+      legend.title = element_text(size = 24),
+      legend.text = element_text(size = 20)
+    ) +
+    guides(color = guide_legend(title = "Migration weight",
+                                override.aes = list(size = 10))) +
+    labs(x = "Drift parameter")
+  
+  return(gg)
+}

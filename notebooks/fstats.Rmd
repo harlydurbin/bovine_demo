@@ -48,6 +48,7 @@ f3 <-
 ```{r, eval=FALSE}
 # write out f3 results
 f3 %>% 
+  distinct(source_2)
   arrange(z_score)
 ```
 

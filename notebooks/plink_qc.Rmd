@@ -33,6 +33,7 @@ tibble::tribble(
   ~ Name, ~ Description, ~ `k ran`,
   "full", "All species. All available samples.", "1-20",
   "20all", "All species. Up to 20 (ranked by coverage) samples per population label.", "1-20",
+  "15randomall", "All species. Up to 15 per species. For cattle, 5 each of African, European, and Asian taurines and indicines.", "-",
   "5regionall", "All species. Up to 5 (ranked by coverage) samples per species per region", "1-20",
   "allcattle", "Bos taurus, B.indicus, B. primigenius, composite. All samples.", "-",
   "20cattle", "Bos taurus, B.indicus, B. primigenius, composite. Up to 20 (ranked by coverage) samples per population label.", "1-20",
@@ -74,7 +75,7 @@ sample_metadata %>%
   write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.20all.txt"), col_names = FALSE)
 ```
 
-## `20randomall`
+## `15randomall`
 
 
 ```{r}
