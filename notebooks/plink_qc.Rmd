@@ -84,7 +84,7 @@ set.seed(100)
 
 
 ```{r}
-seed100 <- sample_metadata %>% 
+sample_metadata %>% 
   filter(!population %in% c("beefmaster", "droughtmaster", "santa gertrudis", "east african zebu")) %>% 
   # Remove problematic jinchuan yaks
   filter(
@@ -254,5 +254,74 @@ sample_metadata %>%
   mutate(fid = international_id) %>% 
   select(international_id, fid) %>% 
   write_tsv(here::here("data/derived_data/plink_qc/thin_variants/keeplist.allbanteng.txt"), col_names = FALSE)
+```
+
+# Continental labels for transfer dataset
+
+## Filter file
+
+```{r}
+sample_metadata %>% 
+  filter(
+    international_id %in% c(
+      "UMCUSAF000000202744",
+      "UMCUSAM000000202672",
+      "UMCUSAF000000202743",
+      "UMCUSAF000000202742",
+      "UMCUSAU000000205018"
+    )
+  ) %>% 
+  mutate(fid = international_id) %>% 
+  select(fid, international_id) %>% 
+  write_delim(here::here("data/derived_data/plink_qc/transfer_dataset/transfer_remove.txt"), col_names = FALSE)
+```
+
+## Population label file
+
+rsync -av --no-p --no-o --no-g -I --size-only /storage/hpc/group/UMAG/WORKING/hjdzpd/bovine_demo/data/derived_data/plink_qc/transfer_dataset/* acad-colab1@acad2.rc.adelaide.edu.au:/data/acad2/
+
+```{r}
+sample_metadata %>% 
+  filter(!population %in% c("east african zebu")) %>% 
+  # Remove problematic jinchuan yaks
+  filter(
+    !international_id %in% c(
+      "UMCUSAF000000202744",
+      "UMCUSAM000000202672",
+      "UMCUSAF000000202743",
+      "UMCUSAF000000202742"
+    )
+  ) %>% 
+  mutate(group = 
+           case_when(
+             # Bison
+             species == "bison bison" ~ "AmericanBison",
+             # Gayal
+             species == "bos frontalis" ~ "Gayal",
+             # Gaur
+             species == "bos gaurus" ~ "Gaur",
+             # Banteng
+             species == "bos javanicus" ~ "Banteng",
+             # Yaks
+             species %in% c("bos grunniens", "bos mutus") ~ "Yak",
+             # Ancient 
+             international_id == "A2494_Yenisei_River" ~ "AncientSiberian",
+             international_id == "ancient_derbyshire" ~ "AncientDerbyshire",
+             # European taurines
+             continent == "europe" & species == "bos taurus" ~ "EuroBt",
+             # African taurines
+             continent == "africa" & species == "bos taurus" ~ "AfrBt",
+             # Asian taurines
+             continent == "asia" & species == "bos taurus" ~ "AsianBt",
+             # Indian indicines
+             region %in% c("india and pakistan", "australia", "americas") & species == "bos indicus" ~ "IndianBi",
+             # Asian indicines 
+             continent == "asia" & species == "bos indicus" ~ "AsianBi",
+             TRUE ~ "Composite"
+           )) %>% 
+  mutate(old_fid = international_id, new_wfid = international_id) %>% 
+  mutate_at(vars("old_fid", "international_id"), ~ if_else(international_id == "ancient_derbyshire", "CPC98_Bprimigenius_EnglandDerbyshire_5936", international_id)) %>% 
+  select(old_fid, international_id, group, new_wfid) %>% 
+  write_delim(here::here("data/derived_data/plink_qc/transfer_dataset/transfer_ids.txt"), col_names = FALSE)
 ```
 

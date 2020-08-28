@@ -41,17 +41,19 @@
     },
     "f3":
     {
-        "t": "48:00:00",
+        "t": "120:00:00",
         "p" : "BioCompute,htc4,hpc5",
         "c": 1,
-        "mail-type" : "END,FAIL"
+        "mail-type" : "END,FAIL",
+        "qos": "biolong"
     },
     "f4":
     {
-        "t": "48:00:00",
+        "t": "120:00:00",
         "p" : "BioCompute,htc4,hpc5",
         "c": 1,
-        "mail-type" : "END,FAIL"
+        "mail-type" : "END,FAIL",
+        "qos": "biolong"
     },
     "treemix_base":
     {

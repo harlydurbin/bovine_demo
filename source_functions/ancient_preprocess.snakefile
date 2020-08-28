@@ -33,15 +33,12 @@ rule all:
 		pop = config["pop"],
 		chr = config["chr"])
 
-bam_path = {"siberian": "data/raw_data/aurochs/A2494_Bprimigenius_RussiaYeniseiRiver_14082.ARS1_UCD1.2.realigned.bam",
-"derbyshire": "data/raw_data/aurochs/CPC98_Bprimigenius_EnglandDerbyshire_5936.ARS1_UCD1.2.realigned.bam"}
-
 # rule to trim reads
 # "trimBam will modify the sequences to 'N', and the quality string to '!' unless the optional parameter --clip/-c is specified. If --clip/-c is specified, the ends will be soft clipped instead of modified."
 
 rule trimBam:
 	input:
-		bam = lambda wildcards: expand("{path}", path = bam_path[wildcards.pop])
+		bam = lambda wildcards: expand("{path}", path = config['bam_path'][wildcards.pop])
 	params:
 		psrecord = "log/psrecord/ancient_preprocess/trimBam.{pop}.log",
 		tmpdir = "temp/ancient_preprocess/{pop}",

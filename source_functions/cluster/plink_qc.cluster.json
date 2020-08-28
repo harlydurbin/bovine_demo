@@ -49,5 +49,12 @@
         "mem" : 24G,
         "t": "2:00:00",
         "p" : "General,Lewis,BioCompute,htc4,hpc5"
+    },
+    "transfer_dataset":
+    {
+        "mem" : 24G,
+        "c" : 12,
+        "t": "2:00:00",
+        "p" : "General,Lewis,BioCompute,htc4,hpc5"
     }
 }

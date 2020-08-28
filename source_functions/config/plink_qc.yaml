@@ -1,4 +1,4 @@
-plink_qc_rules: ['qc_autosomes', 'qc_x', 'qc_y', 'thin_variants', 'merge_thinned', 'downsample_indiv']
+plink_qc_rules: ['qc_autosomes', 'qc_x', 'qc_y', 'thin_variants', 'merge_thinned', 'downsample_indiv', 'transfer_dataset']
 
 imputed_sexes: "data/derived_data/joint_genotyping/sex_imputation/imputed_sexes.txt"
 

@@ -1,4 +1,4 @@
-# snakemake -s source_functions/plink_qc.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/plink_qc.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200817.plink_qc.log
+# snakemake -s source_functions/plink_qc.snakefile -j 1000 --rerun-incomplete --keep-going --latency-wait 30 --config --cluster-config source_functions/cluster/plink_qc.cluster.json --cluster "sbatch -p {cluster.p} -o {cluster.o} --account {cluster.account} -t {cluster.t} -c {cluster.c} --mem {cluster.mem} --account {cluster.account} --mail-user {cluster.mail-user} --mail-type {cluster.mail-type}" -p &> log/snakemake_log/joint_genotyping/200828.plink_qc.log
 
 import os
 
@@ -20,7 +20,7 @@ for x in expand("log/psrecord/joint_genotyping/{rules}", rules = config['plink_q
 
 rule plink_qc_all:
 	input:
-		expand("data/derived_data/plink_qc/thin_variants/{downsample_dataset}.{thin_p}/merge_thinned.{downsample_dataset}.{thin_p}.{extension}", downsample_dataset = config['downsample_dataset'], thin_p = config['thin_p'], extension = ['bed', 'bim', 'fam']), expand("data/derived_data/plink_qc/thin_variants/full.{thin_p}/merge_thinned.full.{thin_p}.{extension}", thin_p = config['thin_p'], extension = ['bed', 'bim', 'fam'])
+		expand("data/derived_data/plink_qc/thin_variants/{downsample_dataset}.{thin_p}/merge_thinned.{downsample_dataset}.{thin_p}.{extension}", downsample_dataset = config['downsample_dataset'], thin_p = config['thin_p'], extension = ['bed', 'bim', 'fam']), expand("data/derived_data/plink_qc/thin_variants/full.{thin_p}/merge_thinned.full.{thin_p}.{extension}", thin_p = config['thin_p'], extension = ['bed', 'bim', 'fam']), expand("data/derived_data/plink_qc/transfer_dataset/bovine_demo.continent.{chr}.{extension}", chr = config['chr'], extension = ['bed', 'bim', 'fam'])
 
 rule qc_autosomes:
 	input:
@@ -160,4 +160,29 @@ rule downsample_indiv:
 		"""
 		module load {params.plink_module}
 		plink --bfile {params.in_prefix} --double-id --cow --threads {params.nt} --keep {input.keep_list} --maf .0001 --make-bed --out {params.out_prefix}
+		"""
+
+# Update name of ancient_derbyshire
+# Remove Jinchuan yaks, East African zebu
+# Add population labels
+rule transfer_dataset:
+	input:
+		bed = "data/derived_data/plink_qc/initial_qc/initial_qc.{chr}.bed",
+		bim = "data/derived_data/plink_qc/initial_qc/initial_qc.{chr}.bim",
+		fam = "data/derived_data/plink_qc/initial_qc/initial_qc.{chr}.fam",
+		remove_file = "data/derived_data/plink_qc/transfer_dataset/transfer_remove.txt",
+		rename_file = "data/derived_data/plink_qc/transfer_dataset/transfer_ids.txt"
+	params:
+		plink_module = config['plink_module'],
+		nt = config['plink_nt'],
+		in_prefix = "data/derived_data/plink_qc/initial_qc/initial_qc.{chr}",
+		out_prefix = "data/derived_data/plink_qc/transfer_dataset/bovine_demo.continent.{chr}",
+	output:
+		bed = "data/derived_data/plink_qc/transfer_dataset/bovine_demo.continent.{chr}.bed",
+		bim = "data/derived_data/plink_qc/transfer_dataset/bovine_demo.continent.{chr}.bim",
+		fam = "data/derived_data/plink_qc/transfer_dataset/bovine_demo.continent.{chr}.fam",
+	shell:
+		"""
+		module load {params.plink_module}
+		plink --bfile {params.in_prefix} --remove {input.remove_file} --update-ids {input.rename_file} --make-bed  --cow --threads {params.nt} --out {params.out_prefix}
 		"""

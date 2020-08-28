@@ -10,6 +10,9 @@ gatk_module: "gatk/gatk-3.8"
 
 gatk_path: "/cluster/software/gatk/gatk-3.8/GenomeAnalysisTK.jar"
 
+bam_path = {"siberian": "/storage/htc/deckerlab/users/hjdzpd/bovine_demo/data/raw_data/aurochs/A2494_Bprimigenius_RussiaYeniseiRiver_14082.ARS1_UCD1.2.realigned.bam",
+"derbyshire": "/storage/htc/deckerlab/users/hjdzpd/bovine_demo/data/raw_data/aurochs/CPC98_Bprimigenius_EnglandDerbyshire_5936.ARS1_UCD1.2.realigned.bam"}
+
 target_creator_nt: 4
 
 target_creator_gc: 2
