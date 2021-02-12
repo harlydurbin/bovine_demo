@@ -1,0 +1,65 @@
+---
+title: "SMC++"
+author: "Harly Durbin"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readr)
+library(readxl)
+library(dplyr)
+library(stringr)
+library(tidylog)
+library(purrr)
+library(rlang)
+library(ggplot2)
+```
+
+```{r}
+samp <- read_csv(here::here("data/derived_data/sample_assignment.csv"))
+```
+
+# `popdict`
+
+```{r}
+# Angus
+samp %>% 
+  filter(population == "angus") %>% 
+  pull(international_id) %>% 
+  paste(., collapse = ",") %>% 
+  str_c("angus:", .)
+
+samp %>% 
+  filter(population == "ndama") %>% 
+  pull(international_id) %>% 
+  paste(., collapse = ",") %>% 
+  str_c("ndama:", .)
+```
+
+# `individualdict`
+
+```{r}
+samp %>% 
+  filter(population == "angus") %>% 
+  pull(international_id) %>% 
+  str_c("'", ., "'", collapse = ", ")
+  
+```
+
+```{r}
+samp %>% 
+  filter(population %in% c("angus", "holstein")) %>% 
+  select(pop = population, international_id) %>% 
+  write_csv(here::here("samples.csv"), col_names = TRUE)
+
+samp %>% 
+  filter(population %in% c("angus", "holstein")) %>% 
+  group_by(population) %>% 
+  sample_n(5) %>% 
+  ungroup %>% 
+  select(pop = population, distinguished = international_id) %>% 
+  write_csv(here::here("distinguished.csv"), col_names = TRUE)
+```
+
